@@ -444,6 +444,50 @@ metadata = {
 print(json.dumps(metadata, indent=2))
 
 # %% [markdown]
+# ## Step 11 — Persist artifacts for Phase 3
+#
+# The XAI modules (T3.1 SHAP, T3.2 LIME) and the adaptive/incremental modules (T3.4, T3.5) all need
+# the *trained* ensemble, not a retrained one — an explanation of a different model than the one
+# evaluated above would be worthless. Everything Phase 3 needs is written to `artifacts/`
+# (gitignored: model weights are build outputs, not source).
+#
+# The background sample for SHAP is drawn from the **training** fold. Drawing it from test data
+# would leak the evaluation set into the explanations.
+
+# %%
+ARTIFACTS = REPO_ROOT / "artifacts"
+ARTIFACTS.mkdir(exist_ok=True)
+(ARTIFACTS / "models").mkdir(exist_ok=True)
+
+for name, model in models.items():
+    model.save(ARTIFACTS / "models" / f"{name}.keras")
+
+rng = np.random.default_rng(RANDOM_STATE)
+background_index = rng.choice(len(X_train), size=min(500, len(X_train)), replace=False)
+
+np.savez_compressed(
+    ARTIFACTS / "ensemble_artifacts.npz",
+    X_test=X_test,
+    y_test=y_test,
+    X_background=X_train[background_index],
+    fused_predictions=fusion.predictions,
+    fused_confidence=fusion.confidence,
+    branch_weights=fusion.branch_weights,
+    **{f"probabilities_{name}": branch_probabilities[name] for name in branch_names},
+)
+(ARTIFACTS / "feature_names.json").write_text(
+    json.dumps({"feature_names": list(selector.selected_features_),
+                "branch_names": branch_names,
+                "sequence_length": int(SEQUENCE_LENGTH)}, indent=2),
+    encoding="utf-8",
+)
+
+print(f"Saved to {ARTIFACTS}:")
+for path in sorted(ARTIFACTS.rglob("*")):
+    if path.is_file():
+        print(f"  {path.relative_to(ARTIFACTS)}  ({path.stat().st_size / 1024:.0f} KB)")
+
+# %% [markdown]
 # ## Verdict (T2.6 VERIFY block)
 #
 # The VERIFY condition is: *"Report exists, states positive class explicitly, includes a

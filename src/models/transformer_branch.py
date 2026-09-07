@@ -97,10 +97,13 @@ def sinusoidal_positional_encoding(sequence_length: int, embed_dim: int) -> np.n
     return encoding
 
 
+@keras.utils.register_keras_serializable(package="iomt_ids")
 class AddPositionalEncoding(layers.Layer):
     """Add a fixed sinusoidal positional encoding to the projected input.
 
-    A layer rather than a lambda so the model serialises cleanly for the TFLite export (T4.1).
+    A layer rather than a lambda so the model serialises cleanly. Registered as serializable so a
+    saved branch reloads without the caller having to pass `custom_objects` -- needed by the XAI
+    modules (T3.1/T3.2), which load the trained ensemble, and by the TFLite export (T4.1).
     """
 
     def __init__(self, sequence_length: int, embed_dim: int, **kwargs: object) -> None:

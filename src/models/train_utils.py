@@ -42,6 +42,7 @@ Positive class: index 1 = **Attack** (`TRD.md §2.3`) in every metric this modul
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
@@ -96,6 +97,7 @@ def compute_class_weights(y: np.ndarray) -> dict[int, float]:
     return weights
 
 
+@keras.utils.register_keras_serializable(package="iomt_ids")
 class PositiveClassF1(keras.metrics.Metric):
     """F1 for the POSITIVE class (Attack, index 1) -- `TRD.md §2.3`'s convention.
 
@@ -141,6 +143,38 @@ class PositiveClassF1(keras.metrics.Metric):
         """Zero the accumulators between epochs."""
         for variable in (self.true_positives, self.false_positives, self.false_negatives):
             variable.assign(0.0)
+
+
+def load_branch(path: str | Path, compile_model: bool = False) -> keras.Model:
+    """Load a saved branch, resolving this project's custom layers and metrics.
+
+    Phase 3 and Phase 4 consume the *trained* branches rather than retraining them, so loading has
+    to work without the caller knowing which custom objects a branch contains. Both custom classes
+    carry `@keras.utils.register_keras_serializable`, AND are passed explicitly in `custom_objects`
+    here. The belt-and-braces is deliberate: the registry is keyed by the `registered_name` stored
+    in the file, so a model saved before a class was registered (or under a different package
+    prefix) will not resolve through the registry alone. `custom_objects` matches on the bare class
+    name and therefore loads both old and new checkpoints.
+
+    Args:
+        path: path to a `.keras` file written by `notebooks/03_train_ensemble_iotid20.ipynb`.
+        compile_model: restore the training configuration too. Defaults to False -- inference and
+            explanation need no optimizer or metrics, and skipping it makes loading independent of
+            the training setup.
+
+    Returns:
+        The loaded `keras.Model`.
+    """
+    from src.models.transformer_branch import AddPositionalEncoding
+
+    return keras.models.load_model(
+        path,
+        compile=compile_model,
+        custom_objects={
+            "AddPositionalEncoding": AddPositionalEncoding,
+            "PositiveClassF1": PositiveClassF1,
+        },
+    )
 
 
 def scale_sequences(

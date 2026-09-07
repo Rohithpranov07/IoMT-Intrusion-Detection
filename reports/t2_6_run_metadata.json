@@ -22,19 +22,19 @@
     "transformer": 71106
   },
   "epochs_run": {
-    "cnn": 17,
+    "cnn": 27,
     "bilstm": 18,
-    "transformer": 28
+    "transformer": 20
   },
   "train_seconds": {
-    "cnn": 21.2,
-    "bilstm": 82.1,
-    "transformer": 94.1
+    "cnn": 37.0,
+    "bilstm": 94.3,
+    "transformer": 77.5
   },
   "dominant_branch_share": {
-    "cnn": 0.5772,
-    "transformer": 0.2691,
-    "bilstm": 0.1537
+    "cnn": 0.6148,
+    "transformer": 0.2154,
+    "bilstm": 0.1698
   },
-  "mean_fused_confidence": 0.9443830079517815
+  "mean_fused_confidence": 0.9490439668019219
 }
