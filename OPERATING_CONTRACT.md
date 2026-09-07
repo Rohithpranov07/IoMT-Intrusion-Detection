@@ -1,6 +1,6 @@
 # Operating Contract
 
-> Source: `Build-Instructions.md` §A. Companions: `PRD.md` (what/why), `TRD.md` (exact technical contracts).
+> Source: `Build-Instructions.md` §A (the repo-root operating contract).  Companions: `PRD.md` (what/why), `TRD.md` (exact technical contracts).
 > **If this file and `TRD.md` disagree on a technical detail, the TRD wins.**
 
 ## Project in one line
