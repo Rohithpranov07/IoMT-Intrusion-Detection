@@ -1,0 +1,29 @@
+# Python 3.11 (TRD.md §8). Create with:
+#   python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt
+#
+# DEVIATIONS FROM TRD.md §8, recorded rather than silently applied:
+#   - TensorFlow 2.21, not the 2.15 the TRD names. TF 2.15 publishes no macOS/arm64 wheel under
+#     the `tensorflow` name, so 2.15 is not installable on the team's dev machines. 2.21 ships
+#     Keras 3, which is what the TRD actually asks for.
+#   - numpy is pinned BELOW 2.0 because scikit-learn 1.3.2 (the TRD's version) is built against
+#     the numpy 1.x C ABI and raises "numpy.dtype size changed" under numpy 2.x. Pinning numpy
+#     rather than bumping scikit-learn keeps the Phase 1 results reproducible, since a different
+#     scikit-learn would change the Random Forest baseline and the feature ranking.
+#     This makes `ml-dtypes` report an unsatisfied numpy>=2 requirement; TensorFlow trains and
+#     MultiHeadAttention runs correctly regardless (verified), so the warning is accepted.
+
+numpy==1.26.4
+scikit-learn==1.3.2
+pandas
+imbalanced-learn
+tensorflow==2.21.0
+matplotlib
+seaborn
+kagglehub
+jupyter
+jupytext
+pytest
+
+# Phase 3 (T3.1-T3.3) -- not yet installed
+# shap
+# lime

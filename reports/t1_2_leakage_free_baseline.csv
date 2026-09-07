@@ -1,0 +1,2 @@
+model,positive_class,accuracy,precision,recall,f1,TP,FP,TN,FN,hand_verified,pipeline_order,test_fold_synthetic_fraction,nn_near_zero_fraction
+LEAKAGE-FREE baseline (split before SMOTE + deduplicated),Attack,0.9964440026000841,0.9970569417786308,0.9989743589743589,0.9980147294268332,23376,69,2684,24,True,split BEFORE resample + deduplicated (TRD.md §2.2 + T1.2 Step 11),0.0,0.05702869596803487

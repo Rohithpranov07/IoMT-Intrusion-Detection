@@ -340,14 +340,14 @@ print(dedup_nn.summary())
 leaky_row = pd.read_csv(leaky_path).iloc[0] if leaky_path.exists() else None
 
 rows = [
-    ("A. LEAKY (base paper's order)", leaky_row, leaky_nn_frac := float(leaky_row["nn_near_zero_fraction"]) if leaky_row is not None else np.nan),
+    ("A. LEAKY (base paper's order)", leaky_row,
+     float(leaky_row["nn_near_zero_fraction"]) if leaky_row is not None else np.nan),
     ("B. Honest order, duplicates kept", honest_metrics, honest_nn.near_zero_fraction),
     ("C. Honest order + deduplicated", dedup_metrics, dedup_nn.near_zero_fraction),
 ]
 
 print(POSITIVE_CLASS_STATEMENT)
-print("
-" + "=" * 100)
+print("\n" + "=" * 100)
 print(f"{'pipeline':<36}{'accuracy':>11}{'precision':>11}{'recall':>10}{'F1':>10}"
       f"{'synthetic':>12}{'NN near-0':>11}")
 print("=" * 100)
@@ -363,11 +363,9 @@ for name, m, nn_frac in rows:
     print(f"{name:<36}{get('accuracy'):>11.6f}{get('precision'):>11.6f}"
           f"{get('recall'):>10.6f}{get('f1'):>10.6f}{synth:>11.2%}{nn_frac:>11.2%}")
 print("=" * 100)
-print("
-'synthetic' = share of the test fold fabricated by SMOTE.")
+print("\n'synthetic' = share of the test fold fabricated by SMOTE.")
 print("'NN near-0' = share of minority test rows at <1e-6 distance from a training row.")
-print("
-C is this project's baseline. Every later result is compared against C, not A or B.")
+print("\nC is this project\'s baseline. Every later result is compared against C, not A or B.")
 
 # %%
 final = results_table([dedup_metrics])

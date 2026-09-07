@@ -44,3 +44,17 @@ confirm its VERIFY block before moving on. One conventional commit per task.
 - Python 3.11 in `.venv/` (`TRD.md §8`). Activate: `source .venv/bin/activate`.
 - Dataset: IoTID20 via `kagglehub.dataset_download("rohulaminlabid/iotid20-dataset")`,
   fetched by `scripts/download_data.py`. `data/` is gitignored.
+- Dependencies are pinned in `requirements.txt`, which also records two deviations from
+  `TRD.md §8` (TensorFlow 2.21 rather than 2.15; numpy pinned below 2.0) and why.
+
+## Phase 1 results (do not re-derive differently)
+| Pipeline | Accuracy | Precision | Recall | F1 | Test fold synthetic | NN near-zero |
+|---|---|---|---|---|---|---|
+| A. Leaky (base paper's order) | 0.998556 | 0.997494 | 0.999624 | 0.998558 | 46.61% | 43.98% |
+| B. Honest order, duplicates kept | 0.998801 | 0.999129 | 0.999590 | 0.999359 | 0.00% | 42.18% |
+| **C. Honest order + deduplicated** | **0.996444** | **0.997057** | **0.998974** | **0.998015** | **0.00%** | **5.70%** |
+
+**Positive class = Attack.** **C is the project's baseline** — every later result is compared
+against C, never A or B. Pipeline B is why: fixing the SMOTE ordering alone did *not* lower the
+number, because 58.2% of cleaned IoTID20 rows are exact duplicates, a larger leakage vector that
+neither the base paper nor the senior's prior work mentions.
