@@ -1,0 +1,2 @@
+model,positive_class,accuracy,precision,recall,f1,TP,FP,TN,FN,hand_verified,pipeline_order,test_fold_synthetic_fraction,nn_near_zero_fraction
+LEAKY pipeline (SMOTE before split),Attack,0.9985563945740937,0.9974939906919654,0.999624150066628,0.9985579343476146,58512,147,58387,22,True,resample BEFORE split (base paper's order),0.4660624594252913,0.4398

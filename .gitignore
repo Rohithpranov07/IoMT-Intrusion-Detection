@@ -1,0 +1,19 @@
+# datasets & artifacts
+data/
+artifacts/
+*.h5
+*.keras
+*.tflite
+*.joblib
+*.pkl
+*.npz
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+
+# os
+.DS_Store

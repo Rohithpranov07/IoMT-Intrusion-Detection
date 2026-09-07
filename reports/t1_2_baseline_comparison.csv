@@ -1,0 +1,4 @@
+model,positive_class,accuracy,precision,recall,f1,TP,FP,TN,FN,hand_verified,pipeline_order,test_fold_synthetic_fraction,nn_near_zero_fraction
+LEAKY pipeline (SMOTE before split),Attack,0.9985563945740936,0.9974939906919654,0.999624150066628,0.9985579343476146,58512,147,58387,22,True,resample BEFORE split (base paper's order),0.4660624594252913,0.4398
+HONEST baseline (split before SMOTE),Attack,0.9988007866839353,0.999129113232356,0.9995899818908669,0.9993594944276015,58510,51,3956,24,True,split BEFORE resample (TRD.md §2.2),0.0,0.4217619166458697
+HONEST baseline (validation fold),Attack,0.9985769562853762,0.9989243823735295,0.9995558137151057,0.9992399982921308,58508,63,3945,26,True,split BEFORE resample (TRD.md §2.2),,
