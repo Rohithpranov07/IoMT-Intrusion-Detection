@@ -308,6 +308,90 @@ for label, predictions in (
 results_table(fusion_variants)[["model", "positive_class", "accuracy", "precision", "recall", "f1"]]
 
 # %% [markdown]
+# ### Step 9b — Diagnosing the fusion result
+#
+# The three fusion rules land within ~0.001 F1 of each other, and the best single branch beats all
+# of them. That is not what the design predicted, so it needs an explanation rather than a shrug.
+#
+# The hypothesis: **confidence weighting can only do work when branch confidences actually differ.**
+# Softmax outputs from over-parameterised networks are notoriously badly calibrated — they saturate
+# near 1.0 whether or not the prediction is right. If every `c_b ≈ 1`, then `w_b ≈ 1/3` and the
+# formula collapses to the simple average it was chosen to beat. The cells below test that directly.
+
+# %%
+confidence_stats = pd.DataFrame({
+    name: {
+        "mean confidence": probabilities.max(axis=1).mean(),
+        "median confidence": np.median(probabilities.max(axis=1)),
+        "std of confidence": probabilities.max(axis=1).std(),
+        "share above 0.99": float((probabilities.max(axis=1) > 0.99).mean()),
+        "share above 0.90": float((probabilities.max(axis=1) > 0.90).mean()),
+    }
+    for name, probabilities in branch_probabilities.items()
+}).T.round(4)
+print("Per-branch confidence distribution on the test fold:")
+print(confidence_stats.to_string())
+
+spread = np.stack([branch_probabilities[n].max(axis=1) for n in branch_names])
+print(f"\nMean per-sample spread between the most and least confident branch: "
+      f"{(spread.max(axis=0) - spread.min(axis=0)).mean():.4f}")
+print(f"Mean fusion weight per branch: "
+      f"{dict(zip(branch_names, fusion.branch_weights.mean(axis=0).round(4)))}")
+print("\nIf those weights are all near 1/3 = 0.3333, confidence weighting is doing nothing.")
+
+# %%
+fig, axes = plt.subplots(1, 2, figsize=(13, 4.2))
+for name, probabilities in branch_probabilities.items():
+    axes[0].hist(probabilities.max(axis=1), bins=50, alpha=0.55, label=name)
+axes[0].set_xlabel("branch confidence  max_k p_b[k]")
+axes[0].set_ylabel("test windows")
+axes[0].set_title("Branch confidence is saturated near 1.0")
+axes[0].legend(fontsize=8)
+
+# Does sharpening the weighting recover the best branch's performance?
+gammas = [0.0, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0]
+gamma_f1 = []
+for gamma in gammas:
+    swept = confidence_weighted_fusion(
+        [branch_probabilities[n] for n in branch_names], branch_names, gamma=gamma
+    )
+    gamma_f1.append(compute_metrics(y_test, swept.predictions, f"gamma={gamma}").f1)
+
+best_branch_f1 = max(r.f1 for r in branch_results)
+axes[1].plot(gammas, gamma_f1, marker="o", label="confidence-weighted fusion")
+axes[1].axhline(best_branch_f1, color="crimson", ls="--", label="best single branch")
+axes[1].set_xscale("symlog"); axes[1].set_xlabel("gamma (CONFIDENCE_SHARPNESS)")
+axes[1].set_ylabel("test F1 (Attack = positive)")
+axes[1].set_title("Sharpening the weighting does not close the gap")
+axes[1].legend(fontsize=8)
+plt.tight_layout(); plt.show()
+
+print(f"Best single branch F1        : {best_branch_f1:.4f}")
+print(f"Fusion F1 at gamma = 1.0     : {gamma_f1[gammas.index(1.0)]:.4f}")
+print(f"Fusion F1 at best gamma      : {max(gamma_f1):.4f} (gamma = {gammas[int(np.argmax(gamma_f1))]})")
+
+# %% [markdown]
+# **Reading the diagnosis.** If the weights sit near 1/3 and the gamma sweep is flat, then the
+# fusion formula is not the problem — *branch calibration* is. Confidence-weighted voting is a sound
+# rule that is being fed an input it cannot use, because every branch claims near-certainty.
+#
+# This is a concrete, actionable finding rather than a dead end, and it gives Phase 3 and Phase 4
+# their direction:
+#
+# - **T3.5 (incremental learning)** already updates `BRANCH_PRIORS` (`alpha_b`), the fusion layer's
+#   only adjustable parameter. Fitting `alpha_b` on the validation fold — rather than leaving all
+#   three at 1.0 — is the natural way to let a genuinely better branch carry more weight, and it
+#   needs no architectural change.
+# - **T4.4 (ablation)** must report the single-branch results alongside the fused ones. On this
+#   dataset the honest headline is that the best single branch beats the ensemble, and
+#   `reports/ablation_study.md` has to say so.
+# - A calibration step (temperature scaling on each branch's logits, fitted on the validation fold)
+#   is the standard fix and would make the confidences informative. It is **not** implemented here,
+#   because it is not in the frozen `docs/architecture_decision.md` §3.1 and inventing it mid-phase
+#   would be exactly the undocumented drift this project criticises. It is recorded as a Phase 3
+#   proposal.
+
+# %% [markdown]
 # ## Step 10 — The comparison that matters: ensemble vs. the leakage-free baseline
 #
 # `reports/t1_2_leakage_free_baseline.csv` is pipeline **C** from T1.2 — the honest, deduplicated

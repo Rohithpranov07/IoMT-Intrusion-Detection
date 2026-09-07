@@ -1,0 +1,40 @@
+{
+  "sequence_shape": [
+    41284,
+    10,
+    62
+  ],
+  "sequence_length": 10,
+  "n_features": 62,
+  "train_windows": 41284,
+  "test_windows": 4894,
+  "val_windows": 4700,
+  "train_attack_rate": 0.896376320124019,
+  "test_attack_rate": 0.8714752758479771,
+  "sessions": {
+    "train": 1475,
+    "test": 1315,
+    "val": 1452
+  },
+  "parameters": {
+    "cnn": 62466,
+    "bilstm": 172226,
+    "transformer": 71106
+  },
+  "epochs_run": {
+    "cnn": 17,
+    "bilstm": 18,
+    "transformer": 28
+  },
+  "train_seconds": {
+    "cnn": 21.2,
+    "bilstm": 82.1,
+    "transformer": 94.1
+  },
+  "dominant_branch_share": {
+    "cnn": 0.5772,
+    "transformer": 0.2691,
+    "bilstm": 0.1537
+  },
+  "mean_fused_confidence": 0.9443830079517815
+}
