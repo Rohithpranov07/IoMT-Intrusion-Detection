@@ -1,0 +1,25 @@
+{
+  "n_nodes": 58281,
+  "n_edges": 58504,
+  "density": 3.4448397044319995e-05,
+  "average_degree": 2.0076525797429694,
+  "median_degree": 1.0,
+  "max_degree": 43441,
+  "degree_1_fraction": 0.9967570906470377,
+  "degree_2_or_less_fraction": 0.999159245723306,
+  "isolated_fraction": 0.0,
+  "top_10_degree_share": 0.49981197866812527,
+  "n_source_ips": 57957,
+  "n_destination_ips": 471,
+  "degree_percentiles": {
+    "p50": 1.0,
+    "p75": 1.0,
+    "p90": 1.0,
+    "p95": 1.0,
+    "p99": 1.0
+  },
+  "decision": "no-go",
+  "reasons": [
+    "99.7% of nodes have degree <= 1, above the 75% threshold; message passing would mostly copy a single neighbour"
+  ]
+}
