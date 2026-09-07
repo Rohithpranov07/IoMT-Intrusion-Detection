@@ -26,4 +26,7 @@ pytest
 
 # Phase 3
 shap==0.51.0        # T3.1, primary XAI method (docs/xai_survey.md)
-# lime              # T3.2, faster fallback -- not yet installed
+lime==0.2.0.1       # T3.2, secondary XAI method. Kept for FAITHFULNESS, not speed: it was
+                    # measured at ~1.9x SLOWER than SHAP here, because T3.1 uses GradientExplainer
+                    # rather than the KernelExplainer the survey compared against. See the
+                    # AMENDMENT in docs/xai_survey.md and reports/t3_2_lime_vs_shap.md.

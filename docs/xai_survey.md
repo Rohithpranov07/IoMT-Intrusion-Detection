@@ -160,3 +160,76 @@ budget.** Concretely, for T3.1/T3.2 to implement:
 - **T3.3** — `metrics.py`: fidelity, stability, comprehensibility. **Stability must be run against
   LIME specifically** — §2.2 predicts it is the weak point, and if the measurement confirms that,
   it belongs in the Review 3 report as a finding, not as something quietly omitted.
+
+---
+
+# AMENDMENT (added at T3.2, after measurement)
+
+> **Scope note:** `Build-Instructions.md` §A.2 confines each task to its declared **Files** line, and
+> T3.2's is `src/xai/lime_explainer.py` alone. This amendment is appended anyway, because §4 above
+> makes a factual claim that measurement has since falsified, and leaving it uncorrected would be
+> the same defect this project criticises the base paper for. The original §1–§6 text is left
+> **unedited** so the reasoning as it stood at T1.4 remains auditable; everything below is the
+> correction.
+
+## What was measured
+
+`scripts/benchmark_xai.py`, 10 flagged detections, identical inputs to both methods, warm-up
+excluded. Full output: `reports/t3_2_lime_vs_shap.md`.
+
+| | SHAP (`GradientExplainer`) | LIME (`num_samples=1000`) |
+|---|---:|---:|
+| Median seconds per explanation | **0.212** | **0.401** |
+
+**SHAP is ~1.9× faster than LIME.**
+
+## Where §2 went wrong
+
+§2.2 listed speed as LIME's headline advantage and §4 designated it "the faster fallback". That
+comparison was made against SHAP **generically**, and the slow SHAP variant is `KernelExplainer`,
+which needs thousands of forward passes per explanation.
+
+**T3.1 never adopted `KernelExplainer`.** §2.1's own "On C4" paragraph chose `GradientExplainer`
+per branch — a gradient-based method costing a handful of passes. The survey then carried §2.2's
+speed comparison forward without noticing that §2.1 had already eliminated the SHAP variant that
+comparison depended on. That is an internal inconsistency in this document, not a surprise in the
+data.
+
+LIME's cost here is structural rather than a tuning error: every explanation pushes 1,000 perturbed
+windows through all three branches *and* the fusion. Cutting `num_samples` would buy speed directly
+out of surrogate stability — already LIME's documented weakness (§2.2) and the exact property T3.3
+must measure. Trading stability away to win a benchmark would be the wrong call.
+
+## Corrected recommendation
+
+**Primary: SHAP. Secondary: LIME — kept for faithfulness, not speed.**
+
+§4's ranking of the two methods is unchanged, and SHAP's case is now *stronger*: it is both faster
+and additively consistent. What changes is LIME's justification.
+
+LIME earns its place through a property §2.2 identified and which does hold: **it explains the
+deployed ensemble directly.** It needs only `predict_proba`, so it sees the fused model — confidence
+weights and all — as one object. SHAP cannot: the fusion is not differentiable end to end, so T3.1
+runs per branch and recombines the attribution maps with the fusion weights, a construction this
+project invented and must defend. LIME provides an independent check that needs no such step.
+
+## Consequence for §5's latency-cutover design
+
+§5's items 2 and 3 specify a latency budget above which SHAP hands over to LIME. **That mechanism is
+now pointless and should not be built**: the primary method is already the cheaper one, so the
+fallback would never fire, and if it did it would make things slower. T3.1 correctly hardcodes no
+budget. `Explanation.method` still records which method produced each explanation, which remains
+worth keeping.
+
+## A second finding, for T3.3
+
+**Mean top-5 feature agreement between SHAP and LIME is 38%** (min 20%, max 40%). The two methods
+largely disagree about which measurements drove the same decision on the same model.
+
+Agreement is a consistency check, not a correctness one — both could be wrong together. But 38%
+means at least one of them is not describing the model faithfully, and that cannot be resolved by
+inspection. **T3.3's fidelity metric is now the deciding measurement**, not a box to tick: ablating
+each method's top-attributed features and checking whether the prediction actually moves in the
+predicted direction is what will say which explanation a clinician should be shown. If fidelity
+comes out low for both, this project should report that its explainability layer is not yet
+trustworthy — which would be an honest and publishable result given Objection #4.
