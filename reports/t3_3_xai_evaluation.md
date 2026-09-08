@@ -28,13 +28,13 @@ k of 62 features moves the prediction somewhat.
 
 | k | top-k drop | random-k drop | gain | ± SEM | significant? |
 |---:|---:|---:|---:|---:|:---|
-| 1 | 0.5213 | 0.0065 | **+0.5148** | 0.0748 | yes |
-| 3 | 0.1887 | 0.0594 | **+0.1294** | 0.0408 | yes |
-| 5 | 0.2223 | 0.0769 | **+0.1454** | 0.0446 | yes |
-| 10 | 0.1544 | 0.1284 | **+0.0260** | 0.0424 | no |
-| 20 | 0.3253 | 0.1790 | **+0.1463** | 0.0443 | yes |
+| 1 | 0.5199 | 0.0065 | **+0.5134** | 0.0751 | yes |
+| 3 | 0.2253 | 0.0594 | **+0.1660** | 0.0436 | yes |
+| 5 | 0.2578 | 0.0769 | **+0.1810** | 0.0458 | yes |
+| 10 | 0.1627 | 0.1284 | **+0.0343** | 0.0490 | no |
+| 20 | 0.2806 | 0.1790 | **+0.1016** | 0.0446 | yes |
 
-**AOPC** (mean gain over k=(1, 3, 5)): **+0.2632**
+**AOPC** (mean gain over k=(1, 3, 5)): **+0.2868**
 
 ### LIME
 
@@ -71,7 +71,7 @@ Gaussian noise at σ=0.01 (1% of each feature's range), 5 repeats per window.
 
 | Method | top-5 Jaccard | Spearman | model flip rate | verdict |
 |---|---:|---:|---:|---|
-| SHAP | **0.865** | +0.913 | 0% | STABLE — near-identical inputs give near-identical explanations |
+| SHAP | **0.830** | +0.916 | 0% | STABLE — near-identical inputs give near-identical explanations |
 | LIME | **0.265** | +0.205 | 0% | UNSTABLE — two operators could see different reasons for the same alert |
 
 The model's own prediction flips **0%** of the
@@ -88,10 +88,43 @@ fidelity score was an artefact of a noisy surrogate, not evidence it had found w
 
 | Method | features cited | top feature's share | cited features' share | top feature argues against verdict |
 |---|---:|---:|---:|---:|
-| SHAP | 5 | 20.1% | 51.7% | 12% |
+| SHAP | 5 | 19.7% | 51.3% | 12% |
 | LIME | 5 | 11.5% | 31.9% | 88% |
 
 This is a readability **proxy**, not a usability result. No clinician has read these.
+
+### Two readability defects found and fixed under this gate
+
+Neither was visible in the numbers above; both were found by reading the output as the
+intended audience would.
+
+**1. Alerts named columns, not concepts.** They cited `Init_Bwd_Win_Byts` and
+`Bwd_Seg_Size_Avg` — *traceable* to the dataset, but not *comprehensible* to the hospital
+IT lead `PRD.md §4` names as the reader. T3.1 had treated traceability as satisfying
+readability; they are different properties. `src/xai/feature_glossary.py` now renders every
+feature in plain language ("how much data the device said it was ready to receive when it
+first replied") with the column name retained in brackets for provenance. Coverage of the
+62 selected features: **100%**, asserted by test.
+
+**2. The top-ranked measurement sometimes argued against its own verdict.** Ranking by
+absolute influence is correct — it is what makes the evidence shares sum to 100% — but it
+read as contradictory. Alerts now split *what pointed to Attack* from *what argued against
+it*, keeping every feature and its true direction. The `mixed_direction_rate` column above
+is what quantified the problem; it is retained because the split does not eliminate
+opposing evidence, it presents it honestly.
+
+### The human gate remains OPEN
+
+`TRD.md §9`'s "XAI output is usable" gate requires a **person** unfamiliar with the model
+to read one alert and state, in their own words, why the flow was flagged. That cannot be
+self-assessed: anyone who has seen the model's internals is no longer the reader the gate
+is about, and their verdict would be evidence of nothing.
+
+`reports/t3_3_reader_test.md` is the handout — self-contained, free of model internals and
+metrics, and containing one deliberately UNVERIFIED alert so the exercise also tests
+whether the trust labelling is noticed. **T3.3 is not complete until a team member
+completes it and the result is recorded there.** The quantitative metrics in this document
+stand on their own but are not a substitute for that gate.
 
 ## 4. What makes the layer trustworthy: per-explanation certification
 
@@ -101,8 +134,8 @@ before it is shown: it ablates the single top-cited feature and confirms the dec
 substantially more than for a random feature (threshold: gain ≥ 0.05).
 
 - **82%** of 40 SHAP explanations certify as trustworthy.
-- Certified at k: {1: 23, 2: 7, 3: 3} — most decisions rest on a single measurement, some on a small set.
-- Cost: **0.068s** per explanation, in one batched forward pass.
+- Certified at k: {1: 21, 2: 8, 3: 2, 5: 2} — most decisions rest on a single measurement, some on a small set.
+- Cost: **0.065s** per explanation, in one batched forward pass.
 
 Two fixes were needed to reach that rate and that cost, both driven by measurement:
 
@@ -114,7 +147,7 @@ Two fixes were needed to reach that rate and that cost, both driven by measureme
    **82%** without weakening the threshold itself.
 2. **All ablations run in one batched prediction.** The first version issued a separate
    forward pass per ablation and cost 0.865s per alert, which would have made
-   per-detection certification impractical. Batching cut it to 0.068s,
+   per-detection certification impractical. Batching cut it to 0.065s,
    changing no number it reports.
 
 The 18% that fail are **not** a defect to tune away: on those windows the

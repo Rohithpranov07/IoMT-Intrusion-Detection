@@ -141,13 +141,27 @@ class Explanation:
     def to_summary(self) -> str:
         """Render the plain-language summary `TRD.md §4` requires.
 
-        Target reader is a hospital IT lead or clinician, not an ML engineer (`PRD.md §4`), so the
-        text avoids "SHAP value", "softmax", "attribution", and feature indices. Every feature is
-        named, and the sentence structure states what the model saw and how strongly.
+        Target reader is a hospital IT lead or clinician, not an ML engineer (`PRD.md §4`), so:
+
+        * every feature is rendered through `src/xai/feature_glossary.py`, which turns
+          `Init_Bwd_Win_Byts` into "how much data the device said it was ready to receive when it
+          first replied". The column name is kept in brackets so the explanation stays traceable to
+          the data (T3.1's VERIFY block) -- the description is added, not substituted;
+        * features are **split by direction** -- what pointed to the verdict, and what argued
+          against it -- rather than presented as one list ranked by absolute influence.
+
+        The split resolves an open question recorded in `reports/t3_1_shap_examples.md`. Ranking by
+        absolute influence is correct and is what makes the evidence shares sum to 100%, but it
+        meant the top-ranked feature sometimes argued against its own verdict (measured at 12% of
+        SHAP explanations, 88% of LIME's). That is truthful and reads as contradictory. Splitting
+        keeps every feature and its true direction while removing the contradiction, so nothing is
+        hidden to make the alert look tidier.
 
         Returns:
             A multi-line, self-contained explanation string.
         """
+        from src.xai.feature_glossary import render_feature
+
         verdict = self.predicted_class_name().upper()
         if self.certification is None:
             trust_line = (
@@ -162,28 +176,34 @@ class Explanation:
             "",
             f"ALERT: this traffic window was classified as {verdict} "
             f"with {self.confidence:.0%} confidence.",
-            "",
-            f"The {len(self.top_features)} measurements that most influenced this decision:",
         ]
 
-        for attribution in self.top_features:
-            pushed = (
-                "raised the suspicion score"
-                if attribution.attribution > 0
-                else "lowered the suspicion score"
+        verdict_is_attack = self.predicted_label == POSITIVE_LABEL
+        supporting = [f for f in self.top_features if (f.attribution > 0) == verdict_is_attack]
+        opposing = [f for f in self.top_features if (f.attribution > 0) != verdict_is_attack]
+        n_timesteps = self.timestep_attributions.shape[0]
+
+        def render(attribution: "FeatureAttribution") -> str:
+            """Render one feature as a numbered, plain-language line."""
+            return (
+                f"  {attribution.rank}. {render_feature(attribution.feature_name)}\n"
+                f"       {attribution.share_of_total:.0%} of the total evidence, "
+                f"strongest at record {attribution.peak_timestep + 1} of {n_timesteps}."
             )
-            lines.append(
-                f"  {attribution.rank}. {attribution.feature_name} — {pushed} "
-                f"({attribution.share_of_total:.0%} of the total evidence), "
-                f"most strongly at record {attribution.peak_timestep + 1} of "
-                f"{self.timestep_attributions.shape[0]} in this window."
-            )
+
+        if supporting:
+            lines += ["", f"What pointed to {verdict.title()}:"]
+            lines += [render(f) for f in supporting]
+        if opposing:
+            other = NEGATIVE_CLASS_NAME if verdict_is_attack else POSITIVE_CLASS_NAME
+            lines += ["", f"What argued against it (these looked more like {other}):"]
+            lines += [render(f) for f in opposing]
 
         leading = int(np.argmax(self.branch_weights))
         lines += [
             "",
-            f"Detector agreement: the {self.branch_names[leading]} detector carried the most weight "
-            f"({self.branch_weights[leading]:.0%}); weights across all detectors were "
+            f"Detector agreement: the {self.branch_names[leading]} detector carried the most "
+            f"weight ({self.branch_weights[leading]:.0%}); weights across all detectors were "
             + ", ".join(
                 f"{name} {weight:.0%}"
                 for name, weight in zip(self.branch_names, self.branch_weights)

@@ -15,6 +15,10 @@ each one carried.
 Each note begins with a status line in square brackets. Part of this exercise is finding
 out whether that line means anything to you without being told what it means.
 
+Each measurement is described in words, with the underlying technical field name in
+brackets after it. You should not need the bracketed name; it is there so a network
+engineer could trace the alert back to the raw traffic.
+
 ## Your task
 
 For **each** alert below, write down — in your own words, in one or two sentences:
@@ -28,6 +32,8 @@ Then answer once, overall:
 4. **Did any alert below look less reliable than the others?** If so, which, and what told
    you?
 5. **What did you not understand?** Every term that stopped you is a defect worth fixing.
+6. **Were the measurement descriptions clear**, or did you find yourself relying on the
+   bracketed technical names? If any description left you guessing, quote it.
 
 ---
 
@@ -38,15 +44,22 @@ Then answer once, overall:
 
 ALERT: this traffic window was classified as ATTACK with 98% confidence.
 
-The 5 measurements that most influenced this decision:
-  1. Pkt_Size_Avg — raised the suspicion score (22% of the total evidence), most strongly at record 8 of 10 in this window.
-  2. Bwd_Seg_Size_Avg — lowered the suspicion score (14% of the total evidence), most strongly at record 9 of 10 in this window.
-  3. Pkt_Len_Mean — lowered the suspicion score (9% of the total evidence), most strongly at record 10 of 10 in this window.
-  4. Pkt_Len_Min — raised the suspicion score (7% of the total evidence), most strongly at record 9 of 10 in this window.
-  5. SYN_Flag_Cnt — lowered the suspicion score (6% of the total evidence), most strongly at record 10 of 10 in this window.
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       22% of the total evidence, strongest at record 9 of 10.
+  5. the size of the smallest packet in the conversation (Pkt_Len_Min)
+       6% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       13% of the total evidence, strongest at record 9 of 10.
+  3. the average packet size in the conversation (Pkt_Len_Mean)
+       8% of the total evidence, strongest at record 10 of 10.
+  4. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       6% of the total evidence, strongest at record 10 of 10.
 
 Detector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 33%.
-(Explanation produced by SHAP in 0.20s. 'Attack' is the positive class.)
+(Explanation produced by SHAP in 0.18s. 'Attack' is the positive class.)
 ```
 
 **Your answers**
@@ -64,15 +77,22 @@ Detector agreement: the cnn detector carried the most weight (34%); weights acro
 
 ALERT: this traffic window was classified as ATTACK with 100% confidence.
 
-The 5 measurements that most influenced this decision:
-  1. Pkt_Size_Avg — raised the suspicion score (20% of the total evidence), most strongly at record 7 of 10 in this window.
-  2. SYN_Flag_Cnt — lowered the suspicion score (15% of the total evidence), most strongly at record 9 of 10 in this window.
-  3. Bwd_Seg_Size_Avg — lowered the suspicion score (7% of the total evidence), most strongly at record 5 of 10 in this window.
-  4. Pkt_Len_Max — lowered the suspicion score (5% of the total evidence), most strongly at record 7 of 10 in this window.
-  5. Pkt_Len_Mean — lowered the suspicion score (4% of the total evidence), most strongly at record 9 of 10 in this window.
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       16% of the total evidence, strongest at record 7 of 10.
+  4. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       5% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       14% of the total evidence, strongest at record 2 of 10.
+  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       6% of the total evidence, strongest at record 9 of 10.
+  5. the smallest packet sent to the device (Fwd_Pkt_Len_Min)
+       4% of the total evidence, strongest at record 9 of 10.
 
 Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
-(Explanation produced by SHAP in 0.19s. 'Attack' is the positive class.)
+(Explanation produced by SHAP in 0.18s. 'Attack' is the positive class.)
 ```
 
 **Your answers**
@@ -90,15 +110,22 @@ Detector agreement: the cnn detector carried the most weight (33%); weights acro
 
 ALERT: this traffic window was classified as ATTACK with 68% confidence.
 
-The 5 measurements that most influenced this decision:
-  1. SYN_Flag_Cnt — lowered the suspicion score (17% of the total evidence), most strongly at record 1 of 10 in this window.
-  2. Pkt_Size_Avg — lowered the suspicion score (12% of the total evidence), most strongly at record 9 of 10 in this window.
-  3. Bwd_Seg_Size_Avg — raised the suspicion score (7% of the total evidence), most strongly at record 5 of 10 in this window.
-  4. Pkt_Len_Mean — raised the suspicion score (6% of the total evidence), most strongly at record 7 of 10 in this window.
-  5. Protocol — lowered the suspicion score (6% of the total evidence), most strongly at record 1 of 10 in this window.
+What pointed to Attack:
+  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       7% of the total evidence, strongest at record 5 of 10.
+  4. the average packet size in the conversation (Pkt_Len_Mean)
+       6% of the total evidence, strongest at record 7 of 10.
+
+What argued against it (these looked more like Normal):
+  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       13% of the total evidence, strongest at record 2 of 10.
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       12% of the total evidence, strongest at record 9 of 10.
+  5. which network protocol was used (TCP, UDP, or other) (Protocol)
+       6% of the total evidence, strongest at record 1 of 10.
 
 Detector agreement: the bilstm detector carried the most weight (39%); weights across all detectors were cnn 32%, bilstm 39%, transformer 29%.
-(Explanation produced by SHAP in 1.85s. 'Attack' is the positive class.)
+(Explanation produced by SHAP in 1.73s. 'Attack' is the positive class.)
 ```
 
 **Your answers**
@@ -142,13 +169,23 @@ The fix in that case is presentational (make the banner louder, or withhold unve
 explanations from the default view), not a change to the model. Record the outcome either
 way in `reports/t3_3_xai_evaluation.md`.
 
-### Known weak point to watch for
+### Two changes already made in response to this gate
 
-Features are ranked by how much they influenced the decision, regardless of direction, so
-an alert's top-ranked measurement sometimes *argues against* its own verdict (measured at
-12% of SHAP explanations). This is truthful but may read as contradictory. If the reader
-trips on it, that settles an open question from `reports/t3_1_shap_examples.md`: split the
-list into 'supported the alert' and 'argued against it' rather than one ranked list.
+Both were defects a reader test would have surfaced, found before the test was run, and
+fixed rather than left for the reader to trip over:
+
+1. **Measurements are now described in words.** Alerts previously cited raw column names
+   such as `Init_Bwd_Win_Byts` and `Bwd_Seg_Size_Avg`. Those are *traceable* to the data
+   but not *comprehensible* to the intended reader, and the two had been conflated.
+   `src/xai/feature_glossary.py` now covers 100% of the 62 features the model can cite.
+2. **Evidence is split by direction.** Features are ranked by absolute influence, which is
+   correct and is what makes the shares sum to 100% — but it meant the top-ranked
+   measurement sometimes argued *against* its own verdict (12% of SHAP explanations, 88%
+   of LIME's). Alerts now separate 'what pointed to Attack' from 'what argued against it',
+   keeping every feature and its true direction while removing the contradiction.
+
+Question 6 exists to check whether the first change actually worked. If the reader still
+leans on the bracketed technical names, the descriptions are not doing their job.
 
 ### Recording the result
 
