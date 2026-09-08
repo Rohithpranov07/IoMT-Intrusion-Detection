@@ -27,9 +27,9 @@
     "transformer": 20
   },
   "train_seconds": {
-    "cnn": 37.0,
-    "bilstm": 94.3,
-    "transformer": 77.5
+    "cnn": 38.4,
+    "bilstm": 84.9,
+    "transformer": 68.5
   },
   "dominant_branch_share": {
     "cnn": 0.6148,

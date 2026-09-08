@@ -371,6 +371,16 @@ print(f"Fusion F1 at gamma = 1.0     : {gamma_f1[gammas.index(1.0)]:.4f}")
 print(f"Fusion F1 at best gamma      : {max(gamma_f1):.4f} (gamma = {gammas[int(np.argmax(gamma_f1))]})")
 
 # %% [markdown]
+# > **CORRECTION (added after T3.4, on measurement).** This cell originally concluded that *branch
+# > calibration* was the problem. **That was an inference, and it was wrong.** Temperature scaling
+# > was later fitted and evaluated (`docs/calibration_decision.md`): the branches are already well
+# > calibrated (ECE 0.012–0.023; the BiLSTM is mildly *under*-confident at T = 0.79), and
+# > calibrating them changes fusion F1 by 0.0001. The measured cause is that the three branches
+# > **agree on 90.9% of test windows**, so fusion can act on only 9.1% — and on those it is *worse*
+# > than its best branch (62.0% vs 71.7%), because the two weaker branches outvote the stronger one
+# > while being confidently wrong. The text below is kept as written so the reasoning stays
+# > auditable.
+#
 # **Reading the diagnosis.** If the weights sit near 1/3 and the gamma sweep is flat, then the
 # fusion formula is not the problem — *branch calibration* is. Confidence-weighted voting is a sound
 # rule that is being fed an input it cannot use, because every branch claims near-certainty.
@@ -385,11 +395,11 @@ print(f"Fusion F1 at best gamma      : {max(gamma_f1):.4f} (gamma = {gammas[int(
 # - **T4.4 (ablation)** must report the single-branch results alongside the fused ones. On this
 #   dataset the honest headline is that the best single branch beats the ensemble, and
 #   `reports/ablation_study.md` has to say so.
-# - A calibration step (temperature scaling on each branch's logits, fitted on the validation fold)
-#   is the standard fix and would make the confidences informative. It is **not** implemented here,
-#   because it is not in the frozen `docs/architecture_decision.md` §3.1 and inventing it mid-phase
-#   would be exactly the undocumented drift this project criticises. It is recorded as a Phase 3
-#   proposal.
+# - ~~A calibration step (temperature scaling) would make the confidences informative.~~
+#   **Tested and rejected** — `docs/calibration_decision.md`. So was fitting `BRANCH_PRIORS`, which
+#   overfits the validation fold (+0.0017 val, −0.0003 test). The ceiling on *any* fusion rule here
+#   is +0.0257 accuracy over the best branch, so the honest conclusion is that on IoTID20 the
+#   ensemble does not earn its complexity. T3.6 (Edge-IIoTset) is the decision point.
 
 # %% [markdown]
 # ## Step 10 — The comparison that matters: ensemble vs. the leakage-free baseline
@@ -465,15 +475,25 @@ for name, model in models.items():
 rng = np.random.default_rng(RANDOM_STATE)
 background_index = rng.choice(len(X_train), size=min(500, len(X_train)), replace=False)
 
+# Validation-fold branch probabilities are saved too, because any post-hoc calibration
+# (temperature scaling) must be FITTED ON VALIDATION and never on test — fitting it on the
+# evaluation fold would be precisely the leakage this project exists to expose.
+validation_probabilities = {
+    name: model.predict(X_val, verbose=0) for name, model in models.items()
+}
+
 np.savez_compressed(
     ARTIFACTS / "ensemble_artifacts.npz",
     X_test=X_test,
     y_test=y_test,
+    X_val=X_val,
+    y_val=y_val,
     X_background=X_train[background_index],
     fused_predictions=fusion.predictions,
     fused_confidence=fusion.confidence,
     branch_weights=fusion.branch_weights,
     **{f"probabilities_{name}": branch_probabilities[name] for name in branch_names},
+    **{f"val_probabilities_{name}": validation_probabilities[name] for name in branch_names},
 )
 (ARTIFACTS / "feature_names.json").write_text(
     json.dumps({"feature_names": list(selector.selected_features_),

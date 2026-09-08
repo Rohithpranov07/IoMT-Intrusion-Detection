@@ -168,6 +168,30 @@ A sweep over γ from 0 to 64 confirms this is not a tuning problem: F1 rises onl
 to **0.9489** at γ=64, still well short of the Transformer's 0.9580. Sharpening weights that are
 built on uninformative confidences cannot recover information that was never there.
 
+> ### CORRECTION (added after T3.4, on measurement)
+>
+> This section originally concluded: *"The real defect is branch calibration, not the fusion rule."*
+> **That was wrong, and it was an inference rather than a measurement.** Temperature scaling was
+> subsequently fitted and evaluated (`docs/calibration_decision.md`,
+> `reports/calibration_evidence.md`): the branches turn out to be **well calibrated already**
+> (ECE 0.012–0.023; the BiLSTM is mildly *under*-confident, `T = 0.79`), and calibrating them
+> changes fusion F1 by 0.0001. The high median confidence is **justified**, not miscalibrated —
+> on 100% label-pure sessions the branches say 99% and are right 99% of the time.
+>
+> The measured cause is different: **the three branches agree on 90.9% of test windows**, so fusion
+> can only act on 9.1% — and on those contested windows it is *worse* than its best branch (62.0%
+> vs 71.7% correct), because the two weaker branches jointly outvote the stronger one. An oracle
+> resolving every disagreement perfectly would gain only +0.0257 accuracy. Confidence weighting
+> cannot help because the weaker branches are **confidently wrong on exactly the contested
+> windows**, and being well calibrated on average says nothing about which individual predictions
+> are mistaken.
+>
+> Fitting the fusion's `BRANCH_PRIORS` was also tested and also fails: it improves validation F1 by
+> 0.0017 and costs 0.0003 on test. See `docs/calibration_decision.md` §4.
+>
+> The paragraph below is retained as originally written, so the reasoning that led to the wrong
+> diagnosis remains auditable.
+
 **The real defect is branch calibration, not the fusion rule.** Over-parameterised softmax
 classifiers are known to be badly calibrated, and these are no exception. That is a specific,
 fixable problem with a standard remedy (temperature scaling per branch, fitted on the validation
@@ -197,11 +221,14 @@ branch ever reappears.
 1. **Make one clean comparison.** Evaluate the Random Forest baseline on the *same* windowed test
    fold as the ensemble. Until that exists, §4's first row and the rest of the table are measuring
    different things and cannot settle whether sequence modelling helps.
-2. **Calibrate the branches** (temperature scaling on the validation fold) and re-measure fusion.
-   §6 predicts this is what makes confidence weighting do any work at all.
-3. **Fit `α_b` instead of leaving all three at 1.0.** T3.5's incremental-learning mechanism already
-   updates exactly this vector — the fusion layer's only adjustable parameter — so letting the
-   Transformer earn a larger prior needs no architectural change and no new spec.
+2. ~~**Calibrate the branches** and re-measure fusion.~~ **Done, and rejected** —
+   `docs/calibration_decision.md`. The branches were already well calibrated and it changed nothing.
+3. ~~**Fit `α_b` instead of leaving all three at 1.0.**~~ **Done, and rejected** — the fit overfits
+   the validation fold (+0.0017 val, −0.0003 test) and zeroes the CNN entirely.
+3b. **Re-run the branch-agreement and fusion-ceiling analysis on Edge-IIoTset (T3.6).** That is now
+   the decision point for Contribution 2: IoTID20 leaves fusion only 9.1% of windows to act on, so a
+   dataset with genuinely diverse branch behaviour is where the ensemble either earns its place or
+   does not.
 4. **Report single-branch results in `ablation_study.md` (T4.4).** On IoTID20 the honest headline is
    that the best single branch beats the ensemble; the ablation must say so plainly.
 5. **Re-run the GNN sparsity check on Edge-IIoTset** (T3.6) rather than assuming IoTID20's verdict
