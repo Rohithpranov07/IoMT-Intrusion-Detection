@@ -103,6 +103,10 @@ class SequenceDataset:
         feature_names: column names of the last axis of `X`, in order.
         n_padded_windows: windows containing at least one pad timestep.
         sequence_length: the window length used.
+        aux_labels: optional per-window auxiliary label, carried through with the SAME
+            last-record rule as `y`. T3.5 uses it for the attack sub-type (`Sub_Cat`), so one
+            attack type can be held out of training and then introduced incrementally. None when
+            no auxiliary series was supplied.
     """
 
     X: np.ndarray
@@ -111,6 +115,7 @@ class SequenceDataset:
     feature_names: list[str]
     n_padded_windows: int
     sequence_length: int
+    aux_labels: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Enforce the shape contract at construction time."""
@@ -125,6 +130,10 @@ class SequenceDataset:
             raise ValueError(
                 f"Length mismatch: X={len(self.X)}, y={len(self.y)}, "
                 f"session_ids={len(self.session_ids)}"
+            )
+        if self.aux_labels is not None and len(self.aux_labels) != len(self.X):
+            raise ValueError(
+                f"aux_labels has length {len(self.aux_labels)} but X has {len(self.X)} windows"
             )
 
     def summary(self) -> str:
@@ -197,6 +206,7 @@ def build_sequences(
     session_ids: pd.Series | None = None,
     min_session_length: int = MIN_SESSION_LENGTH,
     pad_value: float = PAD_VALUE,
+    aux_labels: pd.Series | np.ndarray | None = None,
 ) -> SequenceDataset:
     """Build fixed-length windows from time-ordered records, grouped by session.
 
@@ -215,6 +225,8 @@ def build_sequences(
         session_ids: precomputed session ids. Computed via `assign_sessions` when None.
         min_session_length: sessions shorter than this are dropped.
         pad_value: fill value for pre-padding.
+        aux_labels: optional per-record auxiliary series carried through with the same
+            last-record rule as `y` (T3.5 uses the attack sub-type). Must align with `X`.
 
     Returns:
         A `SequenceDataset` of shape `(n_windows, sequence_length, n_features)`.
@@ -239,6 +251,9 @@ def build_sequences(
             "_label": np.asarray(y).ravel(),
         }
     )
+    aux_array = None if aux_labels is None else np.asarray(aux_labels).ravel()
+    if aux_array is not None and len(aux_array) != len(X):
+        raise ValueError(f"aux_labels has length {len(aux_array)} but X has {len(X)} rows")
     feature_values = X.to_numpy(dtype=np.float32)
     feature_names = list(X.columns)
     n_features = feature_values.shape[1]
@@ -246,6 +261,7 @@ def build_sequences(
     windows: list[np.ndarray] = []
     labels: list[int] = []
     window_sessions: list[int] = []
+    window_aux: list[object] = []
     n_padded = 0
     n_dropped_sessions = 0
     n_dropped_rows = 0
@@ -253,6 +269,7 @@ def build_sequences(
     order = np.lexsort((frame["_timestamp"].to_numpy(), frame["_session"].to_numpy()))
     sorted_sessions = frame["_session"].to_numpy()[order]
     sorted_labels = frame["_label"].to_numpy()[order]
+    sorted_aux = None if aux_array is None else aux_array[order]
 
     # Contiguous runs of equal session id after the lexsort delimit each session.
     boundaries = np.flatnonzero(np.diff(sorted_sessions)) + 1
@@ -276,6 +293,8 @@ def build_sequences(
             windows.append(window)
             labels.append(int(sorted_labels[stop - 1]))
             window_sessions.append(session_id)
+            if sorted_aux is not None:
+                window_aux.append(sorted_aux[stop - 1])
             n_padded += 1
             continue
 
@@ -285,6 +304,8 @@ def build_sequences(
             # Label of the LAST record in the window (§1.3).
             labels.append(int(sorted_labels[start + end - 1]))
             window_sessions.append(session_id)
+            if sorted_aux is not None:
+                window_aux.append(sorted_aux[start + end - 1])
 
     if not windows:
         raise ValueError(
@@ -304,6 +325,7 @@ def build_sequences(
         feature_names=feature_names,
         n_padded_windows=n_padded,
         sequence_length=sequence_length,
+        aux_labels=np.asarray(window_aux, dtype=object) if window_aux else None,
     )
     logger.info("%s", dataset.summary())
     return dataset
@@ -406,4 +428,5 @@ def subset_by_sessions(dataset: SequenceDataset, session_ids: np.ndarray) -> Seq
         feature_names=dataset.feature_names,
         n_padded_windows=int(mask.sum()) if dataset.n_padded_windows else 0,
         sequence_length=dataset.sequence_length,
+        aux_labels=None if dataset.aux_labels is None else dataset.aux_labels[mask],
     )
