@@ -94,7 +94,7 @@ def main() -> None:
         "`SEQUENCE_LENGTH = 10` — a frozen, short window is what makes unrolling expressible.",
         "",
         "It is an **export-time graph transformation, not an architecture change**: layer counts,",
-        "unit counts and every weight are identical, and `export_bilstm_for_tflite` asserts the",
+        "unit counts and every weight are identical, and `unroll_recurrent_layers` asserts the",
         "unrolled model reproduces the trained one to **exactly 0.0** before converting.",
         "`docs/architecture_decision.md` §2.2 is untouched.",
         "",

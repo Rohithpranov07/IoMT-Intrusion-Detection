@@ -38,7 +38,7 @@ builtins. This is available **only** because `docs/architecture_decision.md` §1
 `SEQUENCE_LENGTH = 10` — a frozen, short window is what makes unrolling expressible.
 
 It is an **export-time graph transformation, not an architecture change**: layer counts,
-unit counts and every weight are identical, and `export_bilstm_for_tflite` asserts the
+unit counts and every weight are identical, and `unroll_recurrent_layers` asserts the
 unrolled model reproduces the trained one to **exactly 0.0** before converting.
 `docs/architecture_decision.md` §2.2 is untouched.
 
@@ -47,10 +47,10 @@ unrolled model reproduces the trained one to **exactly 0.0** before converting.
 | Branch | Precision | Size | Max output difference | Prediction agreement | Unrolled |
 |---|---|---:|---:|---:|:--:|
 | cnn | float32 | 251 KB | 7.75e-07 | 100.0% | no |
-| bilstm | float32 | 818 KB | 2.38e-07 | 100.0% | yes |
+| bilstm | float32 | 821 KB | 2.38e-07 | 100.0% | yes |
 | transformer | float32 | 315 KB | 4.77e-07 | 100.0% | no |
 | cnn | float16 | 133 KB | 4.73e-04 | 100.0% | no |
-| bilstm | float16 | 484 KB | 1.71e-04 | 100.0% | yes |
+| bilstm | float16 | 487 KB | 1.71e-04 | 100.0% | yes |
 | transformer | float16 | 181 KB | 1.09e-03 | 100.0% | no |
 
 The probability tolerance is precision-aware — 1e-4 for float32, 5e-3 for float16. A
@@ -59,7 +59,7 @@ float16 carries about three decimal digits and its error (1.7e-4 to 1.1e-3) exce
 bound purely by construction. The prediction-agreement requirement stays at 100% for both,
 and that is the guarantee that actually matters.
 
-Total: **1384 KB** at float32, **798 KB** at float16 (42% smaller).
+Total: **1387 KB** at float32, **801 KB** at float16 (42% smaller).
 
 ## T4.1's VERIFY block
 

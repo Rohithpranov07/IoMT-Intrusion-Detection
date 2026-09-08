@@ -1,0 +1,28 @@
+{
+  "is_deployment_evidence": false,
+  "host": {
+    "model": "Darwin arm64",
+    "machine": "arm64",
+    "processor_count": 8,
+    "total_ram_gb": 8.0,
+    "os_description": "Darwin 25.2.0",
+    "python_version": "3.11.15",
+    "is_raspberry_pi": false
+  },
+  "backend": "tensorflow",
+  "precision": "float32",
+  "n_windows": 60,
+  "cold_start_seconds": 2.299451292026788,
+  "latency_ms": {
+    "50": 0.19258284009993076,
+    "90": 0.21311272867023945,
+    "95": 0.21483744494616985,
+    "99": 0.21908001508563757
+  },
+  "throughput_per_second": 5078.773775621889,
+  "branch_median_ms": {
+    "cnn": 0.026499852538108826,
+    "bilstm": 0.12587523087859154,
+    "transformer": 0.03941659815609455
+  }
+}

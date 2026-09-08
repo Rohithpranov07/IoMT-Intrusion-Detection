@@ -85,7 +85,6 @@ from src.config import (
     POSITIVE_CLASS_NAME,
     POSITIVE_LABEL,
 )
-from src.models import bilstm_branch
 from src.models.fusion import CONFIDENCE_SHARPNESS, DEFAULT_BRANCH_PRIOR, EPSILON
 
 logger = logging.getLogger(__name__)
@@ -164,65 +163,87 @@ class EnsembleExport:
         return "\n".join(lines)
 
 
-def export_bilstm_for_tflite(trained: keras.Model) -> keras.Model:
-    """Rebuild the BiLSTM with `unroll=True` and transfer the trained weights.
+#: Layer types whose dynamic loop blocks TFLite's built-in op set.
+RECURRENT_LAYER_TYPES: tuple[type, ...] = (
+    layers.LSTM, layers.GRU, layers.SimpleRNN, layers.Bidirectional,
+)
+
+
+def needs_unrolling(model: keras.Model) -> bool:
+    """Return whether `model` contains a rolled recurrent layer.
+
+    Detected by INSPECTING THE GRAPH, not by matching the branch name. An earlier version keyed off
+    the string "bilstm", which meant a recurrent branch named anything else — "recurrent", "gru",
+    a renamed experiment — skipped unrolling and failed conversion with an opaque
+    `ConverterError: TensorListReserve` instead. Architecture is a property of the model, not of
+    what someone called it.
+
+    Args:
+        model: the model to inspect.
+
+    Returns:
+        True if any recurrent layer is present with `unroll=False`.
+    """
+    for layer in model.layers:
+        inner = layer.forward_layer if isinstance(layer, layers.Bidirectional) else layer
+        if isinstance(inner, RECURRENT_LAYER_TYPES) and not getattr(inner, "unroll", False):
+            return True
+    return False
+
+
+def unroll_recurrent_layers(trained: keras.Model) -> keras.Model:
+    """Clone `trained` with every recurrent layer unrolled, carrying the same weights.
 
     Removes the dynamic `TensorList` loop that blocks TFLite conversion. Valid because
     `SEQUENCE_LENGTH` is fixed at 10 (`docs/architecture_decision.md` §1.2); an unrolled graph is
     only expressible for a known, short sequence length.
 
+    Implemented as a generic clone rather than a hand-rebuilt copy of the BiLSTM. Rebuilding by
+    hand meant this function silently encoded one architecture's constants, so any change to
+    `bilstm_branch` — or any other recurrent branch — would have produced an export that no longer
+    matched the trained model. Cloning derives the graph from the model itself.
+
     Args:
-        trained: the trained BiLSTM branch.
+        trained: the trained model.
 
     Returns:
         An architecturally identical, unrolled model carrying the same weights.
 
     Raises:
-        ValueError: if the transferred model does not reproduce the original's outputs exactly.
+        ValueError: if the clone does not reproduce the original's outputs exactly.
     """
-    sequence_length, n_features = trained.input_shape[1], trained.input_shape[2]
-    name = bilstm_branch.BRANCH_NAME
+    def clone_layer(layer: layers.Layer) -> layers.Layer:
+        """Rebuild one layer, forcing `unroll=True` on recurrent types."""
+        if isinstance(layer, layers.Bidirectional):
+            inner_config = layer.forward_layer.get_config()
+            inner_config["unroll"] = True
+            inner = type(layer.forward_layer).from_config(inner_config)
+            return layers.Bidirectional(
+                inner, merge_mode=layer.merge_mode, name=layer.name
+            )
+        if isinstance(layer, RECURRENT_LAYER_TYPES):
+            config = layer.get_config()
+            config["unroll"] = True
+            return type(layer).from_config(config)
+        return layer.__class__.from_config(layer.get_config())
 
-    inputs = keras.Input(shape=(sequence_length, n_features), name=f"{name}_input")
-    x = inputs
-    for index in range(1, bilstm_branch.LSTM_LAYER_COUNT + 1):
-        is_last = index == bilstm_branch.LSTM_LAYER_COUNT
-        x = layers.Bidirectional(
-            layers.LSTM(
-                units=bilstm_branch.LSTM_UNITS,
-                return_sequences=not is_last,
-                recurrent_dropout=bilstm_branch.RECURRENT_DROPOUT,
-                unroll=True,  # the whole point of this function
-                name=f"{name}_lstm{index}",
-            ),
-            merge_mode=bilstm_branch.MERGE_MODE,
-            name=f"{name}_bilstm{index}",
-        )(x)
-        x = layers.Dropout(bilstm_branch.DROPOUT_RATE, name=f"{name}_dropout{index}")(x)
-
-    embedding = layers.Dense(
-        bilstm_branch.EMBEDDING_DIM, activation="relu", name=f"{name}_embedding"
-    )(x)
-    outputs = layers.Dense(
-        bilstm_branch.HEAD_UNITS, activation="softmax", name=f"{name}_head"
-    )(embedding)
-
-    unrolled = keras.Model(inputs=inputs, outputs=outputs, name=name)
+    unrolled = keras.models.clone_model(trained, clone_function=clone_layer)
     unrolled.set_weights(trained.get_weights())
 
     # Unrolling must be mathematically identical, not merely similar.
     probe = np.random.default_rng(0).random(
-        (8, sequence_length, n_features)
+        (8, trained.input_shape[1], trained.input_shape[2])
     ).astype(np.float32)
     difference = float(
         np.abs(unrolled.predict(probe, verbose=0) - trained.predict(probe, verbose=0)).max()
     )
     if difference != 0.0:
         raise ValueError(
-            f"Unrolled BiLSTM differs from the trained model by {difference:.3e}; "
+            f"Unrolled model differs from the trained one by {difference:.3e}; "
             "weight transfer is wrong."
         )
-    logger.info("BiLSTM unrolled for TFLite export; outputs identical to the trained model")
+    logger.info("Unrolled %s for TFLite export; outputs identical to the trained model",
+                trained.name)
     return unrolled
 
 
@@ -328,8 +349,9 @@ def export_ensemble(
     export = EnsembleExport(output_dir=output_dir)
 
     for name, model in models.items():
-        unrolled = name == bilstm_branch.BRANCH_NAME.replace("_branch", "") or "bilstm" in name
-        to_convert = export_bilstm_for_tflite(model) if unrolled else model
+        # Detected from the graph, never from the branch's name -- see `needs_unrolling`.
+        unrolled = needs_unrolling(model)
+        to_convert = unroll_recurrent_layers(model) if unrolled else model
 
         blob = _convert(to_convert, precision)
         path = output_dir / f"{name}.tflite"

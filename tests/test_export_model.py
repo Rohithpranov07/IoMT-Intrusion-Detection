@@ -24,8 +24,9 @@ from src.deployment.export_model import (
     DEFAULT_PRECISION,
     MIN_ARGMAX_AGREEMENT,
     PROBABILITY_TOLERANCE,
-    export_bilstm_for_tflite,
     export_ensemble,
+    needs_unrolling,
+    unroll_recurrent_layers,
     verify_tflite,
 )
 from src.models import bilstm_branch
@@ -56,7 +57,7 @@ def test_unrolled_bilstm_is_numerically_identical(sample) -> None:
     evaluated one is what every report in this repository describes.
     """
     trained = build_bilstm_branch(SEQUENCE_LENGTH, N_FEATURES)
-    unrolled = export_bilstm_for_tflite(trained)
+    unrolled = unroll_recurrent_layers(trained)
 
     difference = np.abs(
         unrolled.predict(sample, verbose=0) - trained.predict(sample, verbose=0)
@@ -66,7 +67,7 @@ def test_unrolled_bilstm_is_numerically_identical(sample) -> None:
 
 def test_unrolled_bilstm_keeps_the_documented_architecture(sample) -> None:
     """2 layers, 64 units per direction — Objection #2's fix must survive export."""
-    unrolled = export_bilstm_for_tflite(build_bilstm_branch(SEQUENCE_LENGTH, N_FEATURES))
+    unrolled = unroll_recurrent_layers(build_bilstm_branch(SEQUENCE_LENGTH, N_FEATURES))
 
     bidirectional = [l for l in unrolled.layers if l.__class__.__name__ == "Bidirectional"]
     assert len(bidirectional) == bilstm_branch.LSTM_LAYER_COUNT == 2
@@ -78,11 +79,36 @@ def test_unrolled_bilstm_keeps_the_documented_architecture(sample) -> None:
 def test_unrolled_bilstm_preserves_weights(sample) -> None:
     """Weight transfer must be complete — the discarded export route lost them silently."""
     trained = build_bilstm_branch(SEQUENCE_LENGTH, N_FEATURES)
-    unrolled = export_bilstm_for_tflite(trained)
+    unrolled = unroll_recurrent_layers(trained)
 
     assert len(unrolled.get_weights()) == len(trained.get_weights())
     for exported, original in zip(unrolled.get_weights(), trained.get_weights()):
         np.testing.assert_array_equal(exported, original)
+
+
+def test_unrolling_is_decided_by_the_graph_not_the_branch_name(tmp_path: Path, sample) -> None:
+    """REGRESSION: an earlier version keyed off the string "bilstm" in the branch name.
+
+    A recurrent branch called anything else — "recurrent", "gru", a renamed experiment — skipped
+    unrolling and failed conversion with an opaque `ConverterError: TensorListReserve`. Whether a
+    model needs unrolling is a property of its layers, not of what someone called it.
+    """
+    assert needs_unrolling(build_bilstm_branch(SEQUENCE_LENGTH, N_FEATURES)) is True
+    assert needs_unrolling(build_cnn_branch(SEQUENCE_LENGTH, N_FEATURES)) is False
+
+    # The same recurrent architecture under a name containing no hint of "bilstm".
+    export = export_ensemble(
+        {"recurrent": build_bilstm_branch(SEQUENCE_LENGTH, N_FEATURES)},
+        tmp_path, sample, FEATURE_NAMES,
+    )
+    assert export.all_verified()
+    assert export.branches[0].unrolled is True
+
+
+def test_an_already_unrolled_model_is_not_unrolled_twice(sample) -> None:
+    """`needs_unrolling` must be idempotent, or a second export pass would rebuild needlessly."""
+    once = unroll_recurrent_layers(build_bilstm_branch(SEQUENCE_LENGTH, N_FEATURES))
+    assert needs_unrolling(once) is False
 
 
 # --- Export and verification --------------------------------------------------------------------
