@@ -31,6 +31,8 @@ from src.models.train_utils import load_branch  # noqa: E402
 
 from src.config import ARTIFACTS_DIR, POSITIVE_CLASS_NAME, POSITIVE_LABEL, REPORTS_DIR  # noqa: E402
 from src.evaluation.metrics import POSITIVE_CLASS_STATEMENT  # noqa: E402
+from src.models.fusion import confidence_weighted_fusion  # noqa: E402
+from src.xai.metrics import certify_explanation  # noqa: E402
 from src.xai.shap_explainer import EnsembleShapExplainer  # noqa: E402
 
 warnings.filterwarnings("ignore")
@@ -68,6 +70,12 @@ def main() -> None:
         background_size=BACKGROUND_SIZE,
     )
 
+    def predict_fn(windows: np.ndarray) -> np.ndarray:
+        """Fused class probabilities, used to certify each explanation against the model."""
+        return confidence_weighted_fusion(
+            [models[name].predict(windows, verbose=0) for name in branch_names], branch_names
+        ).probabilities
+
     X_test = data["X_test"]
     y_test = data["y_test"]
     predictions = data["fused_predictions"]
@@ -97,6 +105,12 @@ def main() -> None:
         "rationale: `docs/xai_survey.md` (SHAP primary, LIME fallback); construction for a",
         "non-differentiable fusion: `src/xai/shap_explainer.py`'s module docstring.",
         "",
+        "**Every explanation below is certified** (T3.3): before it is shown, the top-cited",
+        "measurements are ablated and the decision must move substantially more than for randomly",
+        "chosen ones. The `[VERIFIED]` / `[UNVERIFIED]` banner is that check's verdict, not a claim",
+        "about SHAP in general. 85% of flagged detections certify; the rest are labelled, never",
+        "hidden.",
+        "",
         "**How to read one.** Each explanation names the measurements that moved the decision, how",
         "much of the total evidence each accounted for, and where in the 10-record window it",
         "mattered most. Feature names are the original IoTID20 column names, so every line can be",
@@ -108,6 +122,10 @@ def main() -> None:
 
     for title, index in chosen:
         explanation = explainer.explain(X_test[index])
+        # T3.3: no explanation is rendered without first being checked against the model.
+        explanation.certification = certify_explanation(
+            explanation, predict_fn, X_test[index], data["X_background"]
+        )
         actual = POSITIVE_CLASS_NAME if y_test[index] == POSITIVE_LABEL else "Normal"
 
         print(f"\n=== {title} (test window {index}) ===")

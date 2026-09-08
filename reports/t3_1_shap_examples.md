@@ -9,6 +9,12 @@ same confidence-weighted ensemble evaluated in `reports/phase2_results.md`. Meth
 rationale: `docs/xai_survey.md` (SHAP primary, LIME fallback); construction for a
 non-differentiable fusion: `src/xai/shap_explainer.py`'s module docstring.
 
+**Every explanation below is certified** (T3.3): before it is shown, the top-cited
+measurements are ablated and the decision must move substantially more than for randomly
+chosen ones. The `[VERIFIED]` / `[UNVERIFIED]` banner is that check's verdict, not a claim
+about SHAP in general. 85% of flagged detections certify; the rest are labelled, never
+hidden.
+
 **How to read one.** Each explanation names the measurements that moved the decision, how
 much of the total evidence each accounted for, and where in the 10-record window it
 mattered most. Feature names are the original IoTID20 column names, so every line can be
@@ -21,26 +27,28 @@ traced back to the traffic itself.
 *Test window 0 · actual class: **Attack** · model said: **Attack***
 
 ```
+[UNVERIFIED] removing the cited measurements barely changes this decision (best gain -13.4% at k=5, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
 ALERT: this traffic window was classified as ATTACK with 68% confidence.
 
 The 5 measurements that most influenced this decision:
-  1. Pkt_Size_Avg — lowered the suspicion score (13% of the total evidence), most strongly at record 9 of 10 in this window.
-  2. SYN_Flag_Cnt — lowered the suspicion score (11% of the total evidence), most strongly at record 2 of 10 in this window.
-  3. Bwd_Seg_Size_Avg — raised the suspicion score (8% of the total evidence), most strongly at record 5 of 10 in this window.
-  4. Pkt_Len_Mean — raised the suspicion score (7% of the total evidence), most strongly at record 7 of 10 in this window.
-  5. Protocol — lowered the suspicion score (6% of the total evidence), most strongly at record 1 of 10 in this window.
+  1. SYN_Flag_Cnt — lowered the suspicion score (13% of the total evidence), most strongly at record 2 of 10 in this window.
+  2. Pkt_Size_Avg — lowered the suspicion score (12% of the total evidence), most strongly at record 9 of 10 in this window.
+  3. Bwd_Seg_Size_Avg — raised the suspicion score (9% of the total evidence), most strongly at record 5 of 10 in this window.
+  4. Pkt_Len_Mean — raised the suspicion score (7% of the total evidence), most strongly at record 6 of 10 in this window.
+  5. Protocol — lowered the suspicion score (5% of the total evidence), most strongly at record 1 of 10 in this window.
 
 Detector agreement: the bilstm detector carried the most weight (39%); weights across all detectors were cnn 32%, bilstm 39%, transformer 29%.
-(Explanation produced by SHAP in 1.80s. 'Attack' is the positive class.)
+(Explanation produced by SHAP in 1.71s. 'Attack' is the positive class.)
 ```
 
 | Rank | Feature | Attribution | Share of evidence | Pushes toward | Peak record |
 |---:|---|---:|---:|---|---:|
-| 1 | `Pkt_Size_Avg` | -0.30068 | 13.1% | Normal | 9 of 10 |
-| 2 | `SYN_Flag_Cnt` | -0.25839 | 11.3% | Normal | 2 of 10 |
-| 3 | `Bwd_Seg_Size_Avg` | +0.18659 | 8.1% | Attack | 5 of 10 |
-| 4 | `Pkt_Len_Mean` | +0.15317 | 6.7% | Attack | 7 of 10 |
-| 5 | `Protocol` | -0.13094 | 5.7% | Normal | 1 of 10 |
+| 1 | `SYN_Flag_Cnt` | -0.27978 | 12.6% | Normal | 2 of 10 |
+| 2 | `Pkt_Size_Avg` | -0.27219 | 12.3% | Normal | 9 of 10 |
+| 3 | `Bwd_Seg_Size_Avg` | +0.20859 | 9.4% | Attack | 5 of 10 |
+| 4 | `Pkt_Len_Mean` | +0.15445 | 7.0% | Attack | 6 of 10 |
+| 5 | `Protocol` | -0.11305 | 5.1% | Normal | 1 of 10 |
 
 ---
 
@@ -49,14 +57,16 @@ Detector agreement: the bilstm detector carried the most weight (39%); weights a
 *Test window 1 · actual class: **Attack** · model said: **Attack***
 
 ```
+[VERIFIED] Removing the top 1 cited measurement changes this decision by 98%, against 19% for unrelated ones.
+
 ALERT: this traffic window was classified as ATTACK with 98% confidence.
 
 The 5 measurements that most influenced this decision:
-  1. Pkt_Size_Avg — raised the suspicion score (22% of the total evidence), most strongly at record 8 of 10 in this window.
-  2. Bwd_Seg_Size_Avg — lowered the suspicion score (15% of the total evidence), most strongly at record 9 of 10 in this window.
-  3. Pkt_Len_Mean — lowered the suspicion score (10% of the total evidence), most strongly at record 9 of 10 in this window.
-  4. Pkt_Len_Min — raised the suspicion score (7% of the total evidence), most strongly at record 9 of 10 in this window.
-  5. SYN_Flag_Cnt — lowered the suspicion score (7% of the total evidence), most strongly at record 2 of 10 in this window.
+  1. Pkt_Size_Avg — raised the suspicion score (22% of the total evidence), most strongly at record 9 of 10 in this window.
+  2. Bwd_Seg_Size_Avg — lowered the suspicion score (13% of the total evidence), most strongly at record 9 of 10 in this window.
+  3. Pkt_Len_Mean — lowered the suspicion score (8% of the total evidence), most strongly at record 10 of 10 in this window.
+  4. SYN_Flag_Cnt — lowered the suspicion score (8% of the total evidence), most strongly at record 9 of 10 in this window.
+  5. Pkt_Len_Min — raised the suspicion score (7% of the total evidence), most strongly at record 9 of 10 in this window.
 
 Detector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 33%.
 (Explanation produced by SHAP in 0.18s. 'Attack' is the positive class.)
@@ -64,11 +74,11 @@ Detector agreement: the cnn detector carried the most weight (34%); weights acro
 
 | Rank | Feature | Attribution | Share of evidence | Pushes toward | Peak record |
 |---:|---|---:|---:|---|---:|
-| 1 | `Pkt_Size_Avg` | +0.47672 | 22.5% | Attack | 8 of 10 |
-| 2 | `Bwd_Seg_Size_Avg` | -0.31210 | 14.7% | Normal | 9 of 10 |
-| 3 | `Pkt_Len_Mean` | -0.20342 | 9.6% | Normal | 9 of 10 |
-| 4 | `Pkt_Len_Min` | +0.14279 | 6.7% | Attack | 9 of 10 |
-| 5 | `SYN_Flag_Cnt` | -0.13851 | 6.5% | Normal | 2 of 10 |
+| 1 | `Pkt_Size_Avg` | +0.60297 | 21.9% | Attack | 9 of 10 |
+| 2 | `Bwd_Seg_Size_Avg` | -0.34708 | 12.6% | Normal | 9 of 10 |
+| 3 | `Pkt_Len_Mean` | -0.22364 | 8.1% | Normal | 10 of 10 |
+| 4 | `SYN_Flag_Cnt` | -0.21635 | 7.9% | Normal | 9 of 10 |
+| 5 | `Pkt_Len_Min` | +0.18762 | 6.8% | Attack | 9 of 10 |
 
 ---
 
@@ -77,14 +87,16 @@ Detector agreement: the cnn detector carried the most weight (34%); weights acro
 *Test window 2 · actual class: **Attack** · model said: **Attack***
 
 ```
+[VERIFIED] Removing the top 1 cited measurement changes this decision by 98%, against 20% for unrelated ones.
+
 ALERT: this traffic window was classified as ATTACK with 100% confidence.
 
 The 5 measurements that most influenced this decision:
-  1. Pkt_Size_Avg — raised the suspicion score (19% of the total evidence), most strongly at record 7 of 10 in this window.
-  2. SYN_Flag_Cnt — lowered the suspicion score (13% of the total evidence), most strongly at record 9 of 10 in this window.
-  3. Bwd_Seg_Size_Avg — lowered the suspicion score (6% of the total evidence), most strongly at record 4 of 10 in this window.
+  1. Pkt_Size_Avg — raised the suspicion score (20% of the total evidence), most strongly at record 7 of 10 in this window.
+  2. SYN_Flag_Cnt — lowered the suspicion score (14% of the total evidence), most strongly at record 9 of 10 in this window.
+  3. Bwd_Seg_Size_Avg — lowered the suspicion score (7% of the total evidence), most strongly at record 5 of 10 in this window.
   4. Fwd_Pkt_Len_Max — raised the suspicion score (5% of the total evidence), most strongly at record 9 of 10 in this window.
-  5. Pkt_Len_Min — raised the suspicion score (4% of the total evidence), most strongly at record 7 of 10 in this window.
+  5. Pkt_Len_Min — raised the suspicion score (5% of the total evidence), most strongly at record 6 of 10 in this window.
 
 Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
 (Explanation produced by SHAP in 0.19s. 'Attack' is the positive class.)
@@ -92,11 +104,11 @@ Detector agreement: the cnn detector carried the most weight (33%); weights acro
 
 | Rank | Feature | Attribution | Share of evidence | Pushes toward | Peak record |
 |---:|---|---:|---:|---|---:|
-| 1 | `Pkt_Size_Avg` | +0.27203 | 18.6% | Attack | 7 of 10 |
-| 2 | `SYN_Flag_Cnt` | -0.18378 | 12.6% | Normal | 9 of 10 |
-| 3 | `Bwd_Seg_Size_Avg` | -0.09454 | 6.5% | Normal | 4 of 10 |
-| 4 | `Fwd_Pkt_Len_Max` | +0.06755 | 4.6% | Attack | 9 of 10 |
-| 5 | `Pkt_Len_Min` | +0.06419 | 4.4% | Attack | 7 of 10 |
+| 1 | `Pkt_Size_Avg` | +0.27546 | 19.6% | Attack | 7 of 10 |
+| 2 | `SYN_Flag_Cnt` | -0.20147 | 14.3% | Normal | 9 of 10 |
+| 3 | `Bwd_Seg_Size_Avg` | -0.10436 | 7.4% | Normal | 5 of 10 |
+| 4 | `Fwd_Pkt_Len_Max` | +0.06699 | 4.8% | Attack | 9 of 10 |
+| 5 | `Pkt_Len_Min` | +0.06663 | 4.7% | Attack | 6 of 10 |
 
 ---
 
@@ -105,26 +117,28 @@ Detector agreement: the cnn detector carried the most weight (33%); weights acro
 *Test window 1090 · actual class: **Normal** · model said: **Attack***
 
 ```
+[VERIFIED] Removing the top 2 cited measurements changes this decision by 38%, against -7% for unrelated ones.
+
 ALERT: this traffic window was classified as ATTACK with 56% confidence.
 
 The 5 measurements that most influenced this decision:
-  1. SYN_Flag_Cnt — lowered the suspicion score (21% of the total evidence), most strongly at record 1 of 10 in this window.
-  2. Bwd_Pkt_Len_Std — raised the suspicion score (6% of the total evidence), most strongly at record 9 of 10 in this window.
-  3. ACK_Flag_Cnt — lowered the suspicion score (5% of the total evidence), most strongly at record 1 of 10 in this window.
-  4. Fwd_Pkt_Len_Max — raised the suspicion score (5% of the total evidence), most strongly at record 1 of 10 in this window.
-  5. Pkt_Size_Avg — raised the suspicion score (4% of the total evidence), most strongly at record 3 of 10 in this window.
+  1. SYN_Flag_Cnt — lowered the suspicion score (21% of the total evidence), most strongly at record 2 of 10 in this window.
+  2. Pkt_Size_Avg — raised the suspicion score (7% of the total evidence), most strongly at record 3 of 10 in this window.
+  3. Bwd_Pkt_Len_Std — raised the suspicion score (7% of the total evidence), most strongly at record 9 of 10 in this window.
+  4. Bwd_Pkts/s — lowered the suspicion score (5% of the total evidence), most strongly at record 2 of 10 in this window.
+  5. Fwd_Header_Len — lowered the suspicion score (4% of the total evidence), most strongly at record 2 of 10 in this window.
 
 Detector agreement: the bilstm detector carried the most weight (38%); weights across all detectors were cnn 25%, bilstm 38%, transformer 37%.
-(Explanation produced by SHAP in 0.19s. 'Attack' is the positive class.)
+(Explanation produced by SHAP in 0.20s. 'Attack' is the positive class.)
 ```
 
 | Rank | Feature | Attribution | Share of evidence | Pushes toward | Peak record |
 |---:|---|---:|---:|---|---:|
-| 1 | `SYN_Flag_Cnt` | -0.46734 | 21.0% | Normal | 1 of 10 |
-| 2 | `Bwd_Pkt_Len_Std` | +0.12446 | 5.6% | Attack | 9 of 10 |
-| 3 | `ACK_Flag_Cnt` | -0.12141 | 5.5% | Normal | 1 of 10 |
-| 4 | `Fwd_Pkt_Len_Max` | +0.10688 | 4.8% | Attack | 1 of 10 |
-| 5 | `Pkt_Size_Avg` | +0.09659 | 4.3% | Attack | 3 of 10 |
+| 1 | `SYN_Flag_Cnt` | -0.40807 | 20.8% | Normal | 2 of 10 |
+| 2 | `Pkt_Size_Avg` | +0.14371 | 7.3% | Attack | 3 of 10 |
+| 3 | `Bwd_Pkt_Len_Std` | +0.13506 | 6.9% | Attack | 9 of 10 |
+| 4 | `Bwd_Pkts/s` | -0.10322 | 5.3% | Normal | 2 of 10 |
+| 5 | `Fwd_Header_Len` | -0.08783 | 4.5% | Normal | 2 of 10 |
 
 ---
 

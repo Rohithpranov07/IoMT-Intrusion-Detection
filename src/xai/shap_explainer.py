@@ -115,6 +115,10 @@ class Explanation:
         feature_names: all feature names, in `timestep_attributions` column order.
         method: always "shap" here; `Explanation` is shared with the LIME fallback (T3.2), which
             sets "lime". An explanation must never be silently downgraded without saying so.
+        certification: verdict from `src.xai.metrics.certify_explanation`, attached before the
+            explanation is shown. None means the explanation has NOT been checked against the
+            model, and `to_summary()` says so explicitly -- an unchecked explanation must never
+            read as though it had been verified.
         elapsed_seconds: wall-clock time to produce this explanation. Feeds the SHAP-vs-LIME
             cutover threshold once Pi measurements exist (T4.3).
     """
@@ -128,6 +132,7 @@ class Explanation:
     feature_names: list[str] = field(repr=False)
     method: str = "shap"
     elapsed_seconds: float = 0.0
+    certification: object | None = None
 
     def predicted_class_name(self) -> str:
         """Return the human-readable predicted class."""
@@ -144,7 +149,17 @@ class Explanation:
             A multi-line, self-contained explanation string.
         """
         verdict = self.predicted_class_name().upper()
+        if self.certification is None:
+            trust_line = (
+                "[UNCHECKED] This explanation has not been verified against the model. "
+                "Run certify_explanation() before acting on it."
+            )
+        else:
+            trust_line = self.certification.banner()
+
         lines = [
+            trust_line,
+            "",
             f"ALERT: this traffic window was classified as {verdict} "
             f"with {self.confidence:.0%} confidence.",
             "",

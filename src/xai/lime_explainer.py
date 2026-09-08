@@ -3,7 +3,28 @@
 The second half of Contribution 3's explainability layer. `docs/xai_survey.md` (T1.4) designates
 LIME the **fallback** to T3.1's SHAP, for cases where SHAP's cost is prohibitive.
 
->>> READ THIS BEFORE ASSUMING LIME IS THE FAST PATH <<<
+>>> LIME IS A CROSS-CHECK ONLY. DO NOT SHOW ITS OUTPUT TO AN OPERATOR. <<<
+--------------------------------------------------------------------------
+Measured in T3.3 (`reports/t3_3_xai_evaluation.md`), on the trained ensemble:
+
+    stability (top-5 Jaccard under 1% input noise)   SHAP 0.873    LIME 0.269
+    model's own prediction flip rate under that noise             0.0%
+
+The model does not change its mind under that perturbation, so the instability is entirely LIME's.
+A Jaccard of 0.27 means two operators opening the same alert can be shown substantially different
+reasons for it -- which erodes trust faster than offering no explanation at all, and is
+disqualifying in a clinical setting.
+
+Raising `num_samples` does not rescue it. Measured: 1,000 -> 4,000 -> 12,000 samples moves Jaccard
+only 0.16 -> 0.38 -> 0.33, at twelve times the cost, and never reaches the 0.50 floor
+(`TRUST_MIN_STABILITY`) required to be operator-facing. Worse, LIME's apparent fidelity COLLAPSES as
+its sampling converges (+0.349 -> +0.187 -> +0.023): its high early fidelity score was an artefact
+of a noisy surrogate, not evidence that it had found the features that matter.
+
+**LIME therefore stays in the codebase as an independent cross-check on SHAP and for the ablation
+in T4.4, and is never rendered to a human.** `explain()` stamps every LIME explanation accordingly.
+
+>>> ON SPEED, WHICH IS A SEPARATE POINT <<<
 --------------------------------------------------------
 `docs/xai_survey.md` §2.2 predicted LIME would be materially faster than SHAP. **On this project's
 actual configuration that prediction does not hold** -- see `reports/t3_2_lime_vs_shap.md` for the
@@ -334,6 +355,10 @@ class EnsembleLimeExplainer:
             feature_names=list(self.feature_names),
             method="lime",
             elapsed_seconds=time.perf_counter() - started,
+        )
+        logger.warning(
+            "LIME explanation produced (cross-check only, NOT operator-facing -- "
+            "measured top-5 Jaccard 0.27 under 1%% input noise; see the module docstring)"
         )
         logger.info(
             "LIME explanation for a %s detection in %.2fs; top feature %s",

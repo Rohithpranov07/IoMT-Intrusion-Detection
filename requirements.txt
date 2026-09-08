@@ -26,7 +26,10 @@ pytest
 
 # Phase 3
 shap==0.51.0        # T3.1, primary XAI method (docs/xai_survey.md)
-lime==0.2.0.1       # T3.2, secondary XAI method. Kept for FAITHFULNESS, not speed: it was
-                    # measured at ~1.9x SLOWER than SHAP here, because T3.1 uses GradientExplainer
-                    # rather than the KernelExplainer the survey compared against. See the
-                    # AMENDMENT in docs/xai_survey.md and reports/t3_2_lime_vs_shap.md.
+scipy               # T3.3, Spearman rank correlation for the stability metric
+lime==0.2.0.1       # T3.2, CROSS-CHECK ONLY -- never operator-facing. Measured in T3.3 at 0.27
+                    # top-5 Jaccard under 1% input noise (SHAP: 0.87) and NO significant fidelity
+                    # at any k. It is also ~1.9x SLOWER than SHAP (T3.2), so it is not a latency
+                    # fallback either. Retained only as an independent probe and for T4.4's
+                    # ablation. See reports/t3_3_xai_evaluation.md and the AMENDMENT in
+                    # docs/xai_survey.md.
