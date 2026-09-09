@@ -47,6 +47,7 @@ Every gate in `TRD.md §9` passes, every §F checkbox below is checked, and no t
 | `TRD.md` | Exact pipeline, architecture, evaluation formulas, deployment plan |
 | `PPT.pdf` | Original Review 1 slides — source of the timeline and risk register |
 | Base paper (Berguiga et al., HIDS-IoMT) | The system under critique — reference for dataset/feature counts only, not for its (disputed) results |
+| `NS3-Simulation.md` | The network-level validation layer folded into Phase 4 — NS-3 topology, threshold-rule comparison, experiment matrix. Governs its own tasks (T-N1–T-N7); the TRD still wins on any conflict |
 | Senior's `ids-main` repo (Badiyani) | Reviewed for engineering lessons (its live FastAPI/Scapy/React dashboard is a good reference for what real deployment evidence looks like) — **not** the codebase extended here |
 
 ### B.2 Confirmed facts to build against (don't re-derive differently)
@@ -101,7 +102,14 @@ repo/
 │       ├── export_model.py             (T4.1)
 │       ├── pi_inference.py             (T4.2)
 │       └── benchmark.py                (T4.3)
+├── scratch/
+│   └── hids-iomt-adaptive.cc           (NS3-Simulation.md T-N1..T-N5; copied into ns-3's scratch/)
+├── scripts/ns3_experiments/
+│   ├── run_matrix.sh                   (T-N6)
+│   └── aggregate_results.py            (T-N7)
 └── reports/
+    ├── ns3_runs/                       (T-N6, raw saved runs)
+    ├── ns3_simulation_results.md       (T-N7)
     ├── phase2_results.md               (T2.6)
     ├── gnn_go_nogo.md                  (T2.7)
     ├── deployment_benchmark.md         (T4.3)

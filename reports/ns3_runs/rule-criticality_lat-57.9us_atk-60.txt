@@ -1,0 +1,51 @@
+[0/2] Re-checking globbed directories...
+ninja: no work to do.
+
+================ HIDS-IoMT NS-3 run: rule-criticality_lat-57.9us_atk-60 ================
+ALL NUMBERS BELOW ARE NS-3 SIMULATION OUTPUT, NOT PHYSICAL MEASUREMENTS.
+  (NS3-Simulation.md A.1 rule 4: a simulated delay is not a Raspberry Pi number.)
+
+-- topology (T-N1: roles are distinct node sets, never subsets) --
+  wearables (legitimate) : 20
+  attacker-bots          : 60
+  fog nodes (IDS)        : 4
+  total leaf senders     : 80
+
+-- IDS service model --
+  inspection cost/flow   : 57.9000 us
+  latency provenance     : SWEPT-sensitivity-value-no-Pi-measurement-exists
+  capacity PER FOG NODE  : 17271.1572 flows/s
+  capacity AGGREGATE     : 69084.6287 flows/s (4 nodes)
+  queue depth per node   : 200
+
+-- threshold rule --
+  rule                   : criticality
+  base threshold         : 500.0000 ms
+  block after            : 3 violations
+  criticality weights    : LIFE_CRITICAL=0.6000, HIGH=0.8000, STANDARD=1.0000, NON_CLINICAL=1.3000
+
+-- detection --
+  packets reaching fog   : 336952
+  inspected by IDS       : 853
+  dropped, queue full    : 0
+  dropped, source blocked: 336099
+  alerts raised          : 209
+  ... on attacker-bots   : 180  (true positives)
+  ... on wearables       : 29  (FALSE POSITIVES)
+  IDS drop ratio         : 99.7468 % of packets reaching the fog node
+    (NOT the network loss ratio below: these packets arrived, then the IDS
+     queue overflowed or the source was already blocked. Reporting one as the
+     other is the conflation NS3-Simulation.md A.1 rule 4 forbids.)
+  attacker-bots blocked  : 60 / 60
+  wearables blocked      : 9 / 20  (FALSE POSITIVES)
+
+-- network (FlowMonitor, simulated) --
+  tx packets             : 336995
+  rx packets             : 336952
+  delivery ratio         : 99.9872 %
+  loss ratio (network)   : 0.0128 %
+  mean end-to-end delay  : 3.0828 ms (SIMULATED)
+  mean jitter            : 0.0002 ms (SIMULATED)
+  throughput             : 8.2666 Mbps
+  rngRun                 : 1 (seed 42)
+================ end of run: rule-criticality_lat-57.9us_atk-60 ================

@@ -149,7 +149,8 @@ Document whatever split ratio is used (base paper claims 80/10/10 training/testi
 | Classical ML / preprocessing | scikit-learn 1.3, Pandas, NumPy |
 | Explainability | SHAP, LIME |
 | Graph learning (stretch, §3.4) | PyTorch Geometric |
-| Compute | Google Colab / lab GPU for training; Raspberry Pi 4B (8GB) for inference-only deployment testing |
+| Network simulation | **NS-3** (`ns-3-dev`), C++ scratch programs only. Added per `NS3-Simulation.md`, which folds a network-level validation layer into Phase 4. Python bindings are not used and are disabled in the team's build: `cppyy` bindings are unreliable on Apple Silicon and at least one team member is on it, so a Python-bound script would not be portable across the team. |
+| Compute | Google Colab / lab GPU for training; Raspberry Pi 4B (8GB) for inference-only deployment testing; NS-3 runs on any team laptop |
 
 ## 9. Verification Checklist (Acceptance Gates)
 
