@@ -19,6 +19,29 @@ import kagglehub  # noqa: E402
 
 from src.config import IOTID20_KAGGLE_SLUG, RAW_DIR  # noqa: E402
 
+#: Edge-IIoTset (T3.6). The full dataset is 1.63 GB because it bundles raw pcaps; a whole-archive
+#: download failed at 12% with a broken pipe. kagglehub's `path=` argument fetches the single
+#: ML-ready CSV instead, which is all this project needs.
+EDGE_IIOTSET_SLUG = "mohamedamineferrag/edgeiiotset-cyber-security-dataset-of-iot-iiot"
+EDGE_IIOTSET_FILE = (
+    "Edge-IIoTset dataset/Selected dataset for ML and DL/ML-EdgeIIoT-dataset.csv"
+)
+
+
+def download_edge_iiotset() -> Path:
+    """Download the Edge-IIoTset ML-ready CSV and record its path.
+
+    Returns:
+        Path to the downloaded CSV.
+    """
+    path = Path(kagglehub.dataset_download(EDGE_IIOTSET_SLUG, path=EDGE_IIOTSET_FILE))
+    print("Path to Edge-IIoTset CSV:", path)
+
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    (RAW_DIR / "EDGE_IIOTSET_PATH.txt").write_text(str(path) + "\n", encoding="utf-8")
+    print(f"  {path.stat().st_size / (1024 * 1024):.1f} MB")
+    return path
+
 
 def download_iotid20() -> Path:
     """Download the IoTID20 dataset and return the local directory kagglehub cached it in."""
@@ -37,4 +60,7 @@ def download_iotid20() -> Path:
 
 
 if __name__ == "__main__":
-    download_iotid20()
+    if "--edge-iiotset" in sys.argv:
+        download_edge_iiotset()
+    else:
+        download_iotid20()

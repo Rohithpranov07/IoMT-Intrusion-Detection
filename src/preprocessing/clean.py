@@ -260,3 +260,245 @@ def clean_iotid20(
         int((y == NEGATIVE_LABEL).sum()),
     )
     return X, y, meta
+
+
+# ---------------------------------------------------------------------------
+# Edge-IIoTset (Build-Instructions T3.6; TRD.md §6.1)
+# ---------------------------------------------------------------------------
+# NOTE ON REPO LAYOUT: T3.6's Files line names only `notebooks/04_train_edge_iiotset.ipynb`. The
+# cleaning logic lives here rather than in the notebook for the same reason `clean_iotid20` does:
+# a second dataset's schema handling is code, and code in a notebook cannot be unit-tested.
+#
+# Edge-IIoTset is a PACKET-level capture (tshark fields), not a flow-statistics dataset like
+# IoTID20. Its 63 columns are 61 features + 2 labels (`Attack_label`, `Attack_type`), which matches
+# the 61 raw features `TRD.md §6.1` attributes to it.
+#
+# THREE DEFECTS IN THIS FILE, ALL MEASURED (see `reports/t3_6_edge_iiotset.md`)
+# ----------------------------------------------------------------------------
+# 1. PLACEHOLDER SPELLING LEAKS THE LABEL. Normal rows encode an absent field as the string "0";
+#    attack rows encode it as "0.0". The two sets never overlap, so the SPELLING of "missing"
+#    identifies the class. Five columns are affected -- `mqtt.topic`, `mqtt.protoname`,
+#    `mqtt.conack.flags`, `mqtt.msg`, `dns.qry.name.len` -- and three of them reach **100% solo
+#    accuracy** with a depth-6 decision tree against an 84.6% majority baseline. This is an
+#    artefact of preprocessing the normal and attack captures separately, not a property of
+#    attacks. `PLACEHOLDER_TOKENS` normalises every spelling to one token, which removes the
+#    artefact at the root; afterwards no feature solo-predicts above 0.95.
+#
+# 2. `frame.time` IS CORRUPTED. Values are fragments like "6.0", "0.0", or
+#    " 2021 22:14:30.939803000 " -- the date has been split away by the original CSV's commas.
+#    90% retain a clock time but none retain a usable date, so records cannot be ordered.
+#
+# 3. THE FILE IS 15 CONTIGUOUS PER-ATTACK BLOCKS, not capture order. Row order therefore cannot
+#    substitute for a timestamp.
+#
+# Consequences 2 and 3 together mean **no valid sequence construction is possible on this file**,
+# so T3.6 runs the record-level leakage-free pipeline only. Building windows from row order would
+# produce sessions that are label-pure by construction -- an artefact of how the file was
+# concatenated, which would inflate results rather than measure anything.
+#
+# Label convention is unchanged: `Attack_label` 1 = Attack = POSITIVE (`TRD.md §2.3`).
+
+#: Label columns.
+EDGE_LABEL_COLUMNS: tuple[str, ...] = ("Attack_label", "Attack_type")
+
+#: Every spelling of "this field was absent" seen in the file. Normalised to one token so the
+#: SPELLING cannot encode the class (defect 1 above).
+PLACEHOLDER_TOKENS: frozenset[str] = frozenset(
+    {"0", "0.0", "0.00", "", "nan", "NaN", "None", "none"}
+)
+PLACEHOLDER_NORMALISED: str = "__MISSING__"
+
+#: Addresses and timestamps. Excluded from features, retained as metadata: the host columns are
+#: needed for T3.6's GNN sparsity re-check, and `frame.time` is kept only to evidence defect 2.
+EDGE_IDENTIFIER_COLUMNS: tuple[str, ...] = (
+    "frame.time", "ip.src_host", "ip.dst_host",
+    "arp.src.proto_ipv4", "arp.dst.proto_ipv4",
+)
+
+#: Per-connection nonces and ephemeral identifiers. These identify a specific TCP conversation and
+#: carry no meaning across conversations, so a model using them memorises connections rather than
+#: learning attack behaviour -- the same reason `Flow_ID` is dropped from IoTID20. Measured solo
+#: accuracy before removal: tcp.seq 0.919, tcp.ack 0.916.
+#:
+#: `tcp.srcport` and `tcp.dstport` are included here, which needs justifying because ports ARE
+#: normally informative -- IoTID20 keeps both. The distinction is cardinality. On the 96,429
+#: cleaned rows, `tcp.srcport` holds 32,182 distinct values (33.4% of rows) and `tcp.dstport`
+#: 23,188 (24.0%). At that ratio they are ephemeral per-connection numbers, not service
+#: identifiers; IoTID20's `Dst_Port` has 655 distinct values over 625,415 rows (0.1%), which is
+#: what a service port looks like. Keeping them takes a Random Forest to **0.9999 accuracy with
+#: zero errors** -- a perfect score is a defect report, not a result. Dropping them gives 0.9839.
+#: `udp.port` is KEPT: 32 distinct values, genuinely a service identifier.
+EDGE_NONCE_COLUMNS: tuple[str, ...] = (
+    "tcp.seq", "tcp.ack", "tcp.ack_raw", "tcp.checksum",
+    "icmp.checksum", "icmp.seq_le", "icmp.transmit_timestamp",
+    "udp.stream", "dns.qry.name",
+    "tcp.srcport", "tcp.dstport",
+)
+
+#: Raw payload and request content. `http.request.full_uri` and `tcp.payload` map to exactly ONE
+#: attack type for 100% of their non-placeholder values -- they contain the attack strings
+#: themselves (SQL injection payloads, XSS vectors). A model using them memorises attack text; it
+#: does not detect attacks. A Random Forest on four of these columns alone scores 0.9845 against an
+#: 0.8460 baseline.
+EDGE_CONTENT_COLUMNS: tuple[str, ...] = (
+    "tcp.payload", "tcp.options", "http.file_data", "http.request.uri.query",
+    "http.request.full_uri", "http.referer", "mqtt.msg",
+)
+
+#: Columns holding a single value across all 157,800 rows.
+EDGE_ZERO_VARIANCE_COLUMNS: tuple[str, ...] = (
+    "icmp.unused", "http.tls_port", "dns.qry.type", "dns.retransmit_request_in",
+    "mqtt.msg_decoded_as", "mbtcp.len", "mbtcp.trans_id", "mbtcp.unit_id",
+)
+
+EDGE_CSV_RELATIVE_PATH: str = (
+    "Edge-IIoTset dataset/Selected dataset for ML and DL/ML-EdgeIIoT-dataset.csv"
+)
+
+
+def resolve_edge_iiotset_csv(dataset_path: str | Path | None = None) -> Path:
+    """Locate the Edge-IIoTset ML-ready CSV.
+
+    Args:
+        dataset_path: direct path to the CSV, or None to read the pointer written by
+            `scripts/download_data.py`.
+
+    Returns:
+        Path to `ML-EdgeIIoT-dataset.csv`.
+
+    Raises:
+        FileNotFoundError: if the pointer or the CSV is missing.
+    """
+    if dataset_path is not None:
+        path = Path(dataset_path)
+        if path.is_dir():
+            path = path / EDGE_CSV_RELATIVE_PATH
+        if not path.exists():
+            raise FileNotFoundError(f"Edge-IIoTset CSV not found at {path}")
+        return path
+
+    pointer = RAW_DIR / "EDGE_IIOTSET_PATH.txt"
+    if not pointer.exists():
+        raise FileNotFoundError(
+            f"{pointer} not found. Run: python scripts/download_data.py --edge-iiotset"
+        )
+    return Path(pointer.read_text(encoding="utf-8").strip())
+
+
+def load_edge_iiotset(
+    dataset_path: str | Path | None = None, nrows: int | None = None
+) -> pd.DataFrame:
+    """Load the raw Edge-IIoTset CSV with no transformation applied.
+
+    Args:
+        dataset_path: path to the CSV or its directory, or None to auto-resolve.
+        nrows: optional row cap for smoke tests. Never use for reported results.
+
+    Returns:
+        The raw DataFrame (63 columns).
+    """
+    csv_path = resolve_edge_iiotset_csv(dataset_path)
+    df = pd.read_csv(csv_path, nrows=nrows, low_memory=False)
+    logger.info("Loaded Edge-IIoTset: %d rows x %d columns", len(df), df.shape[1])
+    return df
+
+
+def normalise_placeholders(series: pd.Series) -> pd.Series:
+    """Collapse every spelling of "field absent" into one token.
+
+    This removes defect 1 (see the section header): the file spells an absent field "0" in normal
+    rows and "0.0" in attack rows, so the spelling alone identifies the class. Normalising is
+    preferred to dropping the affected columns, because it removes the artefact while keeping
+    whatever legitimate signal the column carries when the field IS present.
+
+    Args:
+        series: the column to normalise.
+
+    Returns:
+        The column with all placeholder spellings replaced by `PLACEHOLDER_NORMALISED`.
+    """
+    text = series.astype(str).str.strip()
+    return text.where(~text.isin(PLACEHOLDER_TOKENS), PLACEHOLDER_NORMALISED)
+
+
+def clean_edge_iiotset(
+    df: pd.DataFrame, drop_duplicates: bool = False
+) -> tuple[pd.DataFrame, pd.Series, pd.DataFrame]:
+    """Clean Edge-IIoTset into features / labels / metadata.
+
+    Steps, in order:
+      1. Normalise placeholder spellings across every column (defect 1).
+      2. Separate labels and identifier columns.
+      3. Drop per-connection nonces, raw content columns, and zero-variance columns.
+      4. Ordinal-encode the surviving low-cardinality categoricals; coerce the rest to numeric.
+      5. Encode labels with **Attack = 1 = positive** (`TRD.md §2.3`).
+
+    Args:
+        df: raw DataFrame from `load_edge_iiotset`.
+        drop_duplicates: drop exact duplicate feature rows. Defaults to False, matching the
+            `clean_iotid20` convention. Edge-IIoTset has only 814 duplicates (0.5%), against
+            IoTID20's 58.2%, so the choice matters far less here.
+
+    Returns:
+        Tuple of `(X, y, meta)`. `y` is 1 = Attack. `meta` carries the identifier columns plus
+        `Attack_type`.
+
+    Raises:
+        ValueError: if `Attack_label` is missing.
+    """
+    if "Attack_label" not in df.columns:
+        raise ValueError("Edge-IIoTset frame is missing the required `Attack_label` column")
+
+    # Step 1: kill the placeholder artefact before anything reads these columns.
+    normalised = df.copy()
+    for column in normalised.columns:
+        if column not in EDGE_LABEL_COLUMNS and normalised[column].dtype == object:
+            normalised[column] = normalise_placeholders(normalised[column])
+
+    dropped = (
+        set(EDGE_LABEL_COLUMNS) | set(EDGE_IDENTIFIER_COLUMNS)
+        | set(EDGE_NONCE_COLUMNS) | set(EDGE_CONTENT_COLUMNS)
+        | set(EDGE_ZERO_VARIANCE_COLUMNS)
+    )
+    feature_columns = [c for c in normalised.columns if c not in dropped]
+    logger.info(
+        "Edge-IIoTset feature funnel: %d raw -> %d "
+        "(-%d identifiers, -%d nonces, -%d content, -%d constant)",
+        len(normalised.columns) - len(EDGE_LABEL_COLUMNS), len(feature_columns),
+        len(EDGE_IDENTIFIER_COLUMNS), len(EDGE_NONCE_COLUMNS),
+        len(EDGE_CONTENT_COLUMNS), len(EDGE_ZERO_VARIANCE_COLUMNS),
+    )
+
+    # Step 4: numeric where possible; ordinal-encode the remaining categoricals.
+    X = pd.DataFrame(index=normalised.index)
+    for column in feature_columns:
+        numeric = pd.to_numeric(normalised[column], errors="coerce")
+        if numeric.notna().mean() > 0.99:
+            X[column] = numeric.fillna(0.0)
+        else:
+            X[column] = normalised[column].astype("category").cat.codes.astype(np.float64)
+
+    X = X.replace([np.inf, -np.inf], np.nan)
+    keep = X.notna().all(axis=1)
+    X = X[keep]
+
+    n_duplicates = int(X.duplicated().sum())
+    logger.info("Exact duplicate feature rows: %d (drop_duplicates=%s)", n_duplicates, drop_duplicates)
+    if drop_duplicates:
+        X = X[~X.duplicated()]
+
+    y = df.loc[X.index, "Attack_label"].astype(np.int8)
+    meta_columns = [c for c in EDGE_IDENTIFIER_COLUMNS if c in df.columns]
+    if "Attack_type" in df.columns:
+        meta_columns.append("Attack_type")
+    meta = df.loc[X.index, meta_columns].copy()
+
+    X = X.reset_index(drop=True)
+    y = y.reset_index(drop=True)
+    meta = meta.reset_index(drop=True)
+
+    logger.info(
+        "Edge-IIoTset clean complete: X=%s, Attack(1)=%d, Normal(0)=%d",
+        X.shape, int((y == POSITIVE_LABEL).sum()), int((y == NEGATIVE_LABEL).sum()),
+    )
+    return X, y, meta
