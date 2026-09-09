@@ -1,0 +1,502 @@
+<title>HIDS-IoMT Findings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,500&display=swap">
+<style>
+  :root{
+    --ember:#fc5000; --plasma:#524ae9; --sulfur:#f5f28e;
+    --limestone:#f7f6f2; --pumice:#e2e2df; --obsidian:#070607; --chalk:#ffffff;
+    --display:'Anton','Bebas Neue',Impact,ui-sans-serif,system-ui,sans-serif;
+    --body:'DM Sans',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --r-card:40px; --r-pill:800px; --r-small:16px; --r-med:20px;
+    --page:1280px; --gap:80px; --pad:40px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--pumice); color:var(--obsidian);
+    font-family:var(--body); font-weight:500; font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--page); margin:0 auto; padding:0 24px}
+  h1,h2,h3{font-family:var(--display); font-weight:400; letter-spacing:.02em; margin:0; text-wrap:balance}
+  h1{font-size:clamp(48px,7.6vw,96px); line-height:.95}
+  h2{font-size:clamp(40px,5.4vw,64px); line-height:1}
+  h3{font-size:26px; line-height:1.2}
+  p{margin:0}
+  a{color:var(--obsidian)}
+  .cap{font-size:12px; line-height:1.2; letter-spacing:.08em; text-transform:uppercase; font-family:var(--body)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* nav */
+  nav{position:sticky; top:0; z-index:40; background:var(--pumice); padding:16px 0}
+  .navpill{
+    display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+    background:var(--limestone); border-radius:var(--r-pill); padding:10px 20px;
+  }
+  .brand{font-family:var(--display); font-size:22px; letter-spacing:.02em; margin-right:auto; display:flex; align-items:center; gap:10px}
+  .brand svg{display:block}
+  nav a{
+    text-decoration:none; font-size:14px; padding:6px 12px; border-radius:var(--r-pill);
+    white-space:nowrap; transition:background .18s ease, color .18s ease;
+  }
+  nav a:hover,nav a:focus-visible{background:var(--ember); color:var(--chalk)}
+  nav a[aria-current="true"]{background:var(--obsidian); color:var(--chalk)}
+  :focus-visible{outline:3px solid var(--ember); outline-offset:3px}
+
+  section{padding-top:var(--gap)}
+  section:last-of-type{padding-bottom:var(--gap)}
+  .lede{max-width:62ch; font-size:18px; line-height:1.5}
+  .head{display:flex; flex-direction:column; gap:16px; margin-bottom:40px}
+
+  /* hero */
+  .hero{display:grid; grid-template-columns:1.15fr .85fr; gap:40px; align-items:end; padding-top:48px}
+  .halftone{width:100%; height:100%; min-height:340px; border-radius:var(--r-card); display:block}
+  .heroCopy{display:flex; flex-direction:column; gap:24px}
+  .tag{background:var(--sulfur); color:var(--obsidian); border-radius:var(--r-pill); padding:4px 12px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; display:inline-block}
+  .tagrow{display:flex; gap:8px; flex-wrap:wrap}
+
+  /* cards + grid */
+  .grid{display:grid; gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--limestone); border-radius:var(--r-card); padding:var(--pad)}
+  .stat{background:var(--ember); color:var(--chalk); border-radius:var(--r-card); padding:var(--pad); display:flex; flex-direction:column; gap:8px}
+  .stat .v{font-family:var(--display); font-size:64px; line-height:1.05; letter-spacing:.02em}
+  .stat.alt{background:var(--plasma)}
+  .stat.quiet{background:var(--limestone); color:var(--obsidian); border:1.5px solid var(--obsidian)}
+
+  /* tables */
+  .scroller{overflow-x:auto; border-radius:var(--r-med)}
+  table{border-collapse:collapse; width:100%; font-size:14px; min-width:560px}
+  th,td{text-align:right; padding:12px 14px; white-space:nowrap}
+  th:first-child,td:first-child{text-align:left; white-space:normal; min-width:200px}
+  thead th{font-size:12px; letter-spacing:.06em; text-transform:uppercase; border-bottom:1.5px solid var(--obsidian)}
+  tbody tr+tr{border-top:1px dotted rgba(7,6,7,.28)}
+  tbody tr.best td{background:var(--ember); color:var(--chalk)}
+  tbody tr.best td:first-child{border-radius:var(--r-small) 0 0 var(--r-small)}
+  tbody tr.best td:last-child{border-radius:0 var(--r-small) var(--r-small) 0}
+  tbody tr.best{border-top-color:transparent}
+  .note{margin-top:16px; font-size:14px; line-height:1.5; color:rgba(7,6,7,.72); max-width:80ch}
+
+  /* heatmap */
+  .ctrls{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px}
+  .ctrl{
+    font:500 14px var(--body); cursor:pointer; border-radius:var(--r-pill);
+    padding:10px 20px; background:transparent; border:1.5px solid var(--obsidian); color:var(--obsidian);
+  }
+  .ctrl[aria-pressed="true"]{background:var(--ember); border-color:var(--ember); color:var(--chalk)}
+  .hm{display:grid; grid-template-columns:auto repeat(4,1fr); gap:8px; min-width:560px}
+  .hm .lbl{font-size:12px; letter-spacing:.06em; text-transform:uppercase; align-self:center; padding-right:8px}
+  .hm .colh{font-size:12px; letter-spacing:.06em; text-transform:uppercase; text-align:center}
+  .cell{
+    border-radius:var(--r-small); padding:16px 12px; text-align:center; display:flex;
+    flex-direction:column; gap:4px; align-items:center; justify-content:center; min-height:92px;
+    border:1.5px solid transparent;
+  }
+  .cell .big{font-family:var(--display); font-size:32px; line-height:1; letter-spacing:.02em}
+  .cell .sub{font-size:12px; line-height:1.2}
+  .cell.on{background:var(--ember); color:var(--chalk)}
+  .cell.off{background:var(--limestone); color:var(--obsidian); border-style:dotted; border-color:var(--obsidian)}
+
+  /* misc */
+  .rule{border:0; border-top:1.5px dotted var(--obsidian); margin:0}
+  .list{display:grid; gap:16px}
+  .finding{background:var(--limestone); border-radius:var(--r-card); padding:var(--pad); display:flex; flex-direction:column; gap:12px}
+  .kv{display:flex; justify-content:space-between; gap:16px; padding:10px 0; font-size:14px}
+  .kv+.kv{border-top:1px dotted rgba(7,6,7,.28)}
+  .kv b{font-variant-numeric:tabular-nums}
+  .blocked{background:var(--obsidian); color:var(--chalk); border-radius:var(--r-card); padding:var(--pad); display:flex; flex-direction:column; gap:16px}
+  .blocked .tag{background:var(--sulfur)}
+  footer{padding:var(--gap) 0 64px; font-size:14px; line-height:1.6}
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr}
+    .g4{grid-template-columns:repeat(2,1fr)}
+    .g3,.g2{grid-template-columns:1fr}
+    :root{--gap:56px; --pad:28px; --r-card:28px}
+    .stat .v{font-size:48px}
+  }
+  @media (max-width:560px){ .g4{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+</style>
+
+<nav>
+  <div class="wrap">
+    <div class="navpill">
+      <span class="brand">
+        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 20 19H2Z" fill="#fc5000"/><path d="M11 8.5 15.5 16h-9Z" fill="#070607"/></svg>
+        HIDS-IoMT
+      </span>
+      <a href="#objections">Objections</a>
+      <a href="#detection">Detection</a>
+      <a href="#simulation">Simulation</a>
+      <a href="#explain">Explainability</a>
+      <a href="#adaptive">Adaptive</a>
+      <a href="#deployment">Deployment</a>
+      <a href="#negative">Negative results</a>
+      <a href="#open">Open</a>
+    </div>
+  </div>
+</nav>
+
+<header class="wrap hero">
+  <div class="heroCopy">
+    <div class="tagrow">
+      <span class="tag">Attack = positive class</span>
+      <span class="tag">373 pass / 20 skip</span>
+    </div>
+    <h1>Four defects, and what survived them.</h1>
+    <p class="lede">A critique-driven reimplementation of HIDS-IoMT (Berguiga et al., IEEE Access 13, 2025). It does not try to beat the paper's 99.92%. It reproduces the leakage that produced it, then reports every result that came out negative, of which there are several.</p>
+  </div>
+  <canvas class="halftone" id="halftone" width="640" height="480" role="img" aria-label="Halftone dot field, violet shading into ember orange"></canvas>
+</header>
+
+<main class="wrap">
+
+  <section id="status">
+    <div class="grid g4">
+      <div class="stat"><span class="cap">Test suite</span><span class="v num">393</span><span>373 pass, 20 skip. Skips are gated on hardware, not failures.</span></div>
+      <div class="stat"><span class="cap">Duplicate rows, IoTID20</span><span class="v num">58.2%</span><span>The larger leakage vector. Neither the base paper nor the prior work mentions it.</span></div>
+      <div class="stat"><span class="cap">Duplicate rows, Edge-IIoTset</span><span class="v num">98.95%</span><span>157,800 rows hold 1,661 distinct feature vectors.</span></div>
+      <div class="stat alt"><span class="cap">NS-3 raw runs</span><span class="v num">60</span><span>Saved before any aggregation, so every table is re-derivable.</span></div>
+    </div>
+  </section>
+
+  <section id="objections">
+    <div class="head">
+      <h2>The four objections</h2>
+      <p class="lede">Each was stated before the work began. Two were confirmed, one was fixed, one only partly.</p>
+    </div>
+    <div class="grid g2">
+      <article class="card">
+        <span class="tag">Confirmed, then fixed</span>
+        <h3 style="margin-top:16px">Pre-split SMOTE inflated the headline</h3>
+        <p style="margin-top:12px">The cleaned majority class is 585,342 rows, and 2 × 585,342 reproduces the paper's stated post-SMOTE total. Its folds partition synthetic data. Reproducing that order put <b class="num">46.61%</b> of the test fold into rows that never existed in the capture.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Fixed</span>
+        <h3 style="margin-top:16px">The LSTM was never specified</h3>
+        <p style="margin-top:12px">Neither layer nor unit count appears in the paper, and its input is a single flow record. This project states both: 2 layers, 64 units per direction, over genuine 10-step sequences. A test fails the build if the code and the decision record disagree.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Confirmed by re-derivation</span>
+        <h3 style="margin-top:16px">Precision and recall labels are swapped</h3>
+        <p style="margin-top:12px">The paper takes Normal as positive and labels both Equations 7 and 8 "Recall", one of which is the precision formula. Recomputing from its own Fig. 11c matrix reproduces the reported accuracy exactly, but shows the reported precision is the true recall.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Partly fixed</span>
+        <h3 style="margin-top:16px">Black box, flat 500 ms for every device</h3>
+        <p style="margin-top:12px">Replaced with per-alert certified SHAP and a criticality-weighted threshold. The explanation layer works. The false-positive target it was meant to hit does not, and section 6 says so.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="detection">
+    <div class="head">
+      <h2>Detection results</h2>
+      <p class="lede">Attack is the positive class in every table. Each row is hand-verified against its own confusion matrix.</p>
+    </div>
+
+    <div class="card">
+      <h3>Record level, IoTID20</h3>
+      <div class="scroller" style="margin-top:24px">
+        <table>
+          <thead><tr><th>Pipeline</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>Test fold synthetic</th></tr></thead>
+          <tbody>
+            <tr><td>Leaky, the base paper's order</td><td class="num">0.9986</td><td class="num">0.9975</td><td class="num">0.9996</td><td class="num">0.9986</td><td class="num">46.61%</td></tr>
+            <tr><td>Honest order, duplicates kept</td><td class="num">0.9988</td><td class="num">0.9991</td><td class="num">0.9996</td><td class="num">0.9994</td><td class="num">0.00%</td></tr>
+            <tr class="best"><td>Honest order, deduplicated</td><td class="num">0.9964</td><td class="num">0.9971</td><td class="num">0.9990</td><td class="num">0.9980</td><td class="num">0.00%</td></tr>
+          </tbody>
+                  </table>
+      </div>
+        <p class="note">Fixing the SMOTE ordering alone did not lower the number. The middle row is why the third exists: 58.2% of cleaned rows are exact duplicates, so a random split puts identical records on both sides no matter when SMOTE runs.</p>
+    </div>
+
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card">
+        <h3>Window level, IoTID20</h3>
+        <div class="scroller" style="margin-top:24px">
+          <table style="min-width:420px">
+            <thead><tr><th>Model</th><th>Accuracy</th><th>F1</th></tr></thead>
+            <tbody>
+              <tr class="best"><td>bilstm + transformer</td><td class="num">0.9487</td><td class="num">0.9710</td></tr>
+              <tr><td>transformer alone</td><td class="num">0.9487</td><td class="num">0.9707</td></tr>
+              <tr><td>Full three-branch ensemble</td><td class="num">0.9399</td><td class="num">0.9661</td></tr>
+              <tr><td>bilstm alone</td><td class="num">0.9271</td><td class="num">0.9595</td></tr>
+              <tr><td>cnn alone</td><td class="num">0.9230</td><td class="num">0.9565</td></tr>
+            </tbody>
+                      </table>
+        </div>
+        <p class="note">The best single branch beats the ensemble, and removing the CNN improves it by 0.0049.</p>
+      </div>
+      <div class="card">
+        <h3>Window level, Edge-IIoTset</h3>
+        <div class="scroller" style="margin-top:24px">
+          <table style="min-width:420px">
+            <thead><tr><th>Model</th><th>Accuracy</th><th>F1</th></tr></thead>
+            <tbody>
+              <tr class="best"><td>cnn alone</td><td class="num">0.9798</td><td class="num">0.9887</td></tr>
+              <tr><td>Full three-branch ensemble</td><td class="num">0.9214</td><td class="num">0.9537</td></tr>
+              <tr><td>bilstm alone</td><td class="num">0.9201</td><td class="num">0.9529</td></tr>
+              <tr><td>transformer alone</td><td class="num">0.8945</td><td class="num">0.9372</td></tr>
+            </tbody>
+                      </table>
+        </div>
+        <p class="note">The same verdict on a second dataset, by a wider margin, with a different winning branch. No branch is reliably best and the fusion does not exploit that.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px; background:var(--plasma); color:var(--chalk)">
+      <h3>The ensemble does not earn its complexity</h3>
+      <p style="margin-top:16px; max-width:70ch">The three branches agree on 90.9% of IoTID20 windows, so fusion can act on 9.1%, and on those contested windows it is worse than its best branch. An oracle resolving every disagreement perfectly would gain only 0.026 accuracy. This is the project's central negative result and it is reported first, not buried.</p>
+    </div>
+  </section>
+
+  <section id="simulation">
+    <div class="head">
+      <h2>Network simulation</h2>
+      <p class="lede">NS-3, 20 legitimate wearables against 60 attacker-bots across 4 fog nodes. Every number here is simulation output. No Raspberry Pi measurement exists anywhere in this project, and none is implied.</p>
+    </div>
+
+    <div class="card">
+      <h3>Three threshold rules, one scenario</h3>
+      <div class="scroller" style="margin-top:24px">
+        <table>
+          <thead><tr><th>Rule</th><th>Alerts</th><th>True positives</th><th>False positives</th><th>Attackers blocked</th><th>Wearables blocked</th></tr></thead>
+          <tbody>
+            <tr><td>fixed, the base paper's flat 500 ms</td><td class="num">327</td><td class="num">267</td><td class="num">60</td><td class="num">60/60</td><td class="num">20/20</td></tr>
+            <tr><td>ewma, congestion-adaptive</td><td class="num">303</td><td class="num">267</td><td class="num">36</td><td class="num">60/60</td><td class="num">8/20</td></tr>
+            <tr class="best"><td>criticality, this project</td><td class="num">296</td><td class="num">267</td><td class="num">29</td><td class="num">60/60</td><td class="num">9/20</td></tr>
+          </tbody>
+                  </table>
+      </div>
+        <p class="note">The flat rule blocks every legitimate wearable in the simulation. A rule that quarantines the whole patient-monitoring estate has not prevented an incident, it has caused one.</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Where each rule goes blind</h3>
+      <p style="margin-top:12px; max-width:70ch">48 runs, every combination of rule, inspection cost and attack scale. Two slices through this cube would have hidden its main result: the blind spot is not at a latency, it is at an offered load.</p>
+      <div class="ctrls" style="margin-top:24px" role="group" aria-label="Select threshold rule">
+        <button class="ctrl" data-rule="fixed" aria-pressed="false">fixed</button>
+        <button class="ctrl" data-rule="ewma" aria-pressed="true">ewma</button>
+        <button class="ctrl" data-rule="criticality" aria-pressed="false">criticality</button>
+      </div>
+      <div class="scroller">
+        <div class="hm" id="hm" aria-live="polite"></div>
+      </div>
+      <p class="cap" style="margin-top:16px">Large figure: attacker-bots blocked. Small figure: false-positive alerts raised against legitimate wearables.</p>
+    </div>
+
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card">
+        <h3>One violation of patience decides it</h3>
+        <p style="margin-top:12px">Same rule, same latency, same 60 attacker-bots. The only variable is how many violations the rule waits for before quarantining a source.</p>
+        <div style="margin-top:20px">
+          <div class="kv"><span>blockAfter 1</span><b>60/60 blocked, 0 dropped</b></div>
+          <div class="kv"><span>blockAfter 2</span><b>60/60 blocked, 0 dropped</b></div>
+          <div class="kv"><span>blockAfter 3</span><b>0/60 blocked, 280,128 dropped</b></div>
+          <div class="kv"><span>blockAfter 4</span><b>0/60 blocked, 280,128 dropped</b></div>
+        </div>
+      </div>
+      <div class="card" style="background:var(--ember); color:var(--chalk)">
+        <span class="tag">Fifth objection</span>
+        <h3 style="margin-top:16px">It does not degrade. It latches off.</h3>
+        <p style="margin-top:12px">Blocking removes a bot's load, so blocking early keeps the queue empty, which keeps the threshold high, which keeps blocking possible. Miss that window and the loop runs backwards: the queue saturates, the threshold collapses toward zero, nothing can violate zero, and it never recovers. A congestion-coupled rule is a congestion detector wearing an intrusion detector's label.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="explain">
+    <div class="head">
+      <h2>Explainability</h2>
+      <p class="lede">A method being reliable on average is not the same as this alert being sound. Every explanation is certified before an operator sees it.</p>
+    </div>
+    <div class="grid g3">
+      <div class="stat"><span class="cap">Explanations that certify</span><span class="v num">82%</span><span>The other 18% are labelled as unverified, not hidden.</span></div>
+      <div class="stat quiet"><span class="cap">SHAP stability, top-5 Jaccard</span><span class="v num">0.87</span><span>Under 1% input noise, while the model's own prediction flip rate is 0%.</span></div>
+      <div class="stat quiet"><span class="cap">LIME stability, same test</span><span class="v num">0.27</span><span>Retained as a cross-check. Never shown to a human.</span></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <p style="max-width:75ch">LIME's apparent quality was noise. Raising its sample count does not rescue it, and its fidelity collapses as sampling converges, from +0.349 down to +0.023. In 88% of its alerts the top-cited feature argues against the alert's own verdict. That is the finding that demoted it from operator-facing fallback to internal cross-check.</p>
+    </div>
+  </section>
+
+  <section id="adaptive">
+    <div class="head">
+      <h2>Adaptive threshold and incremental learning</h2>
+      <p class="lede">The criticality weighting reallocates false positives toward the devices that can afford them. It does not reduce them enough.</p>
+    </div>
+    <div class="card">
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Device mix</th><th>False positives</th><th>Change</th><th>False negatives</th><th>Precision</th><th>Recall</th></tr></thead>
+          <tbody>
+            <tr><td>Flat baseline, every device alike</td><td class="num">222</td><td class="num">0.0%</td><td class="num">72</td><td class="num">0.9497</td><td class="num">0.9831</td></tr>
+            <tr><td>Critical-heavy, an ICU segment</td><td class="num">274</td><td class="num">+23.4%</td><td class="num">37</td><td class="num">0.9391</td><td class="num">0.9913</td></tr>
+            <tr><td>Balanced, a mixed ward</td><td class="num">224</td><td class="num">+0.9%</td><td class="num">74</td><td class="num">0.9493</td><td class="num">0.9826</td></tr>
+            <tr><td>Periphery-heavy, a general network</td><td class="num">198</td><td class="num">-10.8%</td><td class="num">97</td><td class="num">0.9546</td><td class="num">0.9773</td></tr>
+          </tbody>
+                  </table>
+      </div>
+        <p class="note">The target set in the project requirements was a greater than 30% false-positive reduction. The best measured figure is -10.8%, and in the ICU mix false positives rise by 23.4% while missed attacks fall by 48.6%. That trade is the intended behaviour, but the target is not met.</p>
+    </div>
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card">
+        <h3>Incremental update, replay buffer</h3>
+        <div style="margin-top:20px">
+          <div class="kv"><span>Recall on the new attack type</span><b class="num">0.9746 to 0.9880</b></div>
+          <div class="kv"><span>Recall on prior types</span><b class="num">0.9821 to 0.9863</b></div>
+          <div class="kv"><span>Forgetting</span><b class="num">+0.0042</b></div>
+          <div class="kv"><span>Trainable parameters</span><b class="num">8,646</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>The rejected alternative, measured anyway</h3>
+        <p style="margin-top:12px">Fine-tuning the fusion layer alone gives three adjustable parameters, which can only re-mix opinions the branches already hold. Measured, it drops prior-class recall and pushes the false-positive rate from 0.5231 to 0.6280. It fails the gate, and the comparison is reported rather than asserted.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="deployment">
+    <div class="head"><h2>Deployment</h2></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>What exists</h3>
+        <div style="margin-top:20px">
+          <div class="kv"><span>TFLite graphs, float32</span><b class="num">1.4 MB</b></div>
+          <div class="kv"><span>TFLite graphs, float16</span><b class="num">798 KB</b></div>
+          <div class="kv"><span>Prediction agreement with Keras</span><b class="num">100%</b></div>
+          <div class="kv"><span>Standalone Pi bundle</span><b class="num">about 2 MB</b></div>
+        </div>
+        <p style="margin-top:20px">The BiLSTM does not convert as trained. Keras exports it as a dynamic TensorList loop, and one standard escape produced a 16 KB file that loaded, emitted NaN, and agreed with the Keras model on 0% of windows. Fixed by unrolling, valid only because the window length is frozen at 10.</p>
+      </div>
+      <div class="blocked">
+        <span class="tag">Blocked on hardware</span>
+        <h3>No latency number exists</h3>
+        <p>There is no inference latency or throughput figure anywhere in this project, because the Raspberry Pi 4B has not been connected. The benchmark raises an error rather than writing a report off-device, so the prohibition lives in code rather than in discipline.</p>
+        <p>The objection this project makes against the prior work is a real-time claim with no hardware behind it. Publishing a desktop number here would be the same failure wearing this project's name.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="negative">
+    <div class="head">
+      <h2>Results that came out negative</h2>
+      <p class="lede">Kept because they were expensive to learn and are the most useful thing here for anyone building on this work.</p>
+    </div>
+    <div class="list">
+      <article class="finding">
+        <h3>Calibration was the obvious fix, and it does nothing</h3>
+        <p>Two reports had blamed miscalibration and called temperature scaling the highest-value remaining work. That was an inference, and measurement refuted it. The branches are already well calibrated at 0.012 to 0.023 expected calibration error, and the BiLSTM is mildly under-confident. Fitting the fusion priors also fails, overfitting the validation fold. Both corrections were applied at source with the original reasoning left visible.</p>
+      </article>
+      <article class="finding">
+        <h3>A blocker this project reported was its own reasoning error</h3>
+        <p>An earlier report cut half of the Edge-IIoTset task on the grounds that its records could not be ordered in time. The timestamps lose their date to an unquoted comma, but the clock survives on 90.04% of rows and confirms the file's row order rather than contradicting it, with 13 backward steps in 142,088 rows. An ordering existed the whole time. The error was inferring a property of the data from a corrupted column instead of parsing it.</p>
+      </article>
+      <article class="finding">
+        <h3>A fold-balancing proxy that is safe on one dataset and wrong on the next</h3>
+        <p>The session splitter counts each session's entries and documents them as windows; one notebook passes records. On IoTID20 that proxy holds. On Edge-IIoTset, with attack sessions of 7,050 records against a normal median of 2, it produced folds whose test set held no normal windows at all, and every model scored precision 1.0000 against zero negatives. That reads as a triumph and is an empty set.</p>
+      </article>
+      <article class="finding">
+        <h3>An unpinned install silently changed the environment</h3>
+        <p>A single dependency install upgraded numpy and scikit-learn past the versions the requirements file already named. It surfaced only when an unrelated package stopped importing, several tasks later. Every package is now pinned exactly and a test asserts the live environment matches.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="open">
+    <div class="head">
+      <h2>Still open</h2>
+      <p class="lede">Three items. None is unwritten code.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card"><span class="tag">Needs hardware</span><h3 style="margin-top:16px">Pi latency and throughput</h3><p style="margin-top:12px">The export, the standalone runner and the bundle are all verified. Only the measurement is missing.</p></div>
+      <div class="card"><span class="tag">Needs a person</span><h3 style="margin-top:16px">The reader test</h3><p style="margin-top:12px">A teammate unfamiliar with the model must read one alert and say why the flow was flagged. It cannot be self-assessed. One alert in the handout is deliberately unverified, and whether they notice is the real result.</p></div>
+      <div class="card"><span class="tag">Not attempted</span><h3 style="margin-top:16px">Cross-dataset validation</h3><p style="margin-top:12px">CICIDS2017 was scoped as a should and was not attempted. Every result here is a single seed and a single split, which is an omission this project criticises in the prior work and then inherits.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <hr class="rule">
+  <p style="margin-top:24px; max-width:75ch">The base paper's 99.92% accuracy, 99.91% precision, 99.99% recall and 99.95% F1 must not be quoted without two caveats: its precision and recall labels are very likely swapped, and its evaluation fold was contaminated. Every figure on this page uses Attack as the positive class and is hand-verified against its own confusion matrix.</p>
+  <p class="cap" style="margin-top:24px">Computer Networks project. Sanhit, Malika, Nehaa, Rakshan, Rohith.</p>
+</footer>
+
+<script>
+(function(){
+  // Halftone: violet shading into ember, the one signature visual in the system.
+  var c = document.getElementById('halftone');
+  if (c && c.getContext) {
+    var x = c.getContext('2d'), W = c.width, H = c.height;
+    x.fillStyle = '#524ae9'; x.fillRect(0,0,W,H);
+    var step = 13, r = step*0.46;
+    for (var gy=0; gy<H; gy+=step) {
+      for (var gx=0; gx<W; gx+=step) {
+        // Density rises toward the top right, fading the violet into solid ember.
+        var t = (gx/W)*0.62 + (1-gy/H)*0.38;
+        var rad = r * Math.min(1, Math.max(0, t*1.5));
+        if (rad <= 0.2) continue;
+        x.beginPath();
+        x.arc(gx+step/2, gy+step/2, rad, 0, Math.PI*2);
+        x.fillStyle = '#fc5000';
+        x.fill();
+      }
+    }
+  }
+
+  // NS-3 cross product. Values parsed from the 48 saved runs in reports/ns3_runs/.
+  var LAT = ['57.9 us','500 us','2000 us','14542.7 us'];
+  var ATK = ['20 bots','40 bots','60 bots','80 bots'];
+  var DATA = {
+    fixed:       { blocked:[[100,100,100,100],[100,100,100,100],[100,100,100,100],[100,100,100,100]],
+                   fp:[[60,60,60,60],[60,60,60,60],[60,60,60,60],[64,61,67,61]] },
+    ewma:        { blocked:[[100,100,100,100],[100,100,100,100],[100,100,0,0],[0,0,0,0]],
+                   fp:[[34,31,36,43],[34,31,36,43],[34,31,8,7],[8,6,8,7]] },
+    criticality: { blocked:[[100,100,100,100],[100,100,100,100],[100,100,100,100],[100,100,100,100]],
+                   fp:[[30,30,29,30],[30,30,29,30],[30,30,29,30],[34,30,33,33]] }
+  };
+
+  var hm = document.getElementById('hm');
+  function render(rule){
+    var d = DATA[rule], html = '<div></div>';
+    for (var a=0; a<ATK.length; a++) html += '<div class="colh">'+ATK[a]+'</div>';
+    for (var L=0; L<LAT.length; L++){
+      html += '<div class="lbl">'+LAT[L]+'</div>';
+      for (var A=0; A<ATK.length; A++){
+        var b = d.blocked[L][A], f = d.fp[L][A];
+        html += '<div class="cell '+(b>0?'on':'off')+'">'
+             +  '<span class="big num">'+b+'%</span>'
+             +  '<span class="sub num">'+f+' false alerts</span></div>';
+      }
+    }
+    hm.innerHTML = html;
+  }
+  var btns = document.querySelectorAll('.ctrl');
+  for (var i=0;i<btns.length;i++){
+    btns[i].addEventListener('click', function(e){
+      for (var j=0;j<btns.length;j++) btns[j].setAttribute('aria-pressed','false');
+      e.currentTarget.setAttribute('aria-pressed','true');
+      render(e.currentTarget.getAttribute('data-rule'));
+    });
+  }
+  render('ewma');
+
+  // Section rail follows the reader.
+  var links = document.querySelectorAll('nav a');
+  var byId = {};
+  for (var k=0;k<links.length;k++) byId[links[k].getAttribute('href').slice(1)] = links[k];
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (!en.isIntersecting) return;
+        for (var id in byId) byId[id].removeAttribute('aria-current');
+        if (byId[en.target.id]) byId[en.target.id].setAttribute('aria-current','true');
+      });
+    }, { rootMargin:'-20% 0px -70% 0px' });
+    var secs = document.querySelectorAll('section[id]');
+    for (var s=0;s<secs.length;s++) io.observe(secs[s]);
+  }
+})();
+</script>

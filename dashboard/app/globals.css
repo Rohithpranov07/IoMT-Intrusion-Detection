@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/*
+ * Caldera, per ../DESIGN.md. These are the project's tokens, not this app's choices:
+ * do not add an accent colour here without changing DESIGN.md first.
+ */
+@theme {
+  --color-ember: #fc5000;
+  --color-plasma: #524ae9;
+  --color-sulfur: #f5f28e;
+  --color-limestone: #f7f6f2;
+  --color-pumice: #e2e2df;
+  --color-obsidian: #070607;
+  --color-chalk: #ffffff;
+
+  --radius-card: 40px;
+  --radius-pill: 800px;
+  --radius-small: 16px;
+  --radius-medium: 20px;
+
+  --spacing-section: 80px;
+  --spacing-card: 40px;
+}
+
+/*
+ * DESIGN.md declares `Theme: light` and defines no dark palette, so this page commits to one
+ * visual world rather than inventing a second one. Every colour is painted explicitly so the
+ * page holds on any host background.
+ */
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-pumice);
+  color: var(--color-obsidian);
+  font-weight: 500;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* DESIGN.md: display type carries the structural weight, with positive tracking at every size. */
+.display {
+  font-family: var(--font-display), "Bebas Neue", Impact, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-ember);
+  outline-offset: 3px;
+}
+
+/* Dotted, never dashed or solid: a small but consistent signature detail in DESIGN.md. */
+.row-divider + .row-divider {
+  border-top: 1px dotted rgb(7 6 7 / 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
