@@ -50,6 +50,41 @@ The direction differs from the hypothesis, and that matters:
   spikes (max load 0.015 > 0) still let some detections through. **The hypothesis is directionally
   confirmed, not exactly confirmed**, and the difference is recorded rather than rounded away.
 
+## 3b. The failure has a tipping point, and crossing it is irreversible
+
+§3 says the rule goes blind under load. The full cross-product (`reports/ns3_simulation_results.md`
+§5) sharpens that, and the sharper version is the more useful one.
+
+**The blind spot is not at a latency.** At 2000 µs the `ewma` rule blocks 100% of attacker-bots at
+20 and 40 bots, and 0% at 60 and 80 — same rule, same latency, same formula. What matters is offered
+load, the *product* of inspection cost and attack scale. A sweep along either axis alone finds the
+collapse and misattributes its cause.
+
+**And the collapse is a race.** `blockAfter` — how many violations the rule waits for before
+quarantining a source — is the only variable changed below (`ewma`, 2000 µs, 60 attacker-bots):
+
+| `blockAfter` | Alerts | Attackers blocked | Queue overflow |
+|---:|---:|---:|---:|
+| 1 | 511 | **60/60** | **0** |
+| 2 | 883 | **60/60** | **0** |
+| 3 | 102 | **0/60** | 280,128 |
+| 4 | 102 | **0/60** | 280,128 |
+
+One violation of patience decides the outcome. Blocking removes a bot's load, so blocking early
+keeps the queue empty, which keeps the threshold high, which keeps blocking possible. Miss that
+window and the loop runs backwards: the queue saturates, the threshold collapses toward zero, no
+source can violate a threshold of zero, so nothing further is ever blocked and the load never comes
+down.
+
+**A congestion-coupled detector does not degrade under load. It latches off.** That is worse than
+gradual degradation in the way that matters operationally: there is no partial service to notice, no
+warning band, and no recovery once the tipping point is behind you — the system that would have to
+act is the one that has stopped acting.
+
+Where that tipping point sits depends on the **defender's own configuration**, not only on the
+attack. Two deployments running identical code with different `blockAfter` values sit on opposite
+sides of it under the same attack.
+
 ## 4. Why this is a finding and not a defect report
 
 A rule of this shape is a **congestion detector wearing an intrusion detector's label**. Its output

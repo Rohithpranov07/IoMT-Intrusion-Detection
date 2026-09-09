@@ -26,7 +26,7 @@ targeting four verifiable defects in that paper rather than trying to beat its h
 | 4 — Deployment | T4.1 – T4.4 | **T4.1 and T4.4 complete.** T4.2/T4.3 built and verified but **need Raspberry Pi hardware** |
 | 4b — NS-3 validation | T-N1 – T-N7 | **Complete except T-N3**, which is blocked on the same Pi as T4.2/T4.3 |
 
-**362 tests: 342 pass, 20 skip** (those 14 are gated on the Raspberry Pi or on `artifacts/` being
+**393 tests: 373 pass, 20 skip** (those 14 are gated on the Raspberry Pi or on `artifacts/` being
 built — they are skips, not failures). Environment pinned exactly in [`requirements.txt`](requirements.txt) and asserted
 by `tests/test_environment.py`.
 
@@ -62,7 +62,7 @@ python3.11 -m venv .venv
 .venv/bin/python scripts/download_data.py                  # IoTID20  (~300 MB)
 .venv/bin/python scripts/download_data.py --edge-iiotset   # Edge-IIoTset ML CSV (78 MB)
 
-.venv/bin/python -m pytest tests/ -q                       # 362 tests
+.venv/bin/python -m pytest tests/ -q                       # 393 tests
 ```
 
 Then, in order (each depends on the previous):
@@ -255,7 +255,7 @@ it is a reproduction of those runs.
 | T-N3 | [`latency_provenance.md`](docs/latency_provenance.md) — **deferred, not approximated.** No Pi number exists and the base paper publishes none |
 | T-N4 | [`threshold_rules.md`](docs/threshold_rules.md) — `fixed` / `ewma` / `criticality`, three distinct outcomes |
 | T-N5 | [`incremental_scenario.md`](docs/incremental_scenario.md) — a threshold change standing in for a retrain, labelled as such |
-| T-N6 | 29 raw runs in `reports/ns3_runs/`, saved before any aggregation |
+| T-N6 | **60 raw runs** in `reports/ns3_runs/`: the full 3x4x4 cross-product plus the T-N2 and T-N5 probes, saved before any aggregation |
 | T-N7 | [`ns3_simulation_results.md`](reports/ns3_simulation_results.md) — generated from those runs |
 
 **One §F checkbox cannot be ticked**, for the same reason as T3.6's: T-N1–T-N5 declare single
@@ -407,6 +407,14 @@ no inter-message gap is shorter than zero. Coupled **inversely**, the detector d
 network is under attack hard enough to saturate it. Coupled **directly**, it under-detects when
 **fast** (45/60). Not a bug at either end: it is what "let queue state drive the threshold" means.
 
+**It does not degrade under load — it latches off.** The full 48-run cross-product shows the blind
+spot is not at a latency at all: at 2000 µs the rule blocks 100% of attacker-bots at 20 and 40 bots
+and 0% at 60 and 80. What decides it is a race. `blockAfter` — how many violations the rule waits
+for before quarantining a source — is the *only* difference between blocking 60/60 with zero queue
+overflow and blocking 0/60 while dropping 280,128 packets. Blocking removes load, so blocking early
+keeps blocking possible; miss the window and the queue saturates, the threshold collapses toward
+zero, nothing can violate zero, and the loop never comes back.
+
 A rule of that shape is a **congestion detector wearing an intrusion detector's label**, and it is a
 fair fifth objection to timing-only adjacency rules — scoped, carefully, to *this project's own
 reconstruction*, since no published implementation was available to test.
@@ -431,8 +439,8 @@ written into T3.4 for an unrelated reason; this is the first evidence it prevent
 │   └── deployment/      export_model · pi_inference · benchmark
 ├── scratch/         hids-iomt-adaptive.cc  (NS-3, C++ only; copied into ns-3's scratch/)
 ├── scripts/         15 entry points + ns3_experiments/; every report is generated, never hand-written
-├── tests/           16 files, 362 tests (342 pass, 20 hardware/artifact-gated skips)
-└── reports/         17 generated reports + ns3_runs/ (29 raw NS-3 runs)
+├── tests/           16 files, 393 tests (373 pass, 20 hardware/artifact-gated skips)
+└── reports/         17 generated reports + ns3_runs/ (60 raw NS-3 runs)
 ```
 
 **No `src/models/gnn_branch.py`** — T2.7 returned no-go, and a test fails the build if it reappears.

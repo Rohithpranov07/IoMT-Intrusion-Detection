@@ -1,0 +1,51 @@
+[0/2] Re-checking globbed directories...
+ninja: no work to do.
+
+================ HIDS-IoMT NS-3 run: rule-ewma_lat-14542.7us_atk-40 ================
+ALL NUMBERS BELOW ARE NS-3 SIMULATION OUTPUT, NOT PHYSICAL MEASUREMENTS.
+  (NS3-Simulation.md A.1 rule 4: a simulated delay is not a Raspberry Pi number.)
+
+-- topology (T-N1: roles are distinct node sets, never subsets) --
+  wearables (legitimate) : 20
+  attacker-bots          : 40
+  fog nodes (IDS)        : 4
+  total leaf senders     : 60
+
+-- IDS service model --
+  inspection cost/flow   : 14542.7000 us
+  latency provenance     : SWEPT-sensitivity-value-no-Pi-measurement-exists
+  capacity PER FOG NODE  : 68.7630 flows/s
+  capacity AGGREGATE     : 275.0521 flows/s (4 nodes)
+  queue depth per node   : 200
+
+-- threshold rule --
+  rule                   : ewma
+  ewma coupling          : inverse  (tau = base * (1 - load))
+  base threshold         : 500.0000 ms
+  block after            : 3 violations
+
+-- detection --
+  packets reaching fog   : 224945
+  inspected by IDS       : 7732
+  dropped, queue full    : 216413
+  dropped, source blocked: 0
+  alerts raised          : 6
+  ... on attacker-bots   : 0  (true positives)
+  ... on wearables       : 6  (FALSE POSITIVES)
+  IDS drop ratio         : 96.2071 % of packets reaching the fog node
+    (NOT the network loss ratio below: these packets arrived, then the IDS
+     queue overflowed or the source was already blocked. Reporting one as the
+     other is the conflation NS3-Simulation.md A.1 rule 4 forbids.)
+  attacker-bots blocked  : 0 / 40
+  wearables blocked      : 0 / 20  (FALSE POSITIVES)
+
+-- network (FlowMonitor, simulated) --
+  tx packets             : 224970
+  rx packets             : 224945
+  delivery ratio         : 99.9889 %
+  loss ratio (network)   : 0.0111 %
+  mean end-to-end delay  : 3.0828 ms (SIMULATED)
+  mean jitter            : 0.0001 ms (SIMULATED)
+  throughput             : 5.5187 Mbps
+  rngRun                 : 1 (seed 42)
+================ end of run: rule-ewma_lat-14542.7us_atk-40 ================

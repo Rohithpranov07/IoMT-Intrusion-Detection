@@ -1,0 +1,50 @@
+[0/2] Re-checking globbed directories...
+ninja: no work to do.
+
+================ HIDS-IoMT NS-3 run: rule-fixed_lat-14542.7us_atk-20 ================
+ALL NUMBERS BELOW ARE NS-3 SIMULATION OUTPUT, NOT PHYSICAL MEASUREMENTS.
+  (NS3-Simulation.md A.1 rule 4: a simulated delay is not a Raspberry Pi number.)
+
+-- topology (T-N1: roles are distinct node sets, never subsets) --
+  wearables (legitimate) : 20
+  attacker-bots          : 20
+  fog nodes (IDS)        : 4
+  total leaf senders     : 40
+
+-- IDS service model --
+  inspection cost/flow   : 14542.7000 us
+  latency provenance     : SWEPT-sensitivity-value-no-Pi-measurement-exists
+  capacity PER FOG NODE  : 68.7630 flows/s
+  capacity AGGREGATE     : 275.0521 flows/s (4 nodes)
+  queue depth per node   : 200
+
+-- threshold rule --
+  rule                   : fixed
+  base threshold         : 500.0000 ms
+  block after            : 3 violations
+
+-- detection --
+  packets reaching fog   : 112939
+  inspected by IDS       : 1081
+  dropped, queue full    : 202
+  dropped, source blocked: 111656
+  alerts raised          : 913
+  ... on attacker-bots   : 849  (true positives)
+  ... on wearables       : 64  (FALSE POSITIVES)
+  IDS drop ratio         : 99.0428 % of packets reaching the fog node
+    (NOT the network loss ratio below: these packets arrived, then the IDS
+     queue overflowed or the source was already blocked. Reporting one as the
+     other is the conflation NS3-Simulation.md A.1 rule 4 forbids.)
+  attacker-bots blocked  : 20 / 20
+  wearables blocked      : 20 / 20  (FALSE POSITIVES)
+
+-- network (FlowMonitor, simulated) --
+  tx packets             : 112956
+  rx packets             : 112939
+  delivery ratio         : 99.9849 %
+  loss ratio (network)   : 0.0151 %
+  mean end-to-end delay  : 3.0827 ms (SIMULATED)
+  mean jitter            : 0.0000 ms (SIMULATED)
+  throughput             : 2.7708 Mbps
+  rngRun                 : 1 (seed 42)
+================ end of run: rule-fixed_lat-14542.7us_atk-20 ================

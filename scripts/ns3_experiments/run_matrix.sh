@@ -32,27 +32,35 @@ run() {
 
 PROV="SWEPT-sensitivity-value-no-Pi-measurement-exists"
 
-echo "[1/4] threshold rule x IDS latency"
+# T-N6's VERIFY requires EVERY combination in the matrix to have a saved raw output, so this is
+# the full cross-product of rule x latency x attack scale (3 x 4 x 4 = 48), not a pair of 2-D
+# slices through it. Slices would have hidden any interaction between the three axes -- and §5.1 of
+# the aggregated report shows there is one: the ewma rule's collapse point moves with attack scale.
+echo "[1/3] full cross-product: rule x IDS latency x attack scale (48 runs)"
 for rule in fixed ewma criticality; do
   for lat in 57.9 500 2000 14542.7; do
-    run "rule-${rule}_lat-${lat}us_atk-60" --rule="$rule" --idsLatencyUs="$lat" --latencySource="$PROV"
+    for atk in 20 40 60 80; do
+      run "rule-${rule}_lat-${lat}us_atk-${atk}" --rule="$rule" --idsLatencyUs="$lat" \
+          --nAttackers="$atk" --latencySource="$PROV"
+    done
   done
 done
 
-echo "[2/4] attack scale at fixed latency"
-for rule in fixed ewma criticality; do
-  for atk in 20 40 60 80; do
-    run "rule-${rule}_lat-500us_atk-${atk}" --rule="$rule" --idsLatencyUs=500 \
-        --nAttackers="$atk" --latencySource="$PROV"
-  done
-done
-
-echo "[3/4] T-N2 congestion-coupling probe"
+echo "[2/3] T-N2 congestion-coupling probe"
 for coupling in inverse direct; do
   for lat in 57.9 14542.7; do
     run "tn2_ewma-${coupling}_lat-${lat}us" --rule=ewma --ewmaCoupling="$coupling" \
         --idsLatencyUs="$lat" --traceRule=1 --latencySource="$PROV"
   done
+done
+
+echo "[3/4] tipping-point probe: does blocking outrun saturation?"
+# The cross-product shows the ewma rule holding 100% at 40 attacker-bots and collapsing to 0% at
+# 60, at the SAME latency. This isolates why: blockAfter is how many violations the rule waits for
+# before acting, and it is the only variable here.
+for ba in 1 2 3 4; do
+  run "tn2_race_ewma_lat-2000us_atk-60_blockafter-${ba}" --rule=ewma --idsLatencyUs=2000 \
+      --nAttackers=60 --blockAfter="$ba" --latencySource="$PROV"
 done
 
 echo "[4/4] T-N5 incremental-learning stand-in"

@@ -245,26 +245,102 @@ def main() -> None:
     add("")
 
     # --- Latency sensitivity ---------------------------------------------------------------
-    add("## 5. Sensitivity to IDS inspection cost (swept — no measured value exists)")
+    add("## 5. The full cross-product: rule x latency x attack scale")
     add("")
-    add("| Rule | 57.9 µs | 500 µs | 2000 µs | 14542.7 µs |")
-    add("|---|---|---|---|---|")
+    add("48 runs, every combination of 3 rules, 4 swept IDS latencies and 4 attack scales. T-N6's")
+    add("VERIFY requires every combination to have a saved raw output, and it is worth the runs:")
+    add("**two 2-D slices through this cube would have hidden its main result.**")
+    add("")
+    latencies = ("57.9", "500", "2000", "14542.7")
+    scales = ("20", "40", "60", "80")
+    add("### 5.1 Attacker-bots blocked (% of those present)")
+    add("")
     for rule in ("fixed", "ewma", "criticality"):
-        cells = []
-        for lat in ("57.9", "500", "2000", "14542.7"):
-            run = runs.get(f"rule-{rule}_lat-{lat}us_atk-60")
-            if run is None:
-                cells.append("—")
-                continue
-            ba, ta = blocked(run, "blocked_attackers")
-            cells.append(f"{as_int(run, 'alerts')} alerts, {ba}/{ta}")
-        add(f"| `{rule}` | " + " | ".join(cells) + " |")
+        add(f"**`{rule}`**")
+        add("")
+        add("| IDS latency | " + " | ".join(f"{a} bots" for a in scales) + " |")
+        add("|---|" + "---:|" * len(scales))
+        for lat in latencies:
+            cells = []
+            for atk in scales:
+                run = runs.get(f"rule-{rule}_lat-{lat}us_atk-{atk}")
+                if run is None:
+                    cells.append("—")
+                    continue
+                b, total = blocked(run, "blocked_attackers")
+                cells.append(f"{100.0 * b / total:.0f}%" if total else "—")
+            add(f"| {lat} µs | " + " | ".join(cells) + " |")
+        add("")
+
+    add("### 5.2 The result a slice would have hidden")
     add("")
-    add("Reported as *alerts, attackers blocked*. The 57.9 µs and 14542.7 µs columns are the two "
-        "values named in `NS3-Simulation.md §B.1`; they are carried forward **only** as sweep "
-        "points, since §B.2 records that their own origin was never established.")
+    add("`fixed` and `criticality` block 100% of attacker-bots in **all 16 cells**. `ewma` does not,")
+    add("and where it fails is the finding: at **2000 µs it holds 100% at 20 and 40 bots and")
+    add("collapses to 0% at 60 and 80** — same rule, same latency, same threshold formula.")
     add("")
-    add("### Three different things called \"dropped\"")
+    add("So the blind spot is **not at a latency**. It is at an offered load, which is the product")
+    add("of inspection cost and attack scale. A sweep along either axis alone finds a collapse and")
+    add("mislabels its cause: the `atk=60` row alone reads \"ewma fails above 500 µs\", the")
+    add("`lat=500` column alone reads \"ewma is fine at every attack scale\", and both are wrong.")
+    add("")
+
+    add("### 5.3 Why the collapse is a race, and self-reinforcing")
+    add("")
+    add("The cross-product says *where* the rule fails. `blockAfter` — how many violations the rule")
+    add("waits for before quarantining a source — says *why*, and it is the only variable changed")
+    add("here (`ewma`, 2000 µs, 60 attacker-bots):")
+    add("")
+    add("| `blockAfter` | Alerts | Attackers blocked | Queue overflow |")
+    add("|---:|---:|---:|---:|")
+    for ba in ("1", "2", "3", "4"):
+        run = runs.get(f"tn2_race_ewma_lat-2000us_atk-60_blockafter-{ba}")
+        if run is None:
+            continue
+        b, total = blocked(run, "blocked_attackers")
+        add(f"| {ba} | {as_int(run, 'alerts')} | {b}/{total} | {as_int(run, 'queue_drops'):,} |")
+    add("")
+    add("**One violation of patience decides it.** At `blockAfter` 1 or 2 the rule quarantines all")
+    add("60 bots and the queue never overflows at all. At 3 it never blocks a single one and drops")
+    add("280,128 packets. Nothing else differs.")
+    add("")
+    add("The mechanism is a **race between blocking and saturation**, and losing it is")
+    add("**unrecoverable**. A blocked bot stops consuming inspection service, so early blocking")
+    add("keeps load low, which keeps the threshold high, which keeps blocking possible. Miss the")
+    add("window and the loop runs the other way: the queue saturates, the threshold collapses toward")
+    add("zero, no further source can violate it, so nothing more is ever blocked and the load never")
+    add("comes down. **A congestion-coupled detector does not degrade under load; it latches off.**")
+    add("")
+    add("This also bounds §2's claim usefully. The rule is not simply \"blind when congested\" — it")
+    add("is blind *after* a tipping point it cannot cross back over, and where that point sits")
+    add("depends on the defender's own configuration, not only the attack.")
+    add("")
+
+    add("### 5.4 False-positive alerts across the same cube")
+    add("")
+    for rule in ("fixed", "ewma", "criticality"):
+        add(f"**`{rule}`**")
+        add("")
+        add("| IDS latency | " + " | ".join(f"{a} bots" for a in scales) + " |")
+        add("|---|" + "---:|" * len(scales))
+        for lat in latencies:
+            cells = []
+            for atk in scales:
+                run = runs.get(f"rule-{rule}_lat-{lat}us_atk-{atk}")
+                cells.append(str(as_int(run, "alerts_wearables")) if run else "—")
+            add(f"| {lat} µs | " + " | ".join(cells) + " |")
+        add("")
+    add("`criticality` holds between 29 and 34 false alerts across every one of its 16 cells, while")
+    add("`fixed` sits at 60–67 throughout. The gap is stable under both stress axes, which is worth")
+    add("more than its size: a false-positive advantage that survives the whole cube is a property")
+    add("of the rule, not of an operating point someone picked.")
+    add("")
+    add("`ewma`'s apparent improvement to 6–8 in its bottom rows is not an improvement. Those are")
+    add("the cells where it has stopped detecting anything at all, and a detector that raises no")
+    add("alerts raises no false ones either.")
+    add("")
+
+    # --- Drops and delay -------------------------------------------------------------------
+    add("## 6. Three different things called \"dropped\", and one that is not measured")
     add("")
     add("| Rule | latency | reached fog | queue overflow (loss) | source blocked (success) | "
         "network loss | mean delay (sim) |")
@@ -300,25 +376,6 @@ def main() -> None:
         "wire — never sees it. The delay column therefore reports network transit only. **The "
         "detection-latency question this layer cannot answer is exactly the one T4.3's Raspberry Pi "
         "benchmark exists to answer**, which is another reason nothing here substitutes for it.")
-    add("")
-
-    # --- Attack scale ----------------------------------------------------------------------
-    add("## 6. Attack scale")
-    add("")
-    add("| Rule | 20 bots | 40 bots | 60 bots | 80 bots |")
-    add("|---|---|---|---|---|")
-    for rule in ("fixed", "ewma", "criticality"):
-        cells = []
-        for atk in ("20", "40", "60", "80"):
-            run = runs.get(f"rule-{rule}_lat-500us_atk-{atk}")
-            if run is None:
-                cells.append("—")
-                continue
-            ba, ta = blocked(run, "blocked_attackers")
-            cells.append(f"{ba}/{ta}, {as_int(run, 'alerts_wearables')} FP")
-        add(f"| `{rule}` | " + " | ".join(cells) + " |")
-    add("")
-    add("Reported as *attackers blocked, false-positive alerts*.")
     add("")
 
     # --- T-N5 ------------------------------------------------------------------------------
