@@ -9,6 +9,8 @@
  * base paper's, which uses Normal as positive (PRD.md 2.1.3).
  */
 
+import ns3 from "./ns3-results.json";
+
 export type Provenance = "measured" | "simulated" | "blocked";
 
 export interface MetricRow {
@@ -50,7 +52,7 @@ export const STATS: Stat[] = [
   },
   {
     label: "NS-3 raw runs",
-    value: "60",
+    value: String(ns3.runCount),
     note: "Saved before any aggregation, so every table is re-derivable.",
     tone: "plasma",
   },
@@ -133,12 +135,24 @@ export interface RuleRow {
   best?: boolean;
 }
 
-/** Source: reports/ns3_simulation_results.md 3. All SIMULATED. */
-export const NS3_RULES: RuleRow[] = [
-  { rule: "fixed, the base paper's flat 500 ms", alerts: 327, truePositives: 267, falsePositives: 60, attackersBlocked: "60/60", wearablesBlocked: "20/20" },
-  { rule: "ewma, congestion-adaptive", alerts: 303, truePositives: 267, falsePositives: 36, attackersBlocked: "60/60", wearablesBlocked: "8/20" },
-  { rule: "criticality, this project", alerts: 296, truePositives: 267, falsePositives: 29, attackersBlocked: "60/60", wearablesBlocked: "9/20", best: true },
-];
+/**
+ * The three threshold rules at a fixed operating point. Read from ns3-results.json, which
+ * `./start-backend.sh` regenerates from the raw runs. All SIMULATED, never a hardware number.
+ */
+export const NS3_RULES: RuleRow[] = ns3.rules.map((row) => ({
+  rule:
+    row.rule === "fixed"
+      ? "fixed, the base paper's flat 500 ms"
+      : row.rule === "ewma"
+        ? "ewma, congestion-adaptive"
+        : "criticality, this project",
+  alerts: row.alerts,
+  truePositives: row.truePositives,
+  falsePositives: row.falsePositives,
+  attackersBlocked: row.attackersBlocked,
+  wearablesBlocked: row.wearablesBlocked,
+  best: row.rule === "criticality",
+}));
 
 export const NS3_RULES_NOTE =
   "The flat rule blocks every legitimate wearable in the simulation. A rule that quarantines the whole patient-monitoring estate has not prevented an incident, it has caused one.";
@@ -152,68 +166,22 @@ export interface CrossProduct {
   falseAlerts: number[][];
 }
 
-export const LATENCIES = ["57.9 us", "500 us", "2000 us", "14542.7 us"] as const;
-export const ATTACK_SCALES = ["20 bots", "40 bots", "60 bots", "80 bots"] as const;
+export const LATENCIES = ns3.latencies;
+export const ATTACK_SCALES = ns3.attackScales;
 
 /**
- * The full 48-run cross product. Source: the 48 `rule-*_lat-*_atk-*.txt` runs in
- * `../reports/ns3_runs/`, parsed by `scripts/ns3_experiments/aggregate_results.py`.
+ * The full 48-run cross product, read from ns3-results.json rather than transcribed.
  *
  * The `ewma` block is the point of running the whole cube rather than two slices through it:
  * it holds at 20 and 40 bots and collapses to zero at 60 and 80, at the SAME 2000 us latency.
  */
-export const CROSS_PRODUCT: Record<RuleKey, CrossProduct> = {
-  fixed: {
-    blocked: [
-      [100, 100, 100, 100],
-      [100, 100, 100, 100],
-      [100, 100, 100, 100],
-      [100, 100, 100, 100],
-    ],
-    falseAlerts: [
-      [60, 60, 60, 60],
-      [60, 60, 60, 60],
-      [60, 60, 60, 60],
-      [64, 61, 67, 61],
-    ],
-  },
-  ewma: {
-    blocked: [
-      [100, 100, 100, 100],
-      [100, 100, 100, 100],
-      [100, 100, 0, 0],
-      [0, 0, 0, 0],
-    ],
-    falseAlerts: [
-      [34, 31, 36, 43],
-      [34, 31, 36, 43],
-      [34, 31, 8, 7],
-      [8, 6, 8, 7],
-    ],
-  },
-  criticality: {
-    blocked: [
-      [100, 100, 100, 100],
-      [100, 100, 100, 100],
-      [100, 100, 100, 100],
-      [100, 100, 100, 100],
-    ],
-    falseAlerts: [
-      [30, 30, 29, 30],
-      [30, 30, 29, 30],
-      [30, 30, 29, 30],
-      [34, 30, 33, 33],
-    ],
-  },
-};
+export const CROSS_PRODUCT: Record<RuleKey, CrossProduct> = ns3.crossProduct;
 
-/** The tipping-point probe. Source: reports/ns3_runs/tn2_race_ewma_*.txt. */
-export const RACE = [
-  { label: "blockAfter 1", value: "60/60 blocked, 0 dropped" },
-  { label: "blockAfter 2", value: "60/60 blocked, 0 dropped" },
-  { label: "blockAfter 3", value: "0/60 blocked, 280,128 dropped" },
-  { label: "blockAfter 4", value: "0/60 blocked, 280,128 dropped" },
-];
+/** How many raw NS-3 runs the figures above were derived from. */
+export const NS3_RUN_COUNT: number = ns3.runCount;
+
+/** The tipping-point probe, from the same generated file. */
+export const RACE = ns3.race;
 
 /** Source: reports/t3_3_xai_evaluation.md, reports/t3_2_lime_vs_shap.md. */
 export const XAI_STATS: Stat[] = [
