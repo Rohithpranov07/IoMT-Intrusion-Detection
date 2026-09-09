@@ -56,6 +56,11 @@ def generated_markdown() -> list[Path]:
     paths: list[Path] = []
     for directory in ("reports", "docs"):
         paths += sorted((REPO_ROOT / directory).glob("*.md"))
+    # README.md is scanned too, and it matters most: it is the document a reader reaches first and
+    # the one most likely to be quoted from without the surrounding context.
+    readme = REPO_ROOT / "README.md"
+    if readme.exists():
+        paths.append(readme)
     return [p for p in paths if p.name not in SOURCE_SPECS]
 
 
