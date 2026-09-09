@@ -11,9 +11,12 @@ export function StatCard({ stat }: { stat: Stat }) {
     quiet: "bg-limestone text-obsidian border-obsidian",
   } as const;
 
+  // min-w-0: also a direct grid item (see the note in primitives.tsx Card). Cheap insurance
+  // here since text content is unlikely to force this in practice, but consistent is safer than
+  // "unlikely."
   return (
     <div
-      className={`flex flex-col gap-2 rounded-card p-card border-[1.5px] ${
+      className={`flex min-w-0 flex-col gap-2 rounded-card p-card border-[1.5px] ${
         tones[stat.tone ?? "ember"]
       }`}
     >

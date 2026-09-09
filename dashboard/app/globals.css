@@ -69,3 +69,26 @@ body {
     animation-duration: 0.01ms !important;
   }
 }
+
+/*
+ * Mobile scale. DESIGN.md's spacing/radius values are desktop constants; below 768px they are
+ * redefined here rather than in each component, because every utility that reads them (p-card,
+ * rounded-card, ...) compiles to `var(--token)` in Tailwind v4, so one override cascades
+ * everywhere it is used. Proportions match the system's own ratios, not new values.
+ */
+@media (max-width: 768px) {
+  :root {
+    --spacing-card: 24px;
+    --radius-card: 28px;
+    --spacing-section: 56px;
+  }
+}
+
+/* Hide the scrollbar on the mobile nav strip without hiding the ability to scroll it. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

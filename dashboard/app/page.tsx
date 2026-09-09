@@ -42,8 +42,8 @@ export default function Page() {
     <>
       <Nav />
 
-      <header className="mx-auto grid max-w-[1280px] items-end gap-10 px-6 pt-12 md:grid-cols-[1.15fr_0.85fr]">
-        <div className="flex flex-col gap-6">
+      <header className="mx-auto grid max-w-[1280px] items-end gap-8 px-4 pt-8 sm:gap-10 sm:px-6 sm:pt-12 md:grid-cols-[1.15fr_0.85fr]">
+        <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-wrap gap-2">
             <Tag>Attack = positive class</Tag>
             <Tag>373 pass / 20 skip</Tag>
@@ -61,7 +61,7 @@ export default function Page() {
         <Halftone />
       </header>
 
-      <main className="mx-auto max-w-[1280px] px-6">
+      <main className="mx-auto max-w-[1280px] px-4 sm:px-6">
         <Section>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STATS.map((stat) => (
@@ -390,7 +390,7 @@ export default function Page() {
         </Section>
       </main>
 
-      <footer className="mx-auto max-w-[1280px] px-6 pb-16 pt-20">
+      <footer className="mx-auto max-w-[1280px] px-4 pb-12 pt-14 sm:px-6 sm:pb-16 sm:pt-20">
         <hr className="border-0 border-t-[1.5px] border-dotted border-obsidian" />
         <p className="mt-6 max-w-[75ch]">
           The base paper&rsquo;s 99.92% accuracy, 99.91% precision, 99.99% recall and 99.95% F1 must

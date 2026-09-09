@@ -33,7 +33,7 @@ export function CrossProduct() {
             type="button"
             onClick={() => setRule(key)}
             aria-pressed={rule === key}
-            className="cursor-pointer rounded-pill border-[1.5px] border-obsidian px-5 py-2.5 text-sm transition-colors aria-pressed:border-ember aria-pressed:bg-ember aria-pressed:text-chalk"
+            className="cursor-pointer rounded-pill border-[1.5px] border-obsidian px-4 py-3 text-sm sm:px-5 sm:py-2.5 transition-colors aria-pressed:border-ember aria-pressed:bg-ember aria-pressed:text-chalk"
           >
             {key}
           </button>

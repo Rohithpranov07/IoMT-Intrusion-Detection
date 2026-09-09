@@ -13,7 +13,7 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="pt-20 scroll-mt-24">
+    <section id={id} className="scroll-mt-20 pt-(--spacing-section) sm:scroll-mt-24">
       {children}
     </section>
   );
@@ -50,8 +50,15 @@ export function Card({
     plasma: "bg-plasma text-chalk",
     obsidian: "bg-obsidian text-chalk",
   } as const;
+  // min-w-0: Card is used as a direct CSS Grid item throughout this page (`grid md:grid-cols-2`
+  // etc). A grid item's automatic minimum width defaults to its min-content size, and a nested
+  // `overflow-x-auto` table wrapper several levels inside does not exempt CARD ITSELF from that
+  // calculation, only its own box. Without this, a Card holding a wide table is held open to
+  // roughly the table's width by its grid track, well past the viewport on narrow phones, even
+  // though the table's own scroll wrapper is behaving correctly in isolation. Confirmed via CDP:
+  // without min-w-0 this box measured 568px wide at a 375px viewport.
   return (
-    <div className={`rounded-card p-card ${tones[tone]} ${className}`}>{children}</div>
+    <div className={`min-w-0 rounded-card p-card ${tones[tone]} ${className}`}>{children}</div>
   );
 }
 

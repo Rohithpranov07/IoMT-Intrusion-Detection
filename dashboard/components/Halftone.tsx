@@ -42,7 +42,14 @@ export function Halftone() {
       ref={ref}
       width={640}
       height={480}
-      className="block h-full min-h-[340px] w-full rounded-card"
+      // min-w-0: this canvas is a direct CSS Grid item in the hero. A <canvas> is a replaced
+      // element with an intrinsic size from its width/height attributes (640x480), and a grid
+      // item's automatic minimum width defaults to that intrinsic size regardless of `w-full`.
+      // Without min-w-0 the hero grid track (and the page along with it) is forced to at least
+      // 640px wide on every viewport, which is the classic cause of an invisible horizontal
+      // scrollbar on mobile: everything past the real viewport width is silently clipped rather
+      // than wrapped.
+      className="block h-full min-h-[200px] w-full min-w-0 rounded-card sm:min-h-[280px] md:min-h-[340px]"
       role="img"
       aria-label="Halftone dot field, violet shading into ember orange"
     />
