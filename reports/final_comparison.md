@@ -125,6 +125,40 @@ Raspberry Pi 4B has not been connected. `src/deployment/benchmark.py` raises
 objection to the prior work is a real-time claim with no hardware behind it, and the
 prohibition is enforced in code rather than left to discipline.
 
+## 6b. Network-level validation (NS-3 — simulated, never measured)
+
+`NS3-Simulation.md` folds a network simulation into Phase 4. It answers a question the
+record- and window-level results cannot: how the *threshold rule* behaves at network scale,
+with 20 legitimate wearables, 60 attacker-bots and 4 fog nodes. Full results in
+`reports/ns3_simulation_results.md`; every number there is NS-3 output.
+
+| Rule | False-positive alerts | Wearables blocked | Attackers blocked |
+|---|---:|---:|---:|
+| fixed (the base paper's flat 500 ms) | 60 | **20/20** | 60/60 |
+| ewma (congestion-adaptive) | 36 | 8/20 | 60/60 |
+| **criticality (this project, T3.4)** | **29** | 9/20 | 60/60 |
+
+**The base paper's flat threshold blocks every legitimate wearable in the simulation.**
+That is Objection #4's second half with a number attached, and it is the clearest single
+piece of evidence this project has for the criticality weighting being worth its complexity.
+
+Two things this does NOT do, both of which matter more than the table:
+
+1. **It does not meet `PRD.md §3.1`'s >30% false-positive-reduction target.** The -51.7%
+   above is a different quantity that shares a name: legitimate devices quarantined by a
+   *timing rule* in a simulation, not the *ensemble's* false-positive rate on unseen attack
+   types. The latter is §5's -10.8%, and it remains unmet.
+2. **It does not supply a deployment latency.** NS-3's delays are simulated network transit;
+   the IDS inspection cost is modelled inside the fog application, where FlowMonitor cannot
+   see it. Every latency fed to the simulation is a swept value, because no Pi measurement
+   exists and the base paper publishes none (`docs/latency_provenance.md`).
+
+The simulation did produce one finding of its own: a detection threshold multiplied by a
+queue-load term collapses to zero at one end of that term's range, so a congestion-adaptive
+rule stops alerting entirely -- under load, it recorded 8 alerts and 0 of 60 attackers
+blocked. This project's criticality rule is immune only because its load term is bounded and
+clamped (`docs/zero_detection_investigation.md`).
+
 ## 7. What this project actually contributes
 
 1. **A reproducible demonstration that HIDS-IoMT's evaluation fold was contaminated**, with

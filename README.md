@@ -24,8 +24,9 @@ targeting four verifiable defects in that paper rather than trying to beat its h
 | 2 — Implementation | T2.1 – T2.7 | **Complete** |
 | 3 — Explainability & adaptive | T3.1 – T3.6 | **Complete**, except T3.3's human reader test (needs a person) |
 | 4 — Deployment | T4.1 – T4.4 | **T4.1 and T4.4 complete.** T4.2/T4.3 built and verified but **need Raspberry Pi hardware** |
+| 4b — NS-3 validation | T-N1 – T-N7 | **Complete except T-N3**, which is blocked on the same Pi as T4.2/T4.3 |
 
-**307 tests: 293 pass, 14 skip** (those 14 are gated on the Raspberry Pi or on `artifacts/` being
+**362 tests: 342 pass, 20 skip** (those 14 are gated on the Raspberry Pi or on `artifacts/` being
 built — they are skips, not failures). Environment pinned exactly in [`requirements.txt`](requirements.txt) and asserted
 by `tests/test_environment.py`.
 
@@ -61,7 +62,7 @@ python3.11 -m venv .venv
 .venv/bin/python scripts/download_data.py                  # IoTID20  (~300 MB)
 .venv/bin/python scripts/download_data.py --edge-iiotset   # Edge-IIoTset ML CSV (78 MB)
 
-.venv/bin/python -m pytest tests/ -q                       # 307 tests
+.venv/bin/python -m pytest tests/ -q                       # 362 tests
 ```
 
 Then, in order (each depends on the previous):
@@ -76,6 +77,13 @@ Then, in order (each depends on the previous):
 .venv/bin/python scripts/ablation_study.py                 # T4.4
 .venv/bin/python scripts/export_for_pi.py                  # T4.1
 .venv/bin/python scripts/make_pi_bundle.py                 # T4.2 bundle
+```
+
+The NS-3 validation layer is independent of the above and needs a built `ns-3-dev`:
+
+```bash
+scripts/ns3_experiments/run_matrix.sh [path-to-ns-3-dev]   # 29 runs -> reports/ns3_runs/
+.venv/bin/python scripts/ns3_experiments/aggregate_results.py
 ```
 
 `artifacts/` and `data/` are gitignored build outputs — a fresh clone must run notebook 03 before
@@ -152,6 +160,27 @@ there), which is itself the point: no branch is reliably best, and the fusion do
 that. Read §7.3 before treating this as decisive — 83.56% of these test windows appear verbatim in
 the training fold, a property of the published CSV that no split can fix.
 
+### 5.4 The threshold rules at network scale (NS-3 — **simulated, not measured**)
+
+Every number here is NS-3 output. No Raspberry Pi number exists anywhere in this repository, and
+none is implied by these ([`ns3_simulation_results.md`](reports/ns3_simulation_results.md)).
+
+| Rule | Alerts | True positives | **False positives** | Attackers blocked | **Wearables blocked** |
+|---|---:|---:|---:|---:|---:|
+| `fixed` (the base paper's flat 500 ms) | 327 | 267 | **60** | 60/60 | **20/20** |
+| `ewma` (congestion-adaptive) | 303 | 267 | 36 | 60/60 | 8/20 |
+| **`criticality` (this project, T3.4)** | 296 | 267 | **29** | 60/60 | 9/20 |
+
+**The flat rule blocks every legitimate wearable in the simulation.** A rule that quarantines the
+whole patient-monitoring estate has not prevented an incident, it has caused one — which is
+Objection #4 with a number attached. The criticality weighting halves the false alerts.
+
+**This is not the `PRD.md §3.1` target being met.** That target is the *ensemble's* false-positive
+rate on unseen attack types, measured at **−10.8%** in
+[`t3_4_adaptive_threshold.md`](reports/t3_4_adaptive_threshold.md) and **still unmet**. The −51.7%
+above is a different quantity that happens to share a name: how many legitimate devices a *timing
+rule* quarantines in a simulated network. §5.2/5.3 and §5.4 must not be read across.
+
 ---
 
 ## 6. What is complete
@@ -207,6 +236,31 @@ the training fold, a property of the published CSV that no split can fix.
 | T4.2 | [`pi_inference.py`](src/deployment/pi_inference.py) — standalone, imports nothing from `src/`. **Needs the Pi** |
 | T4.3 | [`benchmark.py`](src/deployment/benchmark.py) — **refuses to write a report off Pi hardware.** Needs the Pi |
 | T4.4 | [`ablation_study.md`](reports/ablation_study.md), [`final_comparison.md`](reports/final_comparison.md) |
+
+</details>
+
+<details>
+<summary><b>Phase 4b — NS-3 network-level validation (T-N1 – T-N7)</b></summary>
+
+Governed by [`NS3-Simulation.md`](NS3-Simulation.md), which folds a network simulation into Phase 4.
+**Its §B.1 lists a `scratch/hids-iomt-adaptive.cc` and two completed runs as already existing. None
+of it existed** — not in the tree, not in git history, not in `~/ns-3-dev/scratch/` — so T-N1 had
+nothing to inventory and T-N2 no run to root-cause. The layer is built from scratch and nothing in
+it is a reproduction of those runs.
+
+| Task | Deliverable |
+|---|---|
+| T-N1 | [`ns3_architecture_inventory.md`](docs/ns3_architecture_inventory.md) — three **disjoint** node sets (20 wearables / 60 attacker-bots / 4 fog); capacity printed per-node *and* aggregate |
+| T-N2 | [`zero_detection_investigation.md`](docs/zero_detection_investigation.md) — **mechanism confirmed**; see §8.11 |
+| T-N3 | [`latency_provenance.md`](docs/latency_provenance.md) — **deferred, not approximated.** No Pi number exists and the base paper publishes none |
+| T-N4 | [`threshold_rules.md`](docs/threshold_rules.md) — `fixed` / `ewma` / `criticality`, three distinct outcomes |
+| T-N5 | [`incremental_scenario.md`](docs/incremental_scenario.md) — a threshold change standing in for a retrain, labelled as such |
+| T-N6 | 29 raw runs in `reports/ns3_runs/`, saved before any aggregation |
+| T-N7 | [`ns3_simulation_results.md`](reports/ns3_simulation_results.md) — generated from those runs |
+
+**One §F checkbox cannot be ticked**, for the same reason as T3.6's: T-N1–T-N5 declare single
+**Files** lines, and the work also touched `docs/`, `scripts/ns3_experiments/`, `TRD.md §8` and
+`Build-Instructions.md §B.3` — the last two because §F itself requires them updated.
 
 </details>
 
@@ -346,6 +400,22 @@ were re-checked and stand.
 
 ---
 
+### 8.11 A congestion-adaptive detector goes blind — at whichever end you couple it to
+A threshold multiplied by a queue-load term collapses to zero at one end of that term's range, and
+no inter-message gap is shorter than zero. Coupled **inversely**, the detector dies when
+**congested** — 8 alerts and 0/60 attackers blocked at 99.5% queue occupancy, i.e. exactly when the
+network is under attack hard enough to saturate it. Coupled **directly**, it under-detects when
+**fast** (45/60). Not a bug at either end: it is what "let queue state drive the threshold" means.
+
+A rule of that shape is a **congestion detector wearing an intrusion detector's label**, and it is a
+fair fifth objection to timing-only adjacency rules — scoped, carefully, to *this project's own
+reconstruction*, since no published implementation was available to test.
+
+This project's own criticality rule cannot fail this way: its load term is bounded to ±15% and
+clamped to [50, 2000] ms, so load can modulate the threshold but never annihilate it. That clamp was
+written into T3.4 for an unrelated reason; this is the first evidence it prevents a real failure.
+[`zero_detection_investigation.md`](docs/zero_detection_investigation.md)
+
 ## 9. Repository layout
 
 ```
@@ -359,9 +429,10 @@ were re-checked and stand.
 │   ├── xai/             shap_explainer · lime_explainer · metrics · feature_glossary
 │   ├── adaptive/        threshold · incremental
 │   └── deployment/      export_model · pi_inference · benchmark
-├── scripts/         15 runnable entry points; every report is generated, never hand-written
-├── tests/           15 files, 307 tests (293 pass, 14 hardware/artifact-gated skips)
-└── reports/         16 generated reports
+├── scratch/         hids-iomt-adaptive.cc  (NS-3, C++ only; copied into ns-3's scratch/)
+├── scripts/         15 entry points + ns3_experiments/; every report is generated, never hand-written
+├── tests/           16 files, 362 tests (342 pass, 20 hardware/artifact-gated skips)
+└── reports/         17 generated reports + ns3_runs/ (29 raw NS-3 runs)
 ```
 
 **No `src/models/gnn_branch.py`** — T2.7 returned no-go, and a test fails the build if it reappears.
@@ -400,6 +471,9 @@ operating contract's rules are tests:
 | Branch hyperparameters must match the frozen decision record | `test_branches.py` |
 | The rejected calibration module must not be wired in | `test_calibration.py` |
 | The environment must match `requirements.txt` | `test_environment.py` |
+| The NS-3 criticality rule must stay numerically identical to T3.4's Python one | `test_ns3_simulation.py` |
+| The clamp that makes that rule immune to §8.11's failure must not be removed | `test_ns3_simulation.py` |
+| No saved NS-3 run may be quotable without its latency's origin attached | `test_ns3_simulation.py` |
 
 ---
 
@@ -411,3 +485,4 @@ operating contract's rules are tests:
 4. [`docs/calibration_decision.md`](docs/calibration_decision.md) — a diagnosis this project made, then refuted
 5. [`reports/t3_6_edge_iiotset.md`](reports/t3_6_edge_iiotset.md) — 98.95% duplicates
 6. [`reports/t3_3_xai_evaluation.md`](reports/t3_3_xai_evaluation.md) — is the explainability layer trustworthy?
+7. [`reports/ns3_simulation_results.md`](reports/ns3_simulation_results.md) — the threshold rules at network scale, and §2 for a detector that goes blind under load
