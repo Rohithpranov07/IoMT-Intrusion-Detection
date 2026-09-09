@@ -14,8 +14,9 @@ pipeline:
 1. **Five columns leak the label through the *spelling* of a missing value.** Three reach
    **100% accuracy alone**. This is a preprocessing artefact of the published file.
 2. **Payload columns contain the attack strings themselves**, scoring 0.98 on their own.
-3. **Timestamps are corrupted and row order is not capture order**, so no valid sequence
-   can be constructed — which is what the ensemble requires.
+3. **Timestamps are damaged but the clock survives on 90% of rows.** An earlier version
+   of this report concluded no sequence could be built. That was wrong, and §3 records
+   the correction; the ensemble half now runs in `reports/t3_6_ensemble.md`.
 
 The dataset is 157,800 rows x 63 columns = **61 features + 2 labels**, matching the 61 raw features `TRD.md §6.1`
 attributes to it. Majority-class baseline: **0.8460**.
@@ -78,27 +79,41 @@ than 46. **A 46-feature selection from this file necessarily includes leaking co
 This project therefore uses all 30 surviving features rather than matching the paper's count, and the deviation
 is a consequence of the cleaning, not a choice.
 
-## 3. No valid sequence can be built (why the ensemble is not trained here)
+## 3. Timestamps are damaged, and this report was wrong about what that costs
 
-- **`frame.time` is corrupted.** 90% of rows retain a clock time, but
+> **CORRECTION.** An earlier version of this section was titled *"No valid sequence can
+> be built"* and stated that "records cannot be ordered in time" and that "row order is
+> not capture order". It cut the ensemble half of T3.6 on that basis. **The second claim
+> is false and the first is only half true**, and the original wording is quoted here
+> rather than deleted, because the reasoning error is worth more than the tidier text.
+
+What is true:
+
+- **`frame.time` is damaged.** 90% of rows retain a clock time, but
   the date has been split away by the original file's commas — values read `"6.0"`,
-  `"0.0"`, or `" 2021 22:14:30.939803000 "`. Records cannot be ordered in time.
-- **Row order is not capture order.** The file is **15 contiguous blocks**, one per
-  attack type, for 15 types.
+  `"0.0"`, or `" 2021 22:14:30.939803000 "`. The calendar date is unrecoverable.
+- **The file is 15 contiguous blocks**, one per attack type, for 15 types.
 
-Together these leave no ordering to window over. Building sequences from row order would
-produce sessions that are label-pure *by construction* — an artefact of how the file was
-concatenated — and would inflate every sequence-model result rather than measure anything.
+What was assumed rather than measured, and is false:
 
-`reports/phase2_results.md` §9 already flags that IoTID20's naturally label-pure sessions
-make its sequence task easier than deployment. Manufacturing the same property here, from
-file layout rather than capture design, would be worse.
+- **Row order IS capture order.** Across the 13 blocks that carry a clock, between **0.9992** and **1.0000** of adjacent
+  row pairs agree with the recovered clock, with **13** backward steps in
+  total across 142,088 timed rows. The clock confirms the row order
+  independently; it does not contradict it.
+- **An ordering therefore exists**, over the 142,088 rows that carry a clock.
+  Losing the date costs the ability to place a record on a calendar; it does not cost the
+  ability to order records within a capture, which is all a sequence needs.
 
-**Consequence for Contribution 2:** `docs/calibration_decision.md` §6 designated T3.6 the
-decision point for whether the ensemble earns its complexity, on the expectation that a
-second dataset would show more branch diversity. **That question remains open**, because
-this dataset cannot support the sequence models. It needs either the raw pcaps (a 1.63 GB
-download that includes the capture files) or a third dataset with intact timestamps.
+The error was inferring a property of the data from a corrupted column instead of parsing
+the column. `docs/calibration_decision.md` records this project making the same class of
+mistake once already, and the correction is applied the same way: at source, with the
+original claim left visible.
+
+**The ensemble half of T3.6 therefore runs** — see `reports/t3_6_ensemble.md` and
+`notebooks/04_train_edge_iiotset.ipynb`. Two costs survive the correction and are stated
+there in full: `DDoS_UDP` and `MITM` carry no clock at all and are dropped, so the
+sequence half covers 13 of 15 attack types; and §5's duplicate rate is untouched by any
+ordering fix, which is what keeps that result evidence rather than a verdict.
 
 ## 5. The dataset is 98.95% duplicates
 
@@ -196,8 +211,9 @@ The GNN branch stays cut on both datasets.
 
 ## 8. Honest limits
 
-- **Only the record-level half of T3.6 was completed.** The ensemble comparison — the
-  reason this task mattered most — is blocked by the dataset, not deferred by choice.
+- **This report covers the record-level half of T3.6 only.** The ensemble half runs in
+  `reports/t3_6_ensemble.md`, over the 13 attack types that carry a clock. Both halves
+  are needed: this one keeps all 15 types, that one adds the sequence models.
 - **The leakage findings apply to this published CSV**, the `Selected dataset for ML and
   DL` file most Edge-IIoTset papers use. The raw pcaps may not share the defects; they were
   not examined.

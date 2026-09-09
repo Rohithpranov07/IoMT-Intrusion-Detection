@@ -13,14 +13,18 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from src.preprocessing.sequence_builder import SESSION_GAP_SECONDS, assign_sessions
 from src.preprocessing.clean import (
+    EDGE_BLOCK_OFFSET_SECONDS,
     EDGE_CONTENT_COLUMNS,
     EDGE_IDENTIFIER_COLUMNS,
     EDGE_NONCE_COLUMNS,
     PLACEHOLDER_NORMALISED,
     PLACEHOLDER_TOKENS,
+    build_edge_iiotset_timeline,
     clean_edge_iiotset,
     normalise_placeholders,
+    parse_edge_iiotset_clock,
 )
 
 
@@ -183,3 +187,93 @@ def test_all_features_are_numeric() -> None:
     X, _, _ = clean_edge_iiotset(synthetic_edge_frame())
     assert all(np.issubdtype(dtype, np.number) for dtype in X.dtypes)
     assert not X.isna().any().any()
+
+
+# --- Timeline recovery (T3.6 sequence half) ------------------------------------------------
+#
+# These pin the measurement that unblocked T3.6's ensemble half: the clock inside a damaged
+# `frame.time` is recoverable, and the two corrections applied on top of it behave as documented.
+
+
+def timed_edge_frame() -> pd.DataFrame:
+    """Build a frame reproducing the real file's damaged `frame.time` shapes.
+
+    Three blocks: one normal block that crosses midnight, one attack block with an intact clock,
+    and one attack block whose `frame.time` holds an IP address instead of a time — the exact
+    three shapes measured in the published CSV.
+
+    Returns:
+        A DataFrame with the columns `build_edge_iiotset_timeline` requires.
+    """
+    times = (
+        [" 2021 23:59:58.100000000 ", " 2021 23:59:59.100000000 ", " 2021 00:00:01.100000000 "]
+        + [f" 2021 10:00:0{i}.000000000 " for i in range(4)]
+        + ["185.101.177.190", "185.101.177.191"]
+    )
+    attack_types = ["Normal"] * 3 + ["DDoS_HTTP"] * 4 + ["DDoS_UDP"] * 2
+    return pd.DataFrame({
+        "frame.time": times,
+        "ip.src_host": ["192.168.0.1"] * len(times),
+        "ip.dst_host": ["192.168.0.128"] * len(times),
+        "Attack_type": attack_types,
+    })
+
+
+def test_clock_is_recovered_from_the_damaged_timestamp() -> None:
+    """The surviving HH:MM:SS tail parses; a value with no clock yields NaN."""
+    parsed = parse_edge_iiotset_clock(
+        pd.Series([" 2021 22:14:30.939803000 ", "6.0", "185.101.177.190"])
+    )
+    assert parsed.iloc[0] == pytest.approx(22 * 3600 + 14 * 60 + 30.939803)
+    assert np.isnan(parsed.iloc[1])
+    assert np.isnan(parsed.iloc[2])
+
+
+def test_rows_without_a_clock_are_dropped_never_imputed() -> None:
+    """An invented timestamp would fabricate the ordering the ensemble half depends on."""
+    frame = timed_edge_frame()
+    timeline, keep_mask = build_edge_iiotset_timeline(frame)
+
+    assert keep_mask.sum() == 7, "the two IP-valued frame.time rows must be dropped"
+    assert len(timeline) == 7
+    assert "DDoS_UDP" not in set(timeline["Attack_type"]), "untimed class must not survive"
+    assert timeline["Timestamp"].notna().all(), "no NaT may reach the sequence builder"
+
+
+def test_midnight_wrap_does_not_move_time_backwards() -> None:
+    """23:59:59 -> 00:00:01 is a day boundary, not a 24-hour backward jump."""
+    timeline, _ = build_edge_iiotset_timeline(timed_edge_frame())
+    normal = timeline[timeline["Attack_type"] == "Normal"]["Timestamp"]
+
+    assert normal.is_monotonic_increasing
+    step = (normal.iloc[2] - normal.iloc[1]).total_seconds()
+    assert step == pytest.approx(2.0), f"wrap should leave a 2 s step, got {step}"
+
+
+def test_separate_capture_blocks_cannot_merge_into_one_session() -> None:
+    """Two blocks sharing an hour of the day are different captures, not concurrent traffic."""
+    timeline, _ = build_edge_iiotset_timeline(timed_edge_frame())
+    first_block_end = timeline[timeline["Attack_type"] == "Normal"]["Timestamp"].max()
+    second_block_start = timeline[timeline["Attack_type"] == "DDoS_HTTP"]["Timestamp"].min()
+
+    gap = (second_block_start - first_block_end).total_seconds()
+    assert gap >= EDGE_BLOCK_OFFSET_SECONDS - 86400.0, "blocks must not overlap in time"
+    assert gap > SESSION_GAP_SECONDS, "the gap must exceed the sessionisation threshold"
+
+
+def test_timeline_is_usable_by_the_sequence_builder() -> None:
+    """The whole point: the output feeds `assign_sessions` unchanged, as IoTID20's meta does."""
+    timeline, _ = build_edge_iiotset_timeline(timed_edge_frame())
+
+    assert "Dst_IP" in timeline.columns, "sequence_builder keys sessions on Dst_IP"
+    assert pd.api.types.is_datetime64_any_dtype(timeline["Timestamp"])
+
+    sessions = assign_sessions(timeline)
+    assert len(sessions) == len(timeline)
+    assert sessions.nunique() >= 2, "the block offset must start a new session per block"
+
+
+def test_missing_column_is_rejected() -> None:
+    """A frame that bypassed `clean_edge_iiotset` must fail loudly, not silently mis-order."""
+    with pytest.raises(KeyError):
+        build_edge_iiotset_timeline(timed_edge_frame().drop(columns=["Attack_type"]))

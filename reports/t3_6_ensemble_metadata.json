@@ -1,0 +1,51 @@
+{
+  "task": "T3.6-ensemble",
+  "positive_class": "Attack",
+  "seed": 42,
+  "rows_timed": 142088,
+  "rows_dropped_no_clock": 15712,
+  "timeline_backsteps": 14,
+  "duplicate_rate": 0.9894740177439797,
+  "n_features": 30,
+  "sequence_length": 10,
+  "windows": {
+    "train": 19033,
+    "test": 2379,
+    "val": 2379
+  },
+  "constant_test_windows": 0.0,
+  "test_windows_verbatim_in_train": 0.835645229087852,
+  "branch_agreement": 0.8831441782261454,
+  "results": {
+    "cnn alone": {
+      "accuracy": 0.9798234552332913,
+      "precision": 0.9844997651479568,
+      "recall": 0.9928943628612033,
+      "f1": 0.9886792452830189
+    },
+    "bilstm alone": {
+      "accuracy": 0.9201345102984447,
+      "precision": 0.9984431759211209,
+      "recall": 0.9114163903363335,
+      "f1": 0.952947003467063
+    },
+    "transformer alone": {
+      "accuracy": 0.8944934846574191,
+      "precision": 0.9936305732484076,
+      "recall": 0.886783514921838,
+      "f1": 0.937171464330413
+    },
+    "full three-branch ensemble": {
+      "accuracy": 0.9213955443463641,
+      "precision": 0.9979296066252588,
+      "recall": 0.9133112269066793,
+      "f1": 0.9537472174128123
+    }
+  },
+  "ensemble_minus_best_branch_f1": -0.03493202787020655,
+  "train_seconds": {
+    "cnn": 8.832763875368983,
+    "bilstm": 79.46748279221356,
+    "transformer": 16.339658209122717
+  }
+}

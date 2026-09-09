@@ -22,15 +22,15 @@ targeting four verifiable defects in that paper rather than trying to beat its h
 |---|---|---|
 | 1 — Foundation | T1.1 – T1.5 | **Complete** |
 | 2 — Implementation | T2.1 – T2.7 | **Complete** |
-| 3 — Explainability & adaptive | T3.1 – T3.6 | **Complete**, except T3.3's human reader test and the ensemble half of T3.6 (dataset-blocked) |
+| 3 — Explainability & adaptive | T3.1 – T3.6 | **Complete**, except T3.3's human reader test (needs a person) |
 | 4 — Deployment | T4.1 – T4.4 | **T4.1 and T4.4 complete.** T4.2/T4.3 built and verified but **need Raspberry Pi hardware** |
 
-**298 tests: 284 pass, 14 skip** (those 14 are gated on the Raspberry Pi or on `artifacts/` being
+**307 tests: 293 pass, 14 skip** (those 14 are gated on the Raspberry Pi or on `artifacts/` being
 built — they are skips, not failures). Environment pinned exactly in [`requirements.txt`](requirements.txt) and asserted
 by `tests/test_environment.py`.
 
-**Three things are outstanding.** They are listed in full in [§7](#7-what-is-missing), and none are
-"unwritten code" — two need hardware or a person, one needs a different dataset.
+**Two things are outstanding.** They are listed in full in [§7](#7-what-is-missing), and neither is
+"unwritten code" — one needs hardware, one needs a person.
 
 ---
 
@@ -61,7 +61,7 @@ python3.11 -m venv .venv
 .venv/bin/python scripts/download_data.py                  # IoTID20  (~300 MB)
 .venv/bin/python scripts/download_data.py --edge-iiotset   # Edge-IIoTset ML CSV (78 MB)
 
-.venv/bin/python -m pytest tests/ -q                       # 298 tests
+.venv/bin/python -m pytest tests/ -q                       # 307 tests
 ```
 
 Then, in order (each depends on the previous):
@@ -70,6 +70,8 @@ Then, in order (each depends on the previous):
 .venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/01_reproduce_leakage.ipynb
 .venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/02_leakage_free_baseline.ipynb
 .venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/03_train_ensemble_iotid20.ipynb  # writes artifacts/
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/04_train_edge_iiotset.ipynb
+.venv/bin/python scripts/evaluate_edge_iiotset.py          # T3.6 record level
 .venv/bin/python scripts/evaluate_xai.py                   # T3.3
 .venv/bin/python scripts/ablation_study.py                 # T4.4
 .venv/bin/python scripts/export_for_pi.py                  # T4.1
@@ -132,6 +134,24 @@ leakage vector that neither the base paper nor the prior work mentions.
 §5.1's and §5.2's numbers are **not comparable** — record-level vs window-level, different folds,
 different imbalance handling.
 
+### 5.3 The ensemble (Edge-IIoTset, window level)
+
+The second dataset, over the 13 attack types whose timestamps survive
+([`t3_6_ensemble.md`](reports/t3_6_ensemble.md)).
+
+| Model | Accuracy | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|
+| **cnn alone** | 0.9798 | 0.9845 | 0.9929 | **0.9887** |
+| **Full three-branch ensemble** | 0.9214 | 0.9979 | 0.9133 | 0.9537 |
+| bilstm alone | 0.9201 | 0.9984 | 0.9114 | 0.9529 |
+| transformer alone | 0.8945 | 0.9936 | 0.8868 | 0.9372 |
+
+**The best single branch beats the ensemble again**, by −0.0349 F1 — the same verdict as §5.2 on a
+second dataset, and by a wider margin. The winning branch is different (CNN here, Transformer
+there), which is itself the point: no branch is reliably best, and the fusion does not exploit
+that. Read §7.3 before treating this as decisive — 83.56% of these test windows appear verbatim in
+the training fold, a property of the published CSV that no split can fix.
+
 ---
 
 ## 6. What is complete
@@ -174,7 +194,7 @@ different imbalance handling.
 | T3.3 | [`metrics.py`](src/xai/metrics.py), [`feature_glossary.py`](src/xai/feature_glossary.py), [`t3_3_xai_evaluation.md`](reports/t3_3_xai_evaluation.md) |
 | T3.4 | [`threshold.py`](src/adaptive/threshold.py) — `effective = clamp(base × criticality × context)` |
 | T3.5 | [`incremental.py`](src/adaptive/incremental.py) — replay-buffer fine-tuning |
-| T3.6 | [`t3_6_edge_iiotset.md`](reports/t3_6_edge_iiotset.md) — record-level half only; see §7 |
+| T3.6 | [`t3_6_edge_iiotset.md`](reports/t3_6_edge_iiotset.md) (record level, all 15 attack types) + [`t3_6_ensemble.md`](reports/t3_6_ensemble.md) via [notebook 04](notebooks/04_train_edge_iiotset.ipynb) (windowed ensemble, the 13 types carrying a clock) |
 
 </details>
 
@@ -224,16 +244,19 @@ agreement, a standalone runner, and a ~2 MB bundle. **To close it:** follow
 [`docs/raspberry_pi_setup.md`](docs/raspberry_pi_setup.md). Step 4 is the one that matters — if
 agreement is not 100.0000%, the Pi is not running the model this project evaluated.
 
-### 7.3 T3.6's ensemble half — needs a different dataset
+### 7.3 A dataset the ensemble question can actually be settled on
 
-T3.6 asked to repeat the ensemble training on Edge-IIoTset. **The dataset cannot support it**, for
-reasons that are themselves the finding (§8.4): `frame.time` is corrupted and the file is 15
-contiguous per-attack blocks, so no valid ordering exists to window over.
+**T3.6 itself is now complete** — see §8.9 for the correction that unblocked it and
+[`t3_6_ensemble.md`](reports/t3_6_ensemble.md) for the result. What remains open is the *question*
+[`docs/calibration_decision.md`](docs/calibration_decision.md) §6 asked T3.6 to answer: **does the
+ensemble beat its best branch on a dataset where the branches genuinely differ?**
 
-This leaves open the question [`docs/calibration_decision.md`](docs/calibration_decision.md) §6
-designated T3.6 to answer: **does the ensemble beat its best branch on a dataset where the branches
-genuinely differ?** On IoTID20 it does not. **To close it:** a third dataset with intact timestamps,
-or Edge-IIoTset's raw pcaps (a 1.63 GB download this project did not take).
+Edge-IIoTset now answers it the same way IoTID20 did — it does not, by −0.0349 F1 — but it is a
+poor referee for the question, because 83.56% of its test windows appear verbatim in the training
+fold and only 1,545 distinct feature vectors underlie its 142,088 timed rows. Two datasets agreeing
+is worth more than one, and neither has the record diversity to make the test decisive.
+**To close it:** a dataset with intact timestamps *and* genuine record diversity, or Edge-IIoTset's
+raw pcaps (a 1.63 GB download this project did not take).
 
 ### 7.4 Also not done, and honestly so
 
@@ -271,7 +294,7 @@ at source with the original reasoning left visible.
   split places identical rows on both sides with certainty.
 - **Placeholder spelling leaks the label.** Normal rows spell an absent field `"0"`, attack rows
   `"0.0"`. Three columns with three distinct values each reach **100% accuracy alone**.
-- **Timestamps are corrupted** and row order is not capture order.
+- **Timestamps are damaged** — but not fatally; see §8.9, which corrects this entry.
 
 After removing the leakage vectors only **30** features remain — so the base paper's stated
 46-of-61 selection **necessarily includes leaking columns**.
@@ -299,6 +322,28 @@ A `pip install scipy` in Phase 3 upgraded numpy 1.26 → 2.4 and scikit-learn 1.
 when `imbalanced-learn` stopped importing, several tasks later. Every package is now pinned exactly
 and `tests/test_environment.py` asserts the live environment matches.
 
+### 8.9 A blocker this project reported was its own reasoning error
+An earlier `t3_6_edge_iiotset.md` cut T3.6's ensemble half on the grounds that Edge-IIoTset's
+records "cannot be ordered in time" and that "row order is not capture order". The first is half
+true and the second is false. `frame.time` loses its **date** to an unquoted comma inside
+`Dec 26, 2021 22:14:30.939803000 IST`, but the **clock survives on 90.04% of rows**, and it
+*confirms* the file's row order rather than contradicting it: across all 13 timed capture blocks,
+0.9992–1.0000 of adjacent pairs agree, with 13 backward steps in 142,088 rows, worst −0.024 s.
+
+An ordering existed the whole time. The error was inferring a property of the data from a corrupted
+column instead of parsing the column — the same species of mistake as §8.3, caught the same way, by
+measuring the thing that was assumed. Both halves of T3.6 now run.
+[`t3_6_ensemble.md`](reports/t3_6_ensemble.md)
+
+### 8.10 A fold-balancing proxy that is safe on one dataset and wrong on the next
+`split_sessions` balances folds by counting each session's entries and documents them as *windows*;
+notebook 03 passes *records*. On IoTID20 that is a fair proxy (81.2%/9.6%/9.2% of windows, matched
+class balance). On Edge-IIoTset it is not — attack sessions run to 7,050 records against a Normal
+median of 2 — and the first run of notebook 04 produced 93.7%/3.2%/3.2% folds whose **test fold
+held no Normal windows at all**. Every model scored precision 1.0000 against zero negatives, which
+reads as a triumph and is an empty set. Notebook 04 splits window-level ids; notebook 03's folds
+were re-checked and stand.
+
 ---
 
 ## 9. Repository layout
@@ -306,7 +351,7 @@ and `tests/test_environment.py` asserts the live environment matches.
 ```
 ├── PRD.md · TRD.md · Build-Instructions.md · OPERATING_CONTRACT.md   the specifications
 ├── docs/            5 decision records (feature selection, XAI, architecture, calibration, Pi setup)
-├── notebooks/       01 leakage · 02 baseline · 03 ensemble  (executed, outputs included)
+├── notebooks/       01 leakage · 02 baseline · 03 ensemble · 04 Edge-IIoTset  (executed)
 ├── src/
 │   ├── preprocessing/   clean · feature_select · resample · sequence_builder
 │   ├── models/          cnn · bilstm · transformer · fusion · baseline · train_utils · calibration
@@ -315,8 +360,8 @@ and `tests/test_environment.py` asserts the live environment matches.
 │   ├── adaptive/        threshold · incremental
 │   └── deployment/      export_model · pi_inference · benchmark
 ├── scripts/         15 runnable entry points; every report is generated, never hand-written
-├── tests/           15 files, 298 tests (284 pass, 14 hardware/artifact-gated skips)
-└── reports/         14 generated reports
+├── tests/           15 files, 307 tests (293 pass, 14 hardware/artifact-gated skips)
+└── reports/         16 generated reports
 ```
 
 **No `src/models/gnn_branch.py`** — T2.7 returned no-go, and a test fails the build if it reappears.
@@ -326,6 +371,16 @@ and `tests/test_environment.py` asserts the live environment matches.
 Added, each because a notebook cannot be unit-tested and duplicated logic drifts:
 `src/config.py`, `evaluation/metrics.py`, `models/baseline.py`, `models/train_utils.py`,
 `models/calibration.py`, `xai/feature_glossary.py`.
+
+**T3.6 spans two files rather than its declared one.** T3.6's declared **Files** line is
+`notebooks/04_train_edge_iiotset.ipynb` alone. That notebook exists and holds the ensemble half, but
+the record-level half and the dataset-defect findings live in
+[`scripts/evaluate_edge_iiotset.py`](scripts/evaluate_edge_iiotset.py), and the timestamp recovery
+both depend on is in `src/preprocessing/clean.py`. Recorded because `Build-Instructions.md` §A.2
+forbids touching files outside a task's declared line: a notebook cannot be unit-tested, and the
+timeline reconstruction is the kind of code that must be. §F's "No task touched files outside its
+declared **Files** line" checkbox is therefore **still not checkable**, and saying so is cheaper
+than pretending otherwise.
 
 ---
 

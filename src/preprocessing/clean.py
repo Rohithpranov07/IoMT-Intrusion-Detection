@@ -42,6 +42,7 @@ Determinism: this module performs no randomised operation.
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 
 import numpy as np
@@ -502,3 +503,137 @@ def clean_edge_iiotset(
         X.shape, int((y == POSITIVE_LABEL).sum()), int((y == NEGATIVE_LABEL).sum()),
     )
     return X, y, meta
+
+
+# --- Edge-IIoTset time recovery (T3.6 sequence half) --------------------------------------
+#
+# `frame.time` in the published ML CSV is damaged, but NOT destroyed, and the difference decides
+# whether T3.6's ensemble half can run at all.
+#
+# What the damage is. The original Wireshark field reads like
+# `Dec 26, 2021 22:14:30.939803000 IST`. That value contains a comma, the file does not quote it,
+# and the producer appears to have dropped the leading `Dec 26` fragment to keep the row at 63
+# fields. What survives in column 1 is the tail: ` 2021 22:14:30.939803000 `. The calendar date is
+# gone; **the clock time is intact for 90.04% of rows** (142,088 of 157,800).
+#
+# Why a time-of-day alone is enough. Ordering needs a monotone key per device, not a calendar.
+# Measured on this file: within each contiguous per-attack block, sorting by recovered time-of-day
+# agrees with the file's own row order for 99.92%-100.00% of adjacent pairs, and after midnight-wrap
+# correction only 13 adjacent pairs out of 142,088 step backwards, the worst by 0.024 s. **Row order
+# in this file IS capture order**, and the recovered clock independently confirms it.
+#
+# Two corrections are applied, both of which are this project's own construction and must be
+# reported as such:
+#
+#   1. **Midnight wrap.** Four blocks cross midnight (Ransomware once, Normal three times). A drop
+#      of more than `EDGE_MIDNIGHT_WRAP_THRESHOLD_SECONDS` is read as a day boundary and a day is
+#      added from that point on. Without the date there is no way to distinguish a real wrap from a
+#      large backward jump, so a threshold is a judgement, not a measurement.
+#   2. **Block separation.** The file is contiguous per-attack blocks captured on different days.
+#      Two blocks sharing a wall-clock hour are NOT concurrent traffic, so each block is pushed
+#      `EDGE_BLOCK_OFFSET_SECONDS` past the previous one. Without this, sessionisation would merge
+#      records from separate captures that happen to share a destination host and an hour of the
+#      day, fabricating sessions that never existed.
+#
+# Rows with no recoverable clock are DROPPED rather than imputed: an invented timestamp is exactly
+# the kind of fabricated input this project exists to object to. That costs all 14,498 `DDoS_UDP`
+# rows and all 1,214 `MITM` rows -- those two classes carry no parseable time at all, so the
+# sequence half of T3.6 is evaluated on 13 of the 15 attack types, not 15.
+
+#: Matches the surviving `HH:MM:SS.fffffffff` tail of a damaged `frame.time` value.
+EDGE_TIME_PATTERN: re.Pattern[str] = re.compile(r"(\d{2}):(\d{2}):(\d{2})\.(\d+)")
+
+#: A backward step larger than this within a block is read as crossing midnight. Six hours is well
+#: beyond the largest genuine backward step measured (0.024 s) and well short of a 24-hour wrap.
+EDGE_MIDNIGHT_WRAP_THRESHOLD_SECONDS: float = 6 * 3600.0
+
+#: Spacing forced between consecutive capture blocks. Two days, so no block's real duration (the
+#: longest measured is 86,398 s) can reach into the next block's window.
+EDGE_BLOCK_OFFSET_SECONDS: float = 2 * 86400.0
+
+#: Session key and timestamp column names expected by `sequence_builder`, mapped onto this
+#: dataset's own column names.
+EDGE_SESSION_KEY_SOURCE: str = "ip.dst_host"
+
+
+def parse_edge_iiotset_clock(values: pd.Series) -> pd.Series:
+    """Recover seconds-since-midnight from damaged `frame.time` strings.
+
+    Args:
+        values: the raw `frame.time` column.
+
+    Returns:
+        Float Series of seconds since midnight, NaN where no clock time survives.
+    """
+
+    def to_seconds(value: object) -> float:
+        match = EDGE_TIME_PATTERN.search(str(value))
+        if match is None:
+            return float("nan")
+        hours, minutes, seconds, fraction = match.groups()
+        return (
+            int(hours) * 3600 + int(minutes) * 60 + int(seconds) + float(f"0.{fraction}")
+        )
+
+    return values.map(to_seconds)
+
+
+def build_edge_iiotset_timeline(
+    meta: pd.DataFrame,
+    block_offset_seconds: float = EDGE_BLOCK_OFFSET_SECONDS,
+    wrap_threshold_seconds: float = EDGE_MIDNIGHT_WRAP_THRESHOLD_SECONDS,
+) -> tuple[pd.DataFrame, np.ndarray]:
+    """Build a monotone `Timestamp` and a `Dst_IP` session key for Edge-IIoTset.
+
+    Applies the two corrections documented in this section: per-block midnight-wrap repair, then
+    per-block separation. Rows with no recoverable clock are dropped, never imputed.
+
+    Args:
+        meta: metadata frame from `clean_edge_iiotset`, carrying `frame.time`,
+            `EDGE_SESSION_KEY_SOURCE` and `Attack_type`.
+        block_offset_seconds: spacing forced between consecutive capture blocks.
+        wrap_threshold_seconds: backward step read as crossing midnight.
+
+    Returns:
+        Tuple of `(timeline, keep_mask)`. `timeline` is the subset of `meta` that carries a clock,
+        with datetime64 `Timestamp` and `Dst_IP` columns added, indexed 0..n-1. `keep_mask` is a
+        boolean array over the INPUT rows, for aligning `X` and `y` to the same subset.
+
+    Raises:
+        KeyError: if a required column is missing.
+        ValueError: if no row carries a recoverable clock time.
+    """
+    for column in ("frame.time", EDGE_SESSION_KEY_SOURCE, "Attack_type"):
+        if column not in meta.columns:
+            raise KeyError(f"meta is missing required column {column!r}")
+
+    clock = parse_edge_iiotset_clock(meta["frame.time"])
+    keep_mask = clock.notna().to_numpy()
+    if not keep_mask.any():
+        raise ValueError("No row in this frame carries a recoverable clock time")
+
+    kept = meta.loc[keep_mask].reset_index(drop=True)
+    clock = clock.loc[keep_mask].reset_index(drop=True)
+
+    # Contiguous runs of one attack type = one capture block. Row order is capture order (see the
+    # section comment above), so a change of attack type marks a block boundary.
+    attack_type = kept["Attack_type"]
+    block = (attack_type != attack_type.shift()).cumsum()
+
+    timeline = np.empty(len(kept), dtype=np.float64)
+    for position, (_, group) in enumerate(clock.groupby(block, sort=False)):
+        seconds = group.to_numpy()
+        steps = np.diff(seconds)
+        days = np.concatenate([[0], np.cumsum(steps < -wrap_threshold_seconds)])
+        timeline[group.index] = (
+            seconds + days * 86400.0 + position * block_offset_seconds
+        )
+
+    kept["Timestamp"] = pd.to_datetime(timeline, unit="s")
+    kept["Dst_IP"] = kept[EDGE_SESSION_KEY_SOURCE]
+
+    logger.info(
+        "Edge-IIoTset timeline: %d of %d rows carry a clock (%.2f%%), %d capture blocks",
+        len(kept), len(meta), 100 * len(kept) / len(meta), int(block.nunique()),
+    )
+    return kept, keep_mask
