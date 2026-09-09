@@ -32,7 +32,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    // suppressHydrationWarning: some browser extensions (screen recorders, password managers)
+    // inject attributes onto <html> before React hydrates, e.g. data-scribe-recorder-ready. That
+    // mismatch is real but harmless here since nothing in this app reads or sets that attribute;
+    // this stops React from bailing out over an extension's HTML, not over our own markup.
+    <html lang="en" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
       <body className="font-[family-name:var(--font-body)] bg-pumice text-obsidian">
         {children}
       </body>
