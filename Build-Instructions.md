@@ -264,7 +264,7 @@ repo/
 #### T4.3 — Latency & throughput benchmark
 **Files:** `src/deployment/benchmark.py`, `reports/deployment_benchmark.md`
 **Prompt:**
-> Measure per-sequence inference latency and throughput (sequences/sec) running T4.2's script on the actual Raspberry Pi 4B under a simulated load. Write `reports/deployment_benchmark.md` stating the exact hardware (Pi 4B, 8GB RAM, OS version), the measured numbers, and nothing estimated or assumed.
+> Measure per-sequence inference latency and throughput (sequences/sec) running T4.2's script on the actual Raspberry Pi 4B under a simulated load. Write `reports/deployment_benchmark.md` stating the exact hardware (Pi 4B, 4GB RAM, OS version), the measured numbers, and nothing estimated or assumed.
 **VERIFY (→ TRD §9 "Deployment numbers are real"):** Report cites specific numbers from an actual run on the Pi, with hardware specs stated — this directly fixes the senior's-work gap (`PRD.md §2.2`) of claiming real-time capability with zero reported numbers.
 
 #### T4.4 — Ablation and comparative analysis
