@@ -1,0 +1,20 @@
+DEPLOYMENT EVIDENCE (measured on Raspberry Pi hardware)
+Host: Raspberry Pi 4 Model B Rev 1.5
+  architecture : aarch64
+  cores        : 4
+  RAM          : 3.7 GB
+  OS           : Linux 6.18.50+rpt-rpi-v8
+  Python       : 3.13.5
+  Raspberry Pi : True
+  backend      : ai_edge_litert
+  precision    : float32
+  windows timed: 200 (after 20 warm-up)
+  cold start   : 0.04 s
+  latency ms   : p50=2.89  p90=2.96  p95=2.99  p99=3.03
+  per branch   :
+      cnn          median    0.28 ms
+      bilstm       median    2.09 ms
+      transformer  median    0.51 ms
+  throughput   : 344.9 windows/s
+
+Wrote reports/deployment_benchmark.md

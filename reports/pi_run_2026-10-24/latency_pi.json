@@ -1,0 +1,217 @@
+{
+  "host": {
+    "board": "Raspberry Pi 4 Model B Rev 1.5",
+    "cpu": "",
+    "arch": "aarch64",
+    "cores": 4,
+    "ram_gb": 3.71,
+    "os": "Linux 6.18.50+rpt-rpi-v8",
+    "python": "3.13.5",
+    "is_raspberry_pi": true
+  },
+  "provenance": "TRAINED ensemble from the project (artifacts/deployment/float32: CNN, BiLSTM unrolled for TFLite builtins, transformer), float32; reproduces the evaluated predictions on 256 real test windows",
+  "backend": "ai_edge_litert",
+  "memory": {
+    "rss_before_models_mb": 30.498816,
+    "rss_after_models_mb": 52.924416,
+    "tflite_file_kb": {
+      "cnn": 251.45703125,
+      "bilstm": 820.91015625,
+      "transformer": 314.765625
+    },
+    "parameters": {}
+  },
+  "load_levels": [
+    {
+      "background_cpu_burners": 0,
+      "cnn": {
+        "n": 1000,
+        "mean_ms": 0.187053225,
+        "p50_ms": 0.186176,
+        "p90_ms": 0.1874351,
+        "p95_ms": 0.196565,
+        "p99_ms": 0.20071411
+      },
+      "bilstm": {
+        "n": 1000,
+        "mean_ms": 2.066169687,
+        "p50_ms": 2.079418,
+        "p90_ms": 2.0972699,
+        "p95_ms": 2.1024187999999997,
+        "p99_ms": 2.149491
+      },
+      "transformer": {
+        "n": 1000,
+        "mean_ms": 0.299339224,
+        "p50_ms": 0.296356,
+        "p90_ms": 0.3051576,
+        "p95_ms": 0.3224161,
+        "p99_ms": 0.33393393
+      },
+      "ensemble": {
+        "n": 1000,
+        "mean_ms": 2.995991296,
+        "p50_ms": 3.0032075000000003,
+        "p90_ms": 3.0187256000000002,
+        "p95_ms": 3.02575235,
+        "p99_ms": 3.10861957
+      }
+    },
+    {
+      "background_cpu_burners": 1,
+      "cnn": {
+        "n": 1000,
+        "mean_ms": 0.18838847099999997,
+        "p50_ms": 0.187695,
+        "p90_ms": 0.188898,
+        "p95_ms": 0.1929415,
+        "p99_ms": 0.20069437
+      },
+      "bilstm": {
+        "n": 1000,
+        "mean_ms": 2.060341926,
+        "p50_ms": 2.063143,
+        "p90_ms": 2.0848715,
+        "p95_ms": 2.0918275,
+        "p99_ms": 2.1302691499999997
+      },
+      "transformer": {
+        "n": 1000,
+        "mean_ms": 0.29841322400000003,
+        "p50_ms": 0.2956715,
+        "p90_ms": 0.3067297,
+        "p95_ms": 0.31787170000000003,
+        "p99_ms": 0.32950355
+      },
+      "ensemble": {
+        "n": 1000,
+        "mean_ms": 2.99002932,
+        "p50_ms": 2.9926565,
+        "p90_ms": 3.0094631,
+        "p95_ms": 3.01527155,
+        "p99_ms": 3.07725385
+      }
+    },
+    {
+      "background_cpu_burners": 2,
+      "cnn": {
+        "n": 1000,
+        "mean_ms": 0.188302414,
+        "p50_ms": 0.187361,
+        "p90_ms": 0.1893079,
+        "p95_ms": 0.19542624999999997,
+        "p99_ms": 0.20369844999999998
+      },
+      "bilstm": {
+        "n": 1000,
+        "mean_ms": 2.071451426,
+        "p50_ms": 2.0758395,
+        "p90_ms": 2.0971343,
+        "p95_ms": 2.1020538,
+        "p99_ms": 2.12066829
+      },
+      "transformer": {
+        "n": 1000,
+        "mean_ms": 0.30415711500000003,
+        "p50_ms": 0.300931,
+        "p90_ms": 0.3140096,
+        "p95_ms": 0.32489945,
+        "p99_ms": 0.34820596
+      },
+      "ensemble": {
+        "n": 1000,
+        "mean_ms": 3.0057459680000003,
+        "p50_ms": 3.008901,
+        "p90_ms": 3.0271702,
+        "p95_ms": 3.032998,
+        "p99_ms": 3.08074546
+      }
+    },
+    {
+      "background_cpu_burners": 3,
+      "cnn": {
+        "n": 1000,
+        "mean_ms": 0.189479133,
+        "p50_ms": 0.188381,
+        "p90_ms": 0.189751,
+        "p95_ms": 0.1965951,
+        "p99_ms": 0.20459597
+      },
+      "bilstm": {
+        "n": 1000,
+        "mean_ms": 2.076811517,
+        "p50_ms": 2.079018,
+        "p90_ms": 2.1032169,
+        "p95_ms": 2.1106946,
+        "p99_ms": 2.20647682
+      },
+      "transformer": {
+        "n": 1000,
+        "mean_ms": 0.30264649299999996,
+        "p50_ms": 0.2998015,
+        "p90_ms": 0.3128029,
+        "p95_ms": 0.32386064999999997,
+        "p99_ms": 0.33563597
+      },
+      "ensemble": {
+        "n": 1000,
+        "mean_ms": 3.0342212630000005,
+        "p50_ms": 3.0169125,
+        "p90_ms": 3.0928959999999996,
+        "p95_ms": 3.1644846499999995,
+        "p99_ms": 3.40589188
+      }
+    },
+    {
+      "background_cpu_burners": 4,
+      "cnn": {
+        "n": 1000,
+        "mean_ms": 0.292741623,
+        "p50_ms": 0.186955,
+        "p90_ms": 0.19022329999999998,
+        "p95_ms": 0.2031663,
+        "p99_ms": 4.21848274
+      },
+      "bilstm": {
+        "n": 1000,
+        "mean_ms": 2.350294625,
+        "p50_ms": 2.0767344999999997,
+        "p90_ms": 2.1217501999999997,
+        "p95_ms": 6.0881077999999995,
+        "p99_ms": 6.109327370000001
+      },
+      "transformer": {
+        "n": 1000,
+        "mean_ms": 0.345685583,
+        "p50_ms": 0.2964775,
+        "p90_ms": 0.3205753,
+        "p95_ms": 0.337424,
+        "p99_ms": 1.9888059999999783
+      },
+      "ensemble": {
+        "n": 1000,
+        "mean_ms": 3.247241481,
+        "p50_ms": 3.0144265,
+        "p90_ms": 3.2042117,
+        "p95_ms": 6.180093849999966,
+        "p99_ms": 7.037127170000001
+      }
+    }
+  ],
+  "sustained": {
+    "seconds": 30.002009430999806,
+    "windows": 10023,
+    "windows_per_s": 334.077623135591,
+    "cpu_percent_of_one_core": 100.0
+  },
+  "energy": {
+    "source": "NOT MEASURED: no RAPL counters on this host and no external meter reading"
+  },
+  "per_flow_cost_us_for_ns3": {
+    "definition": "one ensemble window inference per arriving flow (stride-1 deployment); idsLatencyUs = ensemble p50 at the given load level",
+    "idle_p50_us": 3003.2075000000004,
+    "idle_p95_us": 3025.7523499999998,
+    "full_load_p50_us": 3014.4265,
+    "full_load_p95_us": 6180.093849999966
+  }
+}

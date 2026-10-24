@@ -1,0 +1,28 @@
+{
+  "is_deployment_evidence": true,
+  "host": {
+    "model": "Raspberry Pi 4 Model B Rev 1.5",
+    "machine": "aarch64",
+    "processor_count": 4,
+    "total_ram_gb": 3.7067794799804688,
+    "os_description": "Linux 6.18.50+rpt-rpi-v8",
+    "python_version": "3.13.5",
+    "is_raspberry_pi": true
+  },
+  "backend": "ai_edge_litert",
+  "precision": "float32",
+  "n_windows": 200,
+  "cold_start_seconds": 0.03839768900002127,
+  "latency_ms": {
+    "50": 2.887742500092827,
+    "90": 2.9620605999753025,
+    "95": 2.990791699971851,
+    "99": 3.034060489976582
+  },
+  "throughput_per_second": 344.85831902898946,
+  "branch_median_ms": {
+    "cnn": 0.2779330000066693,
+    "bilstm": 2.088211999989653,
+    "transformer": 0.5065325000259691
+  }
+}

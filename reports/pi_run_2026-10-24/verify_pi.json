@@ -1,0 +1,8 @@
+{
+ "board": "Raspberry Pi 4 Model B Rev 1.5",
+ "backend": "ai_edge_litert",
+ "windows": 256,
+ "argmax_agreement": 1.0,
+ "max_probability_difference": 6.480661340901861e-08,
+ "pass": true
+}

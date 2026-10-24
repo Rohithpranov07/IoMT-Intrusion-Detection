@@ -1,0 +1,14 @@
+Host: Raspberry Pi 4 Model B Rev 1.5
+  architecture : aarch64
+  cores        : 4
+  RAM          : 3.7 GB
+  OS           : Linux 6.18.50+rpt-rpi-v8
+  Python       : 3.13.5
+  Raspberry Pi : True
+
+Self-test on 8 synthetic windows: PASS
+  backend            : ai_edge_litert
+  branches           : cnn, bilstm, transformer
+  input shape        : (n, 10, 62)
+  positive class     : Attack (label 1)
+  mean confidence    : 0.9999

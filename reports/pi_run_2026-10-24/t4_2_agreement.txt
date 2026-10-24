@@ -1,0 +1,12 @@
+Host: Raspberry Pi 4 Model B Rev 1.5
+  architecture : aarch64
+  cores        : 4
+  RAM          : 3.7 GB
+  OS           : Linux 6.18.50+rpt-rpi-v8
+  Python       : 3.13.5
+  Raspberry Pi : True
+
+Processed 256 windows with the ai_edge_litert backend
+  flagged as Attack: 251 (98.0%)
+  mean confidence: 0.9498
+  agreement with supplied labels: 100.0000%
