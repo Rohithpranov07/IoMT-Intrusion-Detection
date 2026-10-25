@@ -1,0 +1,11 @@
+dataset,feature_space,rows,features,duplicate_rows,duplicate_pct,distinct_vectors,label_conflicting_vectors,test_rows_with_train_twin_pct_mean,test_rows_with_train_twin_pct_std
+Edge-IIoTset,all 61 raw features,157800,61,814,0.5158428390367554,156986,0,0.5190114068441064,0.036470781248029126
+Edge-IIoTset,minus 5 address/time identifiers,157800,56,5419,3.4340937896070978,152381,0,3.8585234474017738,0.11514674902475594
+Edge-IIoTset,minus 11 per-connection nonces and ports,157800,45,79447,50.346641318124206,78353,0,51.01726869455006,0.13583659701299144
+Edge-IIoTset,minus 7 payload/content columns,157800,38,156107,98.92712294043092,1693,0,99.4681558935361,0.03648055976286131
+Edge-IIoTset,"project modelling space (30 features, placeholders normalised)",157800,30,156139,98.94740177439797,1661,32,99.48352344740178,0.035818759928922514
+WUSTL-EHMS-2020,all 43 raw features,16318,43,0,0.0,16318,0,0.0,0.0
+WUSTL-EHMS-2020,minus 8 address/port/MAC identifiers,16318,35,0,0.0,16318,0,0.0,0.0
+WUSTL-EHMS-2020,network features only (biometrics removed),16318,27,0,0.0,16318,0,0.0,0.0
+"CICIDS2017 (Friday DDoS day only, 32-col variant)",all raw columns,225745,31,2,0.0008859553921460055,225743,0,0.0011074442401825069,0.001344386317896042
+"CICIDS2017 (Friday DDoS day only, 32-col variant)",minus 5 identifiers,225745,26,14133,6.260603778599748,211612,11,7.538262198498306,0.09462273787121317

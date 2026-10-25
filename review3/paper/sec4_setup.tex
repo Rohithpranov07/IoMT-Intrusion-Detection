@@ -1,0 +1,38 @@
+\section{Applying the Framework}\label{sec:setup}
+
+\subsection{Systems audited}
+\noindent HIDS-IoMT \cite{berguiga2025} is the primary subject. For the broadened audit we screened ten open-access IoMT IDS papers from 2024 to 2026 and retained the two whose confusion matrices are given as numbers rather than images, with metrics for the same experiment: XAI-XGBoost \cite{hosain2025} and a leakage-free Nyström sampling study \cite{tarish2026}, both evaluated on WUSTL-EHMS-2020.
+
+\subsection{Datasets}
+\noindent IoTID20 \cite{ullah2020} (625,783 flow records, CICFlowMeter features), Edge-IIoTset \cite{ferrag2022} (the 157,800-row file released for machine learning, per-packet tshark fields), WUSTL-EHMS-2020 \cite{wustl} (16,318 records, Argus flow features plus eight biometric fields) and, for duplicate measurement only, the Friday DDoS day of CICIDS2017 \cite{sharafaldin2018}. IoTID20 figures in this paper come from the project's own pipeline run; the other three were measured for this revision from mirrored copies whose row and class counts match the published descriptions.
+
+\subsection{Threshold architectures}
+\noindent All rules decide the same question for each inspected flow: is this source's inter-message gap too short?
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt,topsep=2pt]
+\item \textbf{A, flat} (the base paper): violation if the gap is below $\tau_0 = 500$\,ms, for every device.
+\item \textbf{B, congestion-coupled EWMA}: violation if the source's EWMA gap ($\alpha = 0.3$) is below $\tau_0(1-L)$, so detection loosens as the fog queue fills. This is our reconstruction of a congestion-adaptive rule, not any published code.
+\item \textbf{C, criticality-weighted} (our proposal): violation if the gap is below $\mathrm{clamp}(\tau_0\, w_d\, (1 + 0.3(L-0.5)), 50, 2000)$\,ms with device-class weights $w_d \in \{0.6, 0.8, 1.0, 1.3\}$ from life-critical to non-clinical.
+\item \textbf{B$'$, mitigated B} (Section~\ref{sec:latch}): B with a hysteresis floor, a dual fixed threshold, or a capacity-coupled threshold.
+\end{itemize}
+Every rule quarantines a source after $p = 3$ violations unless stated.
+
+\subsection{Network scenarios}
+\noindent The baseline is the Review~2 scenario: 20 legitimate wearables (600\,ms telemetry, $\pm$40\,\% jitter), 60 attacker-bots (5\,ms flood), 4 fog nodes, star topology over 10\,Mb/s access and 100\,Mb/s backhaul links, 30 simulated seconds, per-flow inspection cost 500\,µs, balanced device mix. The scenario matrix varies one factor at a time from this baseline: wearables $\{10, 20, 40, 80\}$, attacker-bots $\{20, 40, 60, 80, 120\}$, fog nodes $\{1, 2, 4, 8\}$, topology (star, clustered wards with half the bots in one ward, a 4$\times$4 switch grid, a random geometric switch graph) and device mix (balanced, ICU-heavy 50/30/15/5\,\%, periphery-heavy 5/15/30/50\,\%), each at 500\,µs and at 2,000\,µs per flow. The full factorial would need 960 scenarios per architecture and inspection cost; we run the 16 one-factor scenarios and state the interaction we test separately (inspection cost against attack scale, Section~\ref{sec:latch}).
+
+\subsection{Simulator validity}
+\noindent The Review~3 simulator extends the Review~2 program. With every new option at its default it is the same program, and on the same ns-3 \cite{nsnam} build both produce identical detection counts (checked for all three rules at run 1). Moving the unmodified Review~2 program from the ns-3 build used in Review~2 to ns-3.44 changed its single-seed head-to-head counts (Table~\ref{tab:version}): architecture B went from 8 to 10 quarantined wearables and C from 9 to 10. Nothing in the model changed; the random stream mapping did. This is the strongest argument we have for the multi-seed protocol, and every network-level result below is a 20-seed distribution.
+
+\begin{table}[t]
+\caption{The same Review 2 program, run number 1, on two ns-3 builds. Single-seed results are not stable across simulator versions.}
+\label{tab:version}
+\centering\footnotesize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{ns-3 build} & \textbf{A} & \textbf{B} & \textbf{C} \\
+\midrule
+Review 2 build & 327 / 60 / 20 & 303 / 36 / 8 & 296 / 29 / 9 \\
+ns-3.44 & 321 / 60 / 20 & 300 / 39 / 10 & 291 / 30 / 10 \\
+\bottomrule
+\multicolumn{4}{@{}l}{\scriptsize Cells: alerts / false-positive alerts / wearables quarantined.}
+\end{tabular}
+\end{table}

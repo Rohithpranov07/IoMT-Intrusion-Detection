@@ -1,0 +1,62 @@
+\subsection{Prevalence of data leakage}\label{sec:leakage}
+\subsubsection{Duplicates are a property of the feature space}
+A duplicate rate is not a property of a file. It is a property of the columns a pipeline keeps, and a published figure that does not name its columns cannot be checked. Table~\ref{tab:dup} measures each dataset along the funnel a careful pipeline follows, from every raw column to the space a model is trained on, and adds the quantity that matters for evaluation: under a random stratified 80/20 split, the share of test rows whose exact feature vector also occurs in training (mean over 20 splits).
+
+\begin{table}[t]
+\caption{Exact duplicates and train/test twins along each dataset's feature funnel. Twin: share of test rows with an identical training row under a random 80/20 split (mean of 20).}
+\label{tab:dup}
+\centering\scriptsize
+\begin{tabular}{@{}p{0.43\columnwidth}rrrr@{}}
+\toprule
+\textbf{Feature space} & \textbf{Feat.} & \textbf{Dup.\,\%} & \textbf{Distinct} & \textbf{Twin\,\%} \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Edge-IIoTset, 157,800 rows}}\\
+all raw features & 61 & 0.52 & 156,986 & 0.52 \\
+minus address and time identifiers & 56 & 3.43 & 152,381 & 3.86 \\
+minus per-connection nonces and ports & 45 & 50.35 & 78,353 & 51.02 \\
+minus payload and content columns & 38 & 98.93 & 1,693 & 99.47 \\
+modelling space, placeholders normalised & 30 & 98.95 & 1,661 & 99.48 \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{IoTID20, 625,783 rows (project pipeline)}}\\
+all 86 raw columns & 86 & 26.20 & 461,837 & n/a \\
+modelling space (625,415 rows) & 69 & 58.18 & 261,531 & n/a \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{WUSTL-EHMS-2020, 16,318 rows}}\\
+all raw, or identifiers removed & 43/35 & 0.00 & 16,318 & 0.00 \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{CICIDS2017, Friday DDoS day only (225,745 rows)}}\\
+all raw columns & 31 & 0.00 & 225,743 & 0.00 \\
+minus identifiers & 26 & 6.26 & 211,612 & 7.54 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On Edge-IIoTset the duplicate rate moves from 0.52\,\% to 98.95\,\% as identifier, nonce and payload columns are removed, and each removal is one a careful pipeline should make: ports with a distinct value on a third of all rows are connection identifiers, and payload columns contain the attack strings themselves \cite{galal2026}. Both published figures are correct, the 0.52\,\% reported over all columns \cite{galal2026} and the 98.95\,\% our earlier report gave for the modelling space; they measure different populations, and the second is the one a model sees. In that space DDoS\_UDP's 14,498 rows and DDoS\_ICMP's 14,090 rows are each a single vector, and 99.5\,\% of test rows have a training twin. The step from 38 to 30 features also shows the serialisation artefact at work: normalising the two spellings of a missing value merges 32 vectors that had been separated only by spelling, and each of them then carries both labels. IoTID20 rises from 26.2\,\% in raw rows, consistent with the 164,087 duplicates removed by Alsulami \textit{et al.} \cite{alsulami2022}, to 58.2\,\% in its modelling space. WUSTL-EHMS-2020 contains no duplicates at all, so for the two papers that use it check (d) is moot and the ordering check is the one that matters.
+
+\subsubsection{Oversampling order, isolated over 20 partitions}
+Table~\ref{tab:order} isolates the partitioning order on two datasets with a fixed learner (random forest, 100 trees). LEAKY applies SMOTE \cite{chawla2002} to the whole dataset and then splits, the order confirmed in \cite{berguiga2025} and \cite{hosain2025}; ORDER splits first and oversamples only the training fold; HONEST additionally removes duplicates in the modelling space before splitting.
+
+\begin{table}[t]
+\caption{Effect of partitioning order, 20 stratified partitions per row (mean $\pm$ sd). Attack is positive. Synth.: share of the test fold that is synthetic.}
+\label{tab:order}
+\centering\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Data} & \textbf{Regime} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} & \textbf{Synth.} \\
+\midrule
+WUSTL & LEAKY & 0.959 $\pm$ 0.003 & 0.962 & 0.957 & 42.7\,\% \\
+& ORDER = HONEST & 0.673 $\pm$ 0.014 & 0.724 & 0.629 & 0 \\
+\midrule
+Edge & LEAKY & 0.941 $\pm$ 0.001 & 0.994 & 0.894 & 40.9\,\% \\
+& ORDER & 0.943 $\pm$ 0.001 & 0.998 & 0.893 & 0 \\
+& HONEST & 0.938 $\pm$ 0.009 & 0.961 & 0.916 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On WUSTL-EHMS-2020 the order alone moves F1 from 0.673 to 0.959 (paired Wilcoxon over 20 partitions, $p = 2\times10^{-6}$ raw, $2\times10^{-5}$ after Bonferroni over 12 tests), with 42.7\,\% of the leaky test fold synthetic. The honest figure sits close to the leakage-free F1 of 62.34\,\% that \cite{tarish2026} report on the same dataset with a different learner, and the leaky figure close to the 99.12\,\% of \cite{hosain2025}: three independent pipelines, one effect. On Edge-IIoTset the order barely matters for F1, because almost every test row already has a training twin, and removing duplicates is what moves the result: precision falls from 0.998 to 0.961 and the false-positive rate on normal traffic rises from 0.8\,\% to 13.3\,\% (precision difference, Bonferroni-corrected $p = 2\times10^{-5}$). The two datasets fail in different ways, which is why the audit needs both checks.
+
+\subsubsection{How common is the leaky order?}
+Of the four pipelines whose order we could establish, three oversample before partitioning (\cite{berguiga2025}, \cite{hosain2025}, and the prior work in our own laboratory \cite{badiyani2026}) and one does not \cite{tarish2026}. Four is too few to estimate a prevalence, and we do not; the point is that the leaky order is easy to find in recent IoMT work and that, where it is used, its effect can exceed the margin separating published methods by an order of magnitude.
+
+\pending{IoTID20 Table 3 over 20 partitions: team\_scripts/R3\_multiseed\_tables.py --dataset iotid20 --table 3. Single-partition values from Review 2: LEAKY F1 0.9986 (46.6\,\% synthetic), ORDER 0.9994, HONEST 0.9980.}

@@ -1,0 +1,56 @@
+\section{Results}\label{sec:results}
+
+\subsection{Audit of reported metrics}\label{sec:audit}
+\subsubsection{HIDS-IoMT}
+Section III-G-4 of \cite{berguiga2025} states that SMOTE balancing yields 2,727,996 Edge-IIoTset instances, and its binary split (2,182,396 training, 272,800 testing, 272,800 validation) sums to exactly that figure; the IoTID20 split sums to 1,170,686 against a stated 1,170,684. The partition is drawn from the oversampled population (check c). Its Section IV-C defines a true positive as a correctly classified \emph{normal} instance, and both of its Equations 7 and 8 are labelled recall, with the second being the precision formula. Table~\ref{tab:rederive} applies them to its published confusion matrices (its Figs.~11c and 12c): accuracy reproduces to four decimals, the printed precision is recovered only as $TP/(TP+FN)$ and the printed recall only as $TP/(TP+FP)$ (checks a and b). With Attack as the positive class, as is standard for a detector, IoTID20 precision is 99.7351\,\% rather than the printed 99.913\,\%.
+
+\begin{table}[t]
+\caption{Re-derivation from the confusion matrices published in \cite{berguiga2025}.}
+\label{tab:rederive}
+\centering\footnotesize
+\begin{tabular}{@{}p{0.5\columnwidth}rr@{}}
+\toprule
+\textbf{Quantity} & \textbf{IoTID20} & \textbf{Edge-IIoTset} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Printed in \cite{berguiga2025} (\%)}}\\
+Accuracy & 99.927 & 99.941 \\
+Precision & 99.913 & 99.942 \\
+Recall & 99.990 & 99.900 \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Re-derived, Normal as positive (\%)}}\\
+Accuracy & 99.9265 & 99.9413 \\
+$TP/(TP+FN)$, i.e.\ recall & 99.9126 & 99.9415 \\
+$TP/(TP+FP)$, i.e.\ precision & 99.9898 & 99.8999 \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Recomputed, Attack as positive (\%)}}\\
+Precision & 99.735 & 99.966 \\
+Recall & 99.969 & 99.941 \\
+F1 & 99.852 & 99.954 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Audit of additional systems}
+Table~\ref{tab:audit} applies the same checks to two more IoMT IDS. XAI-XGBoost \cite{hosain2025} reports accuracy 99.22\,\%, precision 98.35\,\%, recall 99.91\,\% and F1 99.12\,\% on WUSTL-EHMS-2020; all four reproduce exactly from its confusion matrix (TP 2,262, TN 2,836, FP 38, FN 2) with Attack as positive, so checks a, b and e pass. Check c fails on two independent pieces of arithmetic. Its balanced dataset has $14{,}271 + 11{,}417 = 25{,}688$ records and 20\,\% of that is 5,138, exactly its test support; and that test fold holds 2,264 attack records while the whole raw dataset holds only 2,046. At least 218 test attacks must therefore be synthetic, and the oversampling preceded the split. The Nyström study \cite{tarish2026} splits first, oversamples only the training fold, and passes checks a, b, c and e; its leakage-free WUSTL-EHMS-2020 attack recall is 46.91\,\% and F1 62.34\,\%. A third screened paper \cite{liu2026} also calls correctly classified normal records true positives, but prints too little to complete the checks. No paper of the three mentions duplicate records (check d); Section~\ref{sec:leakage} measures whether that matters for each dataset.
+
+\begin{table}[t]
+\caption{Audit of three published IoMT IDS. C: confirmed, no: not present, n/m: not mentioned.}
+\label{tab:audit}
+\centering\footnotesize
+\begin{tabular}{@{}p{0.42\columnwidth}ccc@{}}
+\toprule
+\textbf{Check} & \textbf{\cite{berguiga2025}} & \textbf{\cite{hosain2025}} & \textbf{\cite{tarish2026}} \\
+& IoTID20, Edge & WUSTL & WUSTL, ECU \\
+\midrule
+a. Positive-class inversion & C & no & no \\
+b. Transposed precision/recall & C & no & no \\
+c. Partition after oversampling & C & C & no \\
+d. Duplicates handled & n/m & n/m & n/m \\
+e. Irreproducible metric & no & no & no \\
+Reported F1 on its main dataset (\%) & 99.95$^\dagger$ & 99.12 & 62.34 \\
+\bottomrule
+\multicolumn{4}{@{}l}{\scriptsize $^\dagger$ as printed, under the inverted convention.}
+\end{tabular}
+\end{table}
+
+Two observations follow. The metric-definition errors (a, b) did not recur and appear specific to one paper. The ordering error (c) recurred, and it coincides with the size of the reported result: the paper that splits first reports F1 of 62\,\% on the same dataset where the paper that oversamples first reports 99\,\%. Section~\ref{sec:leakage} isolates that ordering experimentally on the same data.

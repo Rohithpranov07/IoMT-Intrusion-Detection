@@ -1,0 +1,14 @@
+\noindent Fig.~\ref{fig:tornado} varies one parameter at a time around the baseline (10 seeds per level): the base threshold $\tau_0 \in \{100, 250, 500, 1000\}$\,ms, B's smoothing $\alpha \in \{0.1, 0.3, 0.5, 0.7\}$, C's weight scheme (frozen $\{0.6, 0.8, 1.0, 1.3\}$, uniform, linear $\{0.7, 0.9, 1.1, 1.3\}$, exponential $\{0.25, 0.5, 1, 2\}$) and the inspection cost $\{57.9, 500, 1000, 2000, 14{,}542.7\}$\,µs.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig_e3_tornado.png}
+\caption{Sensitivity. Each bar spans the outcome's range as one factor varies; dashed line: baseline.}
+\label{fig:tornado}
+\end{figure}
+
+\noindent The base threshold matters most, for every rule. At $\tau_0 = 100$ or 250\,ms all three rules quarantine no wearable and still block all 60 bots, because the wearables' shortest legitimate gap is 360\,ms and the bots send every 5\,ms; at 1,000\,ms all three quarantine all 20. The base paper's collateral damage is thus a consequence of one global constant sitting above some devices' telemetry gaps. That conclusion holds against a fast flood only; Section~\ref{sec:ceiling} repeats the sweep against attackers who send at wearable-like rates, where lowering $\tau_0$ stops being free.
+
+For B, $\alpha$ is the second lever: from 0.1 to 0.7 its quarantine count rises from 5.4 to 19.9, because a less smoothed gap estimate reacts to single short gaps in jittered telemetry. No value of $\alpha$ prevents the latch-off: at 2,000\,µs B latched in 10 of 10 seeds for every $\alpha$ tested. Inspection cost decides B's detection outright (all or nothing) and leaves A and C untouched up to 14.5\,ms per flow.
+
+For C, the weight scheme is the second lever. Uniform weights make C behave like a flat rule (19.3 wearables quarantined, 59 false alerts); the linear scheme quarantines 12.4; the frozen and exponential schemes both quarantine 9.8, because under both every life-critical and high-criticality device stays below the gap threshold and every non-clinical one above it. What the weights must get right is which side of the telemetry distribution each class falls on, not their exact values.

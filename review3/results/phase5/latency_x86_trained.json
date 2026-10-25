@@ -1,0 +1,147 @@
+{
+  "host": {
+    "board": "Linux x86_64 (not a Raspberry Pi)",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "arch": "x86_64",
+    "cores": 2,
+    "ram_gb": 7.84,
+    "os": "Linux 6.18.44-fc-v153",
+    "python": "3.13.16",
+    "is_raspberry_pi": false
+  },
+  "provenance": "TRAINED ensemble from the project (artifacts/deployment/float32: CNN, BiLSTM unrolled for TFLite builtins, transformer), float32; reproduces the evaluated predictions on 256 real test windows",
+  "backend": "ai_edge_litert",
+  "memory": {
+    "rss_before_models_mb": 30.441472,
+    "rss_after_models_mb": 52.240384,
+    "tflite_file_kb": {
+      "cnn": 251.45703125,
+      "bilstm": 820.91015625,
+      "transformer": 314.765625
+    },
+    "parameters": {}
+  },
+  "load_levels": [
+    {
+      "background_cpu_burners": 0,
+      "cnn": {
+        "n": 1000,
+        "mean_ms": 0.034499617999999996,
+        "p50_ms": 0.030697000000000002,
+        "p90_ms": 0.0422421,
+        "p95_ms": 0.05168864999999998,
+        "p99_ms": 0.07342048999999998
+      },
+      "bilstm": {
+        "n": 1000,
+        "mean_ms": 0.30692723299999997,
+        "p50_ms": 0.29894350000000003,
+        "p90_ms": 0.3457282,
+        "p95_ms": 0.3647601,
+        "p99_ms": 0.4063535099999999
+      },
+      "transformer": {
+        "n": 1000,
+        "mean_ms": 0.047287678,
+        "p50_ms": 0.043841000000000005,
+        "p90_ms": 0.0538241,
+        "p95_ms": 0.06664624999999999,
+        "p99_ms": 0.08331645
+      },
+      "ensemble": {
+        "n": 1000,
+        "mean_ms": 0.47414718800000005,
+        "p50_ms": 0.466839,
+        "p90_ms": 0.5291674000000001,
+        "p95_ms": 0.5500399499999999,
+        "p99_ms": 0.5961986499999999
+      }
+    },
+    {
+      "background_cpu_burners": 1,
+      "cnn": {
+        "n": 1000,
+        "mean_ms": 0.034638618999999995,
+        "p50_ms": 0.030114500000000002,
+        "p90_ms": 0.03949330000000001,
+        "p95_ms": 0.051904149999999996,
+        "p99_ms": 0.07497064999999983
+      },
+      "bilstm": {
+        "n": 1000,
+        "mean_ms": 0.36266337099999996,
+        "p50_ms": 0.35398300000000005,
+        "p90_ms": 0.4193051,
+        "p95_ms": 0.44578065,
+        "p99_ms": 0.5399942699999999
+      },
+      "transformer": {
+        "n": 1000,
+        "mean_ms": 0.075996723,
+        "p50_ms": 0.0690135,
+        "p90_ms": 0.09389580000000002,
+        "p95_ms": 0.11867644999999999,
+        "p99_ms": 0.1556751799999999
+      },
+      "ensemble": {
+        "n": 1000,
+        "mean_ms": 0.6307730930000001,
+        "p50_ms": 0.6187235,
+        "p90_ms": 0.6933648,
+        "p95_ms": 0.7304337999999999,
+        "p99_ms": 0.9083417299999997
+      }
+    },
+    {
+      "background_cpu_burners": 2,
+      "cnn": {
+        "n": 1000,
+        "mean_ms": 0.089704824,
+        "p50_ms": 0.040806,
+        "p90_ms": 0.0543372,
+        "p95_ms": 0.07954084999999993,
+        "p99_ms": 4.100945589999999
+      },
+      "bilstm": {
+        "n": 1000,
+        "mean_ms": 0.500478403,
+        "p50_ms": 0.3486185,
+        "p90_ms": 0.4295414,
+        "p95_ms": 0.5705156999999996,
+        "p99_ms": 4.42106236
+      },
+      "transformer": {
+        "n": 1000,
+        "mean_ms": 0.12301607700000002,
+        "p50_ms": 0.056824,
+        "p90_ms": 0.08391720000000001,
+        "p95_ms": 0.10610099999999997,
+        "p99_ms": 4.18441043
+      },
+      "ensemble": {
+        "n": 1000,
+        "mean_ms": 0.922901982,
+        "p50_ms": 0.592022,
+        "p90_ms": 0.7383896,
+        "p95_ms": 4.67164935,
+        "p99_ms": 4.73239276
+      }
+    }
+  ],
+  "sustained": {
+    "seconds": 30.000208378000025,
+    "windows": 59960,
+    "windows_per_s": 1998.6527841576699,
+    "cpu_percent_of_one_core": 99.3
+  },
+  "energy": {
+    "source": "NOT MEASURED: no RAPL counters on this host and no external meter reading"
+  },
+  "per_flow_cost_us_for_ns3": {
+    "definition": "one ensemble window inference per arriving flow (stride-1 deployment); idsLatencyUs = ensemble p50 at the given load level",
+    "idle_p50_us": 466.839,
+    "idle_p95_us": 550.03995,
+    "full_load_p50_us": 592.022,
+    "full_load_p95_us": 4671.64935
+  }
+}

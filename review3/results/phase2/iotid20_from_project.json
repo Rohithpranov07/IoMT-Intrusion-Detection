@@ -1,0 +1,12 @@
+{
+  "dataset": "IoTID20",
+  "source": "project measurement, src/preprocessing/clean.py docstring (not re-run here: dataset unreachable from this machine)",
+  "raw_rows": 625783,
+  "raw_exact_duplicate_rows": 163946,
+  "raw_duplicate_pct": 26.198538471003527,
+  "model_space_rows": 625415,
+  "model_space_features": 69,
+  "model_space_duplicate_rows": 363884,
+  "model_space_duplicate_pct": 58.18280661640671,
+  "corroboration": "Alsulami et al. 2022 report removing 164,087 duplicates of 625,783 rows (26.2%)"
+}

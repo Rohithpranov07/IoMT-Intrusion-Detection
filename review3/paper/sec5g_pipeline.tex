@@ -1,0 +1,28 @@
+\subsection{Detection pipeline: partitions, ensembles and generalisation}\label{sec:pipeline}
+\subsubsection{Ensemble ablation}
+The three-branch ensemble (a three-layer 1-D CNN; a two-layer BiLSTM with 64 units per direction; a two-layer, four-head transformer encoder; confidence-weighted fusion) operates on ten-record flow windows built within sessions, with sessions rather than windows assigned to folds. On a single session-level partition (Table~\ref{tab:ensemble}) the fused ensemble is beaten by its best branch on both datasets, and the best branch differs between them. The three branches agree on 90.9\,\% of IoTID20 test windows, so fusion acts on 9.1\,\% of them, and an oracle that resolved every disagreement correctly would gain only 0.026 accuracy over the best branch. \pending{20-partition version of this table: team\_scripts/R3\_multiseed\_tables.py --table 7 for both datasets, adding mean $\pm$ sd and a paired test of ensemble against best branch.}
+
+\begin{table}[t]
+\caption{Window-level accuracy, single session-level partition (Review 2). Attack is positive.}
+\label{tab:ensemble}
+\centering\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Configuration} & \textbf{IoTID20} & \textbf{Edge-IIoTset} \\
+\midrule
+CNN alone & 0.9230 & \textbf{0.9798} \\
+BiLSTM alone & 0.9271 & 0.9201 \\
+Transformer alone & \textbf{0.9487} & 0.8945 \\
+Full three-branch ensemble & 0.9399 & 0.9214 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Attacks withheld from training}
+A detector deployed in a hospital meets attack types it was not trained on. On the honest (deduplicated) data we hold out one attack type at a time, train on normal traffic and the remaining types, and measure recall on the withheld type over five seeds. On WUSTL-EHMS-2020 the detector recognises 1.1\,\% of withheld data-alteration attacks and 0.09\,\% of withheld spoofing attacks. On Edge-IIoTset recall on a withheld type is mostly near one extreme: near 100\,\% for types whose behaviour resembles another training type (DDoS\_HTTP, SQL injection, XSS, password, uploading, vulnerability scanning) and near zero for those that do not (backdoor 1.1\,\%, ransomware 0.7\,\%), with two in between (MITM 76\,\%, fingerprinting 80\,\%), while false alarms on held-out normal traffic stay between 3\,\% and 23\,\%. Three Edge-IIoTset types (DDoS\_UDP, DDoS\_ICMP, port scanning) cannot be held out at all, because after deduplication their few distinct vectors coincide with vectors of other classes. A 99\,\% in-distribution score says little about the attack a hospital has not yet seen.
+
+\subsubsection{Cross-dataset validation}
+The requested IoTID20$\leftrightarrow$Edge-IIoTset transfer cannot be run as specified. IoTID20 is a table of CICFlowMeter flow statistics; Edge-IIoTset is a table of per-packet tshark protocol fields. Matching column names after normalising spelling, the two share no feature, and neither shares one with WUSTL-EHMS-2020's Argus flow features; only datasets produced by the same extractor overlap (IoTID20 and CICIDS2017 share 20). A model trained on one of these files cannot be evaluated on another without re-extracting both from raw captures with a common tool, which is the experiment we propose rather than one we can claim. We report the held-out-attack test above as the generalisation evidence available within each dataset.
+
+\subsubsection{Incremental adaptation}
+With a replay buffer over 8,646 trainable parameters, recall on a newly introduced attack type rose from 0.9746 to 0.9880 while recall on previously learned types rose from 0.9821 to 0.9863 (forgetting $+0.0042$). Fine-tuning the fusion layer alone, the rejected alternative, raised the false-positive rate from 0.5231 to 0.6280.

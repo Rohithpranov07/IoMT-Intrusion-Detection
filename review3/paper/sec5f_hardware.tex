@@ -1,0 +1,52 @@
+\subsection{Impact of hardware latency on detection performance}\label{sec:hardware}
+\subsubsection{Measured inference cost}
+Inference cost does not depend on weight values, so the frozen three-branch architecture was exported to TensorFlow Lite (float32, BiLSTM unrolled so that only built-in operators are used; 1.1\,MB on disk, 305,798 parameters) and timed with the LiteRT interpreter on one thread, 1,000 windows after 50 warm-up windows, at three background CPU loads. The host was a two-vCPU Intel Xeon at 2.1\,GHz; it is a reference measurement, not a Raspberry Pi, and is labelled as such everywhere it is used.
+
+\begin{table}[t]
+\caption{Measured per-window inference cost, x86-64 2-vCPU host, LiteRT float32, single thread (ms). Load: background CPU-bound processes.}
+\label{tab:latency}
+\centering\footnotesize
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+& \textbf{CNN} & \textbf{BiLSTM} & \textbf{Transformer} & \textbf{Ensemble} \\
+\midrule
+p50, idle & 0.026 & 0.330 & 0.057 & 0.457 \\
+p95, idle & 0.045 & 0.444 & 0.105 & 0.558 \\
+p50, both cores loaded & 0.029 & 0.324 & 0.058 & 0.540 \\
+p95, both cores loaded & 0.047 & 0.503 & 0.093 & 4.493 \\
+p99, both cores loaded & 0.093 & 4.457 & 0.230 & 4.660 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The BiLSTM is 72\,\% of the ensemble's median cost. The median barely moves under contention (0.457 to 0.540\,ms) but the 95th percentile grows eightfold, to 4.49\,ms, when the inference thread competes for the core. Sustained throughput was 1,918 windows per second at 99\,\% of one core, and the three models add 14\,MB of resident memory. Energy could not be measured on this host, which exposes no power counters; it is reported only from the model in Section~\ref{sec:framework} until a metered run is available.
+
+\subsubsection{Simulation with measured costs}
+%%E8TEXT%%
+
+\subsubsection{Raspberry Pi measurement}
+The same harness then ran on a Raspberry Pi~4 Model~B (Rev.~1.5, four Cortex-A72 cores, 4\,GB, Raspberry Pi OS 64-bit, LiteRT 2.3.0, Python 3.13) with the \emph{trained} ensemble rather than the random-weight copy: the float32 export of the project's CNN, unrolled BiLSTM and transformer, 1.42\,MB on disk. Before any timing, the device ran 256 real test windows through the three branches and the fusion rule and reproduced the evaluated predictions exactly (100\,\% argmax agreement, largest probability difference $6.5\times10^{-8}$). The board reported no under-voltage or thermal throttling before or after the run (\texttt{throttled=0x0}; 38.9 to 44.3\,°C). Table~\ref{tab:pi} sets it beside the same trained files timed on the x86 host.
+
+\begin{table}[t]
+\caption{Measured per-window inference cost of the trained ensemble, LiteRT float32, single inference thread (ms). Loaded: every core busy with a background CPU-bound process (2 on x86, 4 on the Pi).}
+\label{tab:pi}
+\centering\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& \textbf{x86 host} & \textbf{Raspberry Pi 4} \\
+\midrule
+Ensemble p50, idle & 0.467 & 3.003 \\
+Ensemble p95, idle & 0.550 & 3.026 \\
+Ensemble p50, loaded & 0.592 & 3.014 \\
+Ensemble p95, loaded & 4.672 & 6.180 \\
+Ensemble p99, loaded & 4.732 & 7.037 \\
+BiLSTM p50, idle & 0.299 & 2.079 \\
+Sustained windows per second & 1,999 & 334 \\
+Resident memory added by the models (MB) & 21.8 & 22.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The Pi is 6.4 times slower than the x86 host at the median and sustains 334 windows per second at one full core. The BiLSTM is 69\,\% of its median cost, as on x86, so the recurrent branch remains the price of the ensemble on an edge device. The Pi's tail behaves like the x86 host's in kind but not in degree: with up to three of its four cores busy the 95th percentile stays within 0.15\,ms of the median, and only when every core is busy does it double, to 6.18\,ms. Energy was not measured: the Pi 4 has no power counters and no inline meter was available, so the energy figures in this paper remain modelled.
+
+%%E9TEXT%%

@@ -1,0 +1,23 @@
+\noindent We re-ran the latency and attack-scale sweep of Review~2 with the two measured costs in place of swept ones: the idle median (456.7\,µs) and the loaded 95th percentile (4,492.7\,µs), at 20 to 80 bots (Table~\ref{tab:measured}). Each run carries its provenance string, naming the host and stating that it is not a Raspberry Pi.
+
+\begin{table}[t]
+\caption{Latency and load sweep with measured per-flow costs (x86 host). Attackers blocked (\%), and wearable p99 delay (ms) in parentheses; 10 to 20 seeds per cell.}
+\label{tab:measured}
+\centering\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Cost} & \textbf{Rule} & \textbf{20 bots} & \textbf{40} & \textbf{60} & \textbf{80} \\
+\midrule
+456.7\,µs & A & 100 (3.6) & 100 (3.7) & 100 (4.8) & 100 (8.4) \\
+idle p50 & B & 100 (3.5) & 100 (3.5) & 100 (3.5) & 100 (3.6) \\
+& C & 100 (3.5) & 100 (3.5) & 100 (3.5) & 100 (3.6) \\
+\midrule
+4,492.7\,µs & A & 100 (232) & 100 (841) & 100 (850) & 100 (855) \\
+loaded p95 & B & 100 (125) & \textbf{0} (901) & \textbf{0} (901) & \textbf{0} (901) \\
+& B$'$ hyst. & 100 (125) & 100 (710) & 100 (696) & 100 (691) \\
+& C & 100 (140) & 100 (743) & 100 (742) & 100 (726) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Two conclusions follow. The latch-off is robust to realistic hardware: at the cost measured under contention, B latches in 10 of 10 seeds from 40 bots upward, between the swept 2,000\,µs case (latched from 60 bots) and the swept 14,542.7\,µs case (from 20), and the hysteresis floor restores full detection at every scale. The blind spot is therefore not an artefact of the swept values. Second, a detector that keeps detecting can still fail the clinical requirement: with the loaded cost, wearable p99 delay rises from 3.5 to 8.4\,ms at the idle cost to between 690 and 855\,ms at 40 bots or more under A, C and the mitigated rule, because telemetry queues behind the flood at the fog node until the bots are quarantined. The median cost of inference barely changes under contention; its tail decides both the latch-off and the delay, which is why the measurement must report percentiles under load and not a single benchmark figure.

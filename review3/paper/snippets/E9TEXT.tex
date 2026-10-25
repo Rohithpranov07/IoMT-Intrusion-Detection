@@ -1,0 +1,25 @@
+\subsubsection{Simulation with the Raspberry Pi's measured costs}
+We then repeated the latency and attack-scale sweep with the two costs measured on the Pi: its idle median (3,003.2\,µs) and its 95th percentile with every core busy (6,180.1\,µs), 10 seeds per cell, every run stamped with the board's name (Table~\ref{tab:pimeasured}).
+
+\begin{table}[t]
+\caption{Latency and load sweep with per-flow costs measured on the Raspberry Pi 4 (trained ensemble). Attackers blocked (\%), and wearable p99 delay (ms) in parentheses; 10 seeds per cell.}
+\label{tab:pimeasured}
+\centering\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Cost} & \textbf{Rule} & \textbf{20 bots} & \textbf{40} & \textbf{60} & \textbf{80} \\
+\midrule
+3,003.2\,µs & A & 100 (67) & 100 (479) & 100 (562) & 100 (538) \\
+idle p50 & B & 100 (11) & 100 (341) & \textbf{0} (604) & \textbf{0} (604) \\
+ & B$'$ hyst. & 100 (11) & 100 (341) & 100 (422) & 100 (382) \\
+ & C & 100 (12) & 100 (356) & 100 (446) & 100 (424) \\
+\midrule
+6,180.1\,µs & A & 100 (533) & 100 (1186) & 100 (1187) & 100 (1167) \\
+loaded p95 & B & 100 (408) & \textbf{0} (1239) & \textbf{0} (1239) & \textbf{0} (1239) \\
+ & B$'$ hyst. & 100 (408) & 100 (1028) & 100 (1034) & 100 (1034) \\
+ & C & 100 (431) & 100 (1083) & 100 (1067) & 100 (1076) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent On the Pi the congestion-coupled rule fails without any contention at all. At the board's idle median it latches in 10 of 10 seeds from 60 bots upward, which includes the Review~2 baseline of 60 bots: a configuration that worked at the x86 host's idle cost switches itself off on the edge device a fog node would use. Under contention it latches from 40 bots. The hysteresis floor, the flat rule and the criticality rule block every attacker in every cell. Delay is where the hardware shows most. At 40 to 80 bots, wearable p99 delay is 341 to 562\,ms at the idle cost and 1.03 to 1.19\,s at the loaded cost under the rules that keep detecting, against 3.5 to 8.4\,ms on the x86 host at its idle cost; a fog node built on this board would deliver telemetry late during every flood it stops. The effect of hardware latency on detection performance is therefore not a gradual loss of accuracy: below the latch-off boundary detection is unchanged and the cost appears as delay, and above it a congestion-coupled detector stops detecting altogether.

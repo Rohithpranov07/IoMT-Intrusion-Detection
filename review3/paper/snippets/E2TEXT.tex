@@ -1,0 +1,14 @@
+\noindent Fig.~\ref{fig:e2} varies one factor at a time from the baseline at 500\,µs per flow (10 seeds per cell, 20 for the baseline; 35 cells first run under an earlier, larger schedule keep 12 or 20 seeds; full table in the repository).
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_e2_matrix_500us.png}
+\caption{Scenario matrix at 500\,µs per flow, means over seeds. Top: attackers blocked. Bottom: wearables quarantined. Lines that coincide are hidden behind the last one drawn; in the top row every rule except B is at 100\,\% in every cell.}
+\label{fig:e2}
+\end{figure*}
+
+\noindent Three results hold across all 16 scenarios. First, the flat rule of \cite{berguiga2025} quarantines 100\,\% of the wearables in every one of them, whatever the ward size, attack scale, fog capacity, topology or device mix: its collateral damage is a property of the rule, not of the scenario. Second, rule C blocks every attacker in every scenario. Third, every rule that blocks attackers at all blocks all of them; no scenario separates the rules by detection rate except where B fails.
+
+At this cost B fails in two scenarios although it was safe in the baseline. With a single fog node the whole flood lands on one queue, B latches off in 10 of 10 seeds and detects nothing (wearable delivery 0.20). On the random topology each leaf is served by its nearest fog node, which concentrates bots on some nodes; B detects 87\,\% of attackers on average and wearable delivery falls to 0.63. The latch-off is therefore triggered by \emph{placement}, not only by inspection cost, which is a failure mode no dataset and no single-topology simulation would show. Each of the three mitigations restores 100\,\% detection in both scenarios.
+
+Rule C's collateral damage depends on the device mix, which is what its weights encode. Its quarantine rate is 49\,\% of wearables in a balanced ward, 20\,\% in an ICU-heavy ward and 79\,\% in a periphery-heavy ward. In every mix, no life-critical or high-criticality device was ever quarantined (0 of 5 and 0 of 5 in the balanced ward, 0 of 10 and 0 of 6 in the ICU-heavy ward, 0 of 1 and 0 of 3 in the periphery-heavy ward); every quarantine fell on standard or non-clinical devices. B, hysteresis and dual threshold quarantine 45 to 47\,\% in all three mixes, because they ignore device role. The capacity-coupled variant quarantines between 0\,\% (20 bots) and 47\,\% (80 bots): its utilisation estimate counts all arriving traffic, including floods from bots it has already quarantined, so below its knee it relaxes in proportion to attack pressure, and its collateral damage varies with the attack rather than with the ward.

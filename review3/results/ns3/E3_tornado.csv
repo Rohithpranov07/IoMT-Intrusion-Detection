@@ -1,0 +1,15 @@
+arch,outcome,factor,low,high,baseline,range
+A,wearablesBlocked,tau0,0.0,20.0,20.0,20.0
+A,wearablesBlocked,cost,20.0,20.0,20.0,0.0
+B,attackersBlocked,tau0,60.0,60.0,60.0,0.0
+B,attackersBlocked,alpha,60.0,60.0,60.0,0.0
+B,attackersBlocked,cost,0.0,60.0,60.0,60.0
+B,wearablesBlocked,tau0,0.0,20.0,9.0,20.0
+B,wearablesBlocked,alpha,5.4,19.9,9.0,14.499999999999998
+B,wearablesBlocked,cost,0.0,9.3,9.0,9.3
+C,wearablesBlocked,tau0,0.0,20.0,9.85,20.0
+C,wearablesBlocked,weights,9.8,19.3,9.85,9.5
+C,wearablesBlocked,cost,9.8,9.85,9.85,0.049999999999998934
+C,fpAlerts,tau0,0.0,60.0,29.8,60.0
+C,fpAlerts,weights,29.7,59.2,29.8,29.500000000000004
+C,fpAlerts,cost,29.7,30.9,29.8,1.1999999999999993

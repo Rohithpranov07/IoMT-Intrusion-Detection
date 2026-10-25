@@ -1,0 +1,21 @@
+\subsection{Head-to-head under 20 seeds}\label{sec:headtohead}
+\noindent Table~\ref{tab:e1} reports all six rules in the baseline scenario at two inspection costs, 20 seeds each. Fig.~\ref{fig:e1} shows four of the measures with 95\,\% confidence intervals.
+
+%%E1TABLE%%
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_e1_baseline.png}
+\caption{Baseline scenario, 20 seeds per bar (mean and 95\,\% CI). Top: 500\,µs per flow. Bottom: 2,000\,µs. B'h, B'd, B'c: B with hysteresis, dual and capacity-coupled mitigation.}
+\label{fig:e1}
+\end{figure*}
+
+\noindent At 500\,µs every rule blocks all 60 attackers in all 20 seeds; by detection rate the rules cannot be told apart. They differ in what else they block. The flat rule of \cite{berguiga2025} quarantines all 20 wearables in every seed, so wearables deliver 21.6\,\% of their telemetry before being cut off. B quarantines $9.0 \pm 2.2$ and C $9.85 \pm 0.37$; the difference between B and C is not significant (paired Wilcoxon $p = 0.08$ raw, 1.0 after Bonferroni). C raises significantly fewer false-positive alerts than B ($29.8 \pm 0.5$ against $36.6 \pm 4.5$, Bonferroni $p = 0.007$) and does so with about a ninth of B's standard deviation, while B keeps more wearable traffic flowing (delivery ratio 0.709 against 0.647, Bonferroni $p = 0.012$). C is therefore the more predictable rule and the quieter one, not the dominant one, and the Review~2 single-seed reading that B quarantines one wearable fewer than C does not survive multiple seeds as a difference.
+
+At 2,000\,µs B fails in all 20 seeds: it blocks 0.05 of 60 attackers on average, the IDS queue overflows by $2.8\times10^5$ packets, the wearables' mean delay rises from 3.6\,ms to 323\,ms and their delivery ratio to 0.18, and the fog nodes use 2.2 times the modelled energy of any other rule, inspecting a flood they never stop. A and C are unaffected in detection; their wearable delay rises to 21 and 10.5\,ms because wearable packets queue behind flood packets until the bots are quarantined, 110\,ms after the attack starts. None of these quantities, delay, delivery, energy or quarantine, exists in a dataset evaluation. Quarantine signalling is negligible for every rule (0.06 to 0.07\,\% of bytes wherever the rule quarantines anything, and about zero for B when it latches).
+
+\subsection{Scenario matrix}\label{sec:matrix}
+%%E2TEXT%%
+
+\subsection{Sensitivity analysis}\label{sec:sensitivity}
+%%E3TEXT%%

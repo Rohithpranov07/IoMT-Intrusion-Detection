@@ -1,0 +1,18 @@
+\subsection{Latch-off in congestion-coupled thresholds}\label{sec:latch}
+\subsubsection{Mechanism}
+Rule B's threshold is $\tau_0(1-L)$. A flood fills the fog queue, $L$ approaches 1, the threshold approaches zero, and no inter-arrival gap can be shorter than zero. The loop can run either way. If enough bots are quarantined early, their load disappears, the queue stays short, the threshold stays high and the rest are caught. If they are not, the queue saturates, the threshold collapses, nothing can violate it and the load never falls. The detector does not degrade under load; it switches off and stays off. Review~2 showed this as a single-seed discontinuity in patience: 60/60 bots blocked with $p \le 2$, 0/60 with $p \ge 3$.
+
+\subsubsection{The latch-off boundary}
+%%E4TEXT%%
+
+\subsubsection{Mitigations}
+We implemented all three options and evaluate each as a variant B$'$ of rule B, changing nothing else.
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt,topsep=2pt]
+\item \textbf{Hysteresis floor} (option B). The threshold may not fall below $0.3\tau_0$, and once load exceeds 0.8 it is held at that floor until load falls below 0.2, so it can neither collapse nor oscillate at the boundary.
+\item \textbf{Dual threshold} (option C). A source violates if its EWMA gap is below the adaptive threshold \emph{or} its raw gap is below a fixed 100\,ms, so a flood is caught whatever the load.
+\item \textbf{Capacity coupling} (option A). The rule estimates offered utilisation $\rho$ (arrivals in the last second times the per-flow cost) and relaxes as $\tau_0(1-\rho)$ only while $\rho < 0.8$. At or above that boundary, demand beyond capacity is itself evidence of a flood, and the threshold returns to the strict $\tau_0$.
+\end{itemize}
+In the baseline scenario at 2,000\,µs, where B latches in 20 of 20 seeds, each mitigation blocks 60 of 60 bots in 20 of 20 seeds (Table~\ref{tab:e1}; raw $p = 1.2\times10^{-5}$ for each against B, $4\times10^{-4}$ after Bonferroni over the 36 pairwise tests among B and its variants), restores the wearable delivery ratio from 0.18 to between 0.72 and 0.73 and the mean wearable delay from 323\,ms to about 10\,ms. At 500\,µs, where B does not latch, hysteresis and dual threshold produce results identical to B in every seed: they cost nothing when the network is healthy. Capacity coupling quarantines slightly fewer wearables than B at 500\,µs ($8.65$ against $9.0$, not significant after correction) because it relaxes on offered rate rather than on queue length.
+
+\subsubsection{Validation across the scenario matrix}
+%%E2BTEXT%%

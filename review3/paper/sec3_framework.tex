@@ -1,0 +1,51 @@
+\section{A Framework for Network-Level IoMT IDS Evaluation}\label{sec:framework}
+\noindent The framework has five steps (Fig.~\ref{fig:framework}). Each produces an artefact that the next consumes, and each has an explicit failure condition, so a step that cannot be completed is reported as such rather than worked around.
+
+\begin{figure}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[node distance=3.2mm, every node/.style={font=\scriptsize\sffamily},
+  box/.style={draw=ieeeblue, rounded corners=1.5pt, align=left, text width=0.86\columnwidth, inner sep=3pt, fill=ieeeblue!4},
+  arr/.style={-{Stealth[length=1.8mm]}, draw=ieeeblue!80!black}]
+\node[box] (s1) {\textbf{1. Obtain the published system.} Thresholds, inspection period, datasets, hardware, confusion matrices, split sizes. \emph{Fails if} the decision rule or the matrices are not stated.};
+\node[box, below=of s1] (s2) {\textbf{2. Audit the reported numbers.} Five arithmetic checks (Table~\ref{tab:checks}) on the paper's own figures. \emph{Output:} verdict per check with the page and table it rests on.};
+\node[box, below=of s2] (s3) {\textbf{3. Re-implement under leakage controls.} Attack-positive metrics, split before resampling, duplicates removed in the modelling feature space, 20 partitions. \emph{Output:} an honest detector and its measured error rates.};
+\node[box, below=of s3] (s4) {\textbf{4. Place the decision rule in a simulator.} The detector sits in the fog node's forwarding path as a single-server queue with per-flow cost $c$; legitimate and attacking devices are distinct node sets. \emph{Output:} collateral quarantine, delay with inspection queueing, control overhead, inspection energy.};
+\node[box, below=of s4] (s5) {\textbf{5. Evaluate across conditions.} 20 seeds, a scenario matrix, a sensitivity analysis, measured inference costs, paired non-parametric tests with Bonferroni correction. \emph{Output:} results with intervals, and the conditions under which each conclusion holds.};
+\draw[arr] (s1) -- (s2); \draw[arr] (s2) -- (s3); \draw[arr] (s3) -- (s4); \draw[arr] (s4) -- (s5);
+\draw[arr] (s5.east) -- ++(2.2mm,0) |- node[pos=0.25, right, align=left, font=\tiny\sffamily, text width=1.1cm]{new failure mode} (s3.east);
+\end{tikzpicture}}
+\caption{The five-step framework. The feedback arrow is how mitigations enter: a failure found in step 5 is fixed in the rule and re-evaluated, as for the latch-off in Section~\ref{sec:latch}.}
+\label{fig:framework}
+\end{figure}
+
+\subsection{Step 2: the audit checks}
+\noindent The checks need only quantities a paper prints (Table~\ref{tab:checks}). Check (a) recomputes precision and recall from the confusion matrix with each class as positive and asks which convention reproduces the printed figures. Check (b) asks whether the printed precision equals the recomputed recall and vice versa, or whether the printed formulae are swapped. Check (c) sums the reported split sizes and compares them with the dataset sizes before and after oversampling; a test fold that matches the oversampled total, or that contains more minority samples than the raw data holds, proves the partition was drawn after oversampling. Check (d) searches the text for duplicate handling and, where the data is available, measures duplicates directly. Check (e) records any printed metric that cannot be reproduced from the matrix.
+
+\begin{table}[t]
+\caption{Audit checks. Each needs only the paper's printed numbers.}
+\label{tab:checks}
+\centering\footnotesize
+\begin{tabular}{@{}p{0.07\columnwidth}p{0.36\columnwidth}p{0.5\columnwidth}@{}}
+\toprule
+& \textbf{Check} & \textbf{Evidence that confirms it} \\
+\midrule
+a & Positive-class inversion & printed P/R reproduce only with Normal as positive \\
+b & Transposed precision/recall & printed P equals recomputed R, or formulae swapped \\
+c & Partition after oversampling & split sizes sum to the oversampled total; test minority exceeds raw minority \\
+d & Duplicates unhandled & no mention, and duplicates present in the data \\
+e & Irreproducible metric & a printed value not derivable from the matrix \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Step 4: the detector in the data path}
+\noindent A fog node with per-flow inspection cost $c$ serves at most $S = 1/c$ flows per second. Its queue occupancy $L \in [0,1]$ (queue length over capacity) is the load signal an adaptive rule may read. Each inspected flow updates a per-source record of inter-arrival gaps, and a source accumulating $p$ violations of the rule (the \emph{patience}) is quarantined: its later packets are dropped at the fog node and a quarantine notice is sent to the controller and to every peer fog node. A quarantined legitimate device is a false positive at the network level, and it is counted separately from false-positive alerts.
+
+Two measurements matter that a flow monitor on the wire does not provide. The first is application-level delay: each packet carries its send time, and delay is measured when the fog node finishes inspecting it, so inspection queueing is included. The second is inspection energy, $E = N P_{\mathrm{idle}} T + (P_{\mathrm{active}} - P_{\mathrm{idle}})\, n_{\mathrm{insp}}\, c$ for $N$ fog nodes over $T$ seconds and $n_{\mathrm{insp}}$ inspections. The power figures are model parameters (6.4\,W active, 2.7\,W idle, a nominal fog-node envelope) until replaced by a meter reading (Section~\ref{sec:hardware}); we therefore compare energy only between rules under identical parameters.
+
+\subsection{Step 5: statistical protocol}
+\noindent Every configuration is run with independent ns-3 run numbers $1, \dots, n$ (seed 42), with $n = 20$ for the baseline and $n$ stated for every other experiment, varying sender start offsets and telemetry jitter. Rules compared at the same run number see identical traffic, so comparisons are paired: we use the Wilcoxon signed-rank test and correct with Bonferroni across each family of tests, and report means with standard deviations and 95\,\% confidence intervals ($t$ distribution, $n-1$ degrees of freedom). Every raw run is stored as one line of key-value output before aggregation, so every number in this paper can be re-derived from the logs.
+
+\subsection{Reuse}
+\noindent Nothing in steps 1 to 5 is specific to HIDS-IoMT. Another detector enters by supplying its decision rule (a function from per-source state and node load to a violation) and its per-flow cost; another dataset enters through steps 2 and 3 unchanged. The simulator, runner and analysis scripts are released (Section~\ref{sec:repro}).

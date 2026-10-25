@@ -1,0 +1,38 @@
+
+== P1_Hosain2025_XAI-XGBoost_WUSTL  (printed: Table 5 (proposed model row), Table 6, Abstract)
+n=5138 attack=2264 normal=2874
+accuracy          99.2215  printed 99.22
+Attack+ P  98.3478 R  99.9117 F1  99.1236   printed P 98.35 R 99.91 F1 99.12
+Normal+ P  99.9295 R  98.6778 F1  99.2997   printed P 98.35 R 99.91 F1 99.12
+macro   P 99.1387 R 99.2947 F1 99.2116
+weighted P 99.2326 R 99.2215 F1 99.2221
+matches: {'accuracy': True, 'attack_pos_precision': True, 'attack_pos_recall': True, 'attack_pos_f1': True, 'normal_pos_precision': False, 'normal_pos_recall': False, 'swapped_precision': False, 'swapped_recall': False}
+
+== P2_Tarish2026_RFK_ECU-IoHT  (printed: Table 4, RFK (a priori) row; attack-class Prec/Rec/F1)
+n=16682 attack=13164 normal=3518
+accuracy          93.2742  printed 93.27
+Attack+ P  99.9834 R  91.4919 F1  95.5494   printed P 99.98 R 91.49 F1 95.55
+Normal+ P  75.8412 R  99.9431 F1  86.2399   printed P 99.98 R 91.49 F1 95.55
+macro   P 87.9123 R 95.7175 F1 90.8946
+weighted P 94.8922 R 93.2742 F1 93.5861
+matches: {'accuracy': True, 'attack_pos_precision': True, 'attack_pos_recall': True, 'attack_pos_f1': True, 'normal_pos_precision': False, 'normal_pos_recall': False, 'swapped_precision': False, 'swapped_recall': False}
+
+== P2_Tarish2026_RFK_WUSTL  (printed: Table 5, RFK (a priori) row; attack-class Prec/Rec/F1)
+n=2448 attack=307 normal=2141
+accuracy          92.8922  printed 92.89
+Attack+ P  92.9032 R  46.9055 F1  62.3377   printed P 92.9 R 46.91 F1 62.34
+Normal+ P  92.8914 R  99.4862 F1  96.0758   printed P 92.9 R 46.91 F1 62.34
+macro   P 92.8973 R 73.1959 F1 79.2067
+weighted P 92.8929 R 92.8922 F1 91.8447
+matches: {'accuracy': True, 'attack_pos_precision': True, 'attack_pos_recall': True, 'attack_pos_f1': True, 'normal_pos_precision': False, 'normal_pos_recall': False, 'swapped_precision': False, 'swapped_recall': False}
+
+== Split arithmetic
+P1_balanced_total: 25688
+P1_20pct_of_balanced: 5137.6
+P1_20pct_of_original: 3263.6000000000004
+P1_test_support: 5138
+P1_test_attack_exceeds_all_original_attacks: True
+P1_balancing_factor_check_0.8x14271: 11416.800000000001
+P2_WUSTL_15pct_of_original: 2447.7
+P2_WUSTL_attack_share_test: 0.12540849673202614
+P2_WUSTL_attack_share_original: 0.1253830126240961

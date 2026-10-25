@@ -1,0 +1,12 @@
+\noindent We repeated the full 16-scenario matrix at 2,000\,µs per flow, the cost at which B latches in the baseline (5 seeds per cell, 20 for the baseline; Fig.~\ref{fig:e2b}). With five seeds a paired Wilcoxon test cannot fall below $p = 0.0625$, so we report counts of runs rather than $p$-values.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_e2_matrix_2000us.png}
+\caption{Scenario matrix at 2,000\,µs per flow, means over seeds. Top: attackers blocked. Bottom: wearables quarantined. B is the only rule that falls below 100\,\% detection; the three mitigated rules coincide in most cells.}
+\label{fig:e2b}
+\end{figure*}
+
+At this cost B is the exception rather than the rule. It blocks every attacker in only three of the 15 non-baseline scenarios (20 and 40 bots, 8 fog nodes), each of which lowers the load per fog queue. It latches off, blocking fewer than half of the attackers, in all 5 seeds of 11 scenarios: every ward size, 80 and 120 bots, 1 and 2 fog nodes, the grid and random topologies and both skewed device mixes. On the clustered topology it blocks exactly 30 of 60 bots in every seed, consistent with the fog nodes that carry the clustered traffic latching while the others keep working. Across the matrix, 55 of B's 75 runs latch.
+
+Each mitigation blocks every attacker in every one of its 75 runs, as do A and C. Averaged over the scenarios in which B latches, the mitigated rules raise wearable delivery from 0.19 to 0.76 and lower mean wearable delay from 265\,ms to about 10\,ms and modelled fog energy from 623\,J to 301\,J. Their collateral quarantine ranges from 26\,\% (one fog node) to 50\,\% (80 bots) of wearables, against 100\,\% for A in every scenario and 20\,\% to 79\,\% for C depending on the device mix. The three mitigations differ from one another by at most four percentage points of quarantine in any scenario, so the choice between them can rest on implementation cost: the hysteresis floor and the dual threshold need no capacity estimate and leave B unchanged when the network is healthy.

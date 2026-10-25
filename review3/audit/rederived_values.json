@@ -1,0 +1,133 @@
+{
+  "P1_Hosain2025_XAI-XGBoost_WUSTL": {
+    "n_total": 5138,
+    "n_attack_actual": 2264,
+    "n_normal_actual": 2874,
+    "accuracy": 0.9922148695990658,
+    "attack_pos": {
+      "precision": 0.9834782608695652,
+      "recall": 0.9991166077738516,
+      "f1": 0.9912357581069238
+    },
+    "normal_pos": {
+      "precision": 0.9992952783650458,
+      "recall": 0.9867780097425192,
+      "f1": 0.9929971988795518
+    },
+    "transposed_attack_pos": {
+      "precision_if_swapped": 0.9991166077738516,
+      "recall_if_swapped": 0.9834782608695652
+    },
+    "macro": {
+      "precision": 0.9913867696173055,
+      "recall": 0.9929473087581854,
+      "f1": 0.9921164784932378
+    },
+    "weighted": {
+      "precision": 0.9923256933884465,
+      "recall": 0.9922148695990658,
+      "f1": 0.9922210404698145
+    },
+    "match_2dp_pct": {
+      "accuracy": true,
+      "attack_pos_precision": true,
+      "attack_pos_recall": true,
+      "attack_pos_f1": true,
+      "normal_pos_precision": false,
+      "normal_pos_recall": false,
+      "swapped_precision": false,
+      "swapped_recall": false
+    }
+  },
+  "P2_Tarish2026_RFK_ECU-IoHT": {
+    "n_total": 16682,
+    "n_attack_actual": 13164,
+    "n_normal_actual": 3518,
+    "accuracy": 0.9327418774727251,
+    "attack_pos": {
+      "precision": 0.9998339697825004,
+      "recall": 0.9149194773625038,
+      "f1": 0.9554938516461721
+    },
+    "normal_pos": {
+      "precision": 0.7584124245038827,
+      "recall": 0.9994314951677089,
+      "f1": 0.8623988226637234
+    },
+    "transposed_attack_pos": {
+      "precision_if_swapped": 0.9149194773625038,
+      "recall_if_swapped": 0.9998339697825004
+    },
+    "macro": {
+      "precision": 0.8791231971431915,
+      "recall": 0.9571754862651063,
+      "f1": 0.9089463371549478
+    },
+    "weighted": {
+      "precision": 0.9489215494318124,
+      "recall": 0.9327418774727251,
+      "f1": 0.9358614147704826
+    },
+    "match_2dp_pct": {
+      "accuracy": true,
+      "attack_pos_precision": true,
+      "attack_pos_recall": true,
+      "attack_pos_f1": true,
+      "normal_pos_precision": false,
+      "normal_pos_recall": false,
+      "swapped_precision": false,
+      "swapped_recall": false
+    }
+  },
+  "P2_Tarish2026_RFK_WUSTL": {
+    "n_total": 2448,
+    "n_attack_actual": 307,
+    "n_normal_actual": 2141,
+    "accuracy": 0.928921568627451,
+    "attack_pos": {
+      "precision": 0.9290322580645162,
+      "recall": 0.46905537459283386,
+      "f1": 0.6233766233766234
+    },
+    "normal_pos": {
+      "precision": 0.9289140863497601,
+      "recall": 0.9948622139187295,
+      "f1": 0.9607577807848443
+    },
+    "transposed_attack_pos": {
+      "precision_if_swapped": 0.46905537459283386,
+      "recall_if_swapped": 0.9290322580645162
+    },
+    "macro": {
+      "precision": 0.9289731722071382,
+      "recall": 0.7319587942557817,
+      "f1": 0.7920672020807338
+    },
+    "weighted": {
+      "precision": 0.9289289060868638,
+      "recall": 0.928921568627451,
+      "f1": 0.9184473170085682
+    },
+    "match_2dp_pct": {
+      "accuracy": true,
+      "attack_pos_precision": true,
+      "attack_pos_recall": true,
+      "attack_pos_f1": true,
+      "normal_pos_precision": false,
+      "normal_pos_recall": false,
+      "swapped_precision": false,
+      "swapped_recall": false
+    }
+  },
+  "split_checks": {
+    "P1_balanced_total": 25688,
+    "P1_20pct_of_balanced": 5137.6,
+    "P1_20pct_of_original": 3263.6000000000004,
+    "P1_test_support": 5138,
+    "P1_test_attack_exceeds_all_original_attacks": true,
+    "P1_balancing_factor_check_0.8x14271": 11416.800000000001,
+    "P2_WUSTL_15pct_of_original": 2447.7,
+    "P2_WUSTL_attack_share_test": 0.12540849673202614,
+    "P2_WUSTL_attack_share_original": 0.1253830126240961
+  }
+}

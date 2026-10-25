@@ -1,0 +1,88 @@
+\documentclass[10pt,twocolumn,a4paper]{article}
+\usepackage[margin=0.62in,columnsep=0.24in,top=0.7in,bottom=0.75in]{geometry}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{DejaVu Sans Mono}[Scale=0.8]
+\usepackage[dvipsnames]{xcolor}
+\definecolor{ieeeblue}{HTML}{0072BC}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\graphicspath{{../../figs/}}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric}
+\usepackage[hidelinks]{hyperref}
+
+\titleformat{\section}{\sffamily\bfseries\small\color{ieeeblue}}{\thesection.}{0.5em}{\MakeUppercase}
+\titleformat{\subsection}{\sffamily\bfseries\footnotesize\itshape}{\thesubsection.}{0.5em}{\MakeUppercase}
+\titleformat{\subsubsection}{\sffamily\footnotesize}{\arabic{subsubsection})}{0.5em}{\MakeUppercase}
+\titlespacing*{\section}{0pt}{9pt}{4pt}
+\titlespacing*{\subsection}{0pt}{7pt}{3pt}
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\makeatletter\renewcommand{\p@subsection}{\thesection-}\makeatother
+
+\captionsetup[table]{font=footnotesize,labelfont={sf,bf,color=ieeeblue},labelsep=period,justification=raggedright,singlelinecheck=false,skip=3pt}
+\captionsetup[figure]{font=footnotesize,labelfont={sf,bf,color=ieeeblue},labelsep=period,justification=raggedright,singlelinecheck=false}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\footnotesize\sffamily M. Balaji \textit{et al.}: Network-Level Evaluation of IoMT Intrusion Detection}
+\fancyfoot[C]{\footnotesize\sffamily\thepage}
+\setlength{\parindent}{1.1em}
+\setlength{\tabcolsep}{2.9pt}
+\renewcommand{\arraystretch}{1.1}
+\newcommand{\pending}[1]{\textcolor{red}{\textbf{[PENDING: #1]}}}
+
+\begin{document}
+\twocolumn[
+\begin{@twocolumnfalse}
+\vspace{-6pt}
+{\footnotesize\sffamily\itshape Review 3 manuscript, October 2026. Code, raw simulation logs and analysis scripts accompany this manuscript (Section~\ref{sec:repro}).}
+\vspace{4pt}\hrule height 0.4pt
+\vspace{10pt}
+
+{\sffamily\bfseries\fontsize{20}{24}\selectfont\color{ieeeblue}
+Detection Rate Is Not Enough: A Simulation-in-the-Loop\\ Framework for Network-Level Evaluation of\\ IoMT Intrusion Detection\par}
+\vspace{9pt}
+{\sffamily\bfseries\fontsize{10.5}{13}\selectfont MALIKA BALAJI, NEHAA PRABHU, ROHITH PRANOV, SANHIT MUTHUSWAMY, AND RAKSHAN V. P.\par}
+\vspace{2pt}
+{\footnotesize School of Computer Science and Engineering, Vellore Institute of Technology, Vellore 632014, India}
+\vspace{10pt}
+
+\noindent\begin{minipage}{\textwidth}
+\footnotesize
+\textbf{\color{ieeeblue}ABSTRACT}\quad
+\input{abstract}
+\vspace{6pt}
+
+\textbf{\color{ieeeblue}INDEX TERMS}\quad Internet of Medical Things, intrusion detection, evaluation methodology, network simulation, ns-3, data leakage, adaptive thresholds, explainable AI, reproducibility.
+\end{minipage}
+\vspace{14pt}
+\end{@twocolumnfalse}
+]
+
+\input{sec1_intro}
+\input{sec2_related}
+\input{sec3_framework}
+\input{sec4_setup}
+\input{sec5a_audit}
+\input{sec5b_leakage}
+\input{sec5c_network}
+\input{sec5d_latch}
+\input{sec5e_threshold}
+\input{sec5f_hardware}
+\input{sec5g_pipeline}
+\input{sec5h_xai}
+\input{sec6_discussion}
+\input{sec7_limits}
+\input{sec8_conclusion}
+\input{refs}
+
+\end{document}

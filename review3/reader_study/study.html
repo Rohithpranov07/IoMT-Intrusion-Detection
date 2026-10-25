@@ -1,0 +1,337 @@
+<title>Alert Reader Study</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single centred working column, like a triage console; one task on screen at a time. */
+:root{
+  --bg:#f3f5f4; --panel:#ffffff; --ink:#18242a; --muted:#5b6b70; --line:#d5dddb;
+  --accent:#1f6f6a; --accent-ink:#ffffff; --warn:#a6620b; --warn-bg:#fbf1e2; --bad:#a83232; --ok:#2f7a45;
+  --code-bg:#eef2f1;
+  --f-display:"Newsreader",Georgia,"Times New Roman",serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111a1d; --panel:#172226; --ink:#e3ecea; --muted:#9aaeb0; --line:#2b3a3e;
+  --accent:#4fb3aa; --accent-ink:#0c1517; --warn:#e2a54c; --warn-bg:#2a2214; --bad:#e07a7a; --ok:#6cc387;
+  --code-bg:#0e171a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111a1d; --panel:#172226; --ink:#e3ecea; --muted:#9aaeb0; --line:#2b3a3e;
+  --accent:#4fb3aa; --accent-ink:#0c1517; --warn:#e2a54c; --warn-bg:#2a2214; --bad:#e07a7a; --ok:#6cc387;
+  --code-bg:#0e171a; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:820px;margin:0 auto;display:grid;gap:20px}
+header.top{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:12px}
+h1{font-family:var(--f-display);font-weight:600;font-size:1.75rem;margin:0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:600;font-size:1.35rem;margin:0 0 4px;text-wrap:balance}
+h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 6px;font-weight:600}
+p{margin:0;max-width:65ch}
+.meta{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px;display:grid;gap:14px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font:inherit;font-weight:600;border-radius:5px;padding:9px 16px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,label.opt:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+input[type=text],select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:8px 10px;width:100%;box-sizing:border-box}
+textarea{min-height:64px;resize:vertical}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:8px;min-width:0}
+legend{font-weight:600;margin-bottom:6px;padding:0}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+label.opt{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:5px;padding:7px 11px;cursor:pointer;background:var(--bg)}
+label.opt input{margin-top:4px}
+label.opt.feature{flex:1 1 100%}
+.scale{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.scale label.opt{justify-content:center;padding:7px 0}
+.scale-ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+pre.alert{font-family:var(--f-mono);font-size:.82rem;line-height:1.5;background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:14px;margin:0;white-space:pre-wrap;word-break:break-word;overflow-x:auto}
+.progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.progress>div{height:100%;background:var(--accent);transition:width .3s}
+.note{background:var(--warn-bg);border:1px solid var(--warn);color:var(--ink);border-radius:5px;padding:10px 12px;font-size:.9rem}
+table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}
+.tablebox{overflow-x:auto}
+.pill{font-family:var(--f-mono);font-size:.75rem;border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.stat{display:grid;gap:2px}.stat b{font-size:1.4rem;font-variant-numeric:tabular-nums}
+textarea.dump{font-family:var(--f-mono);font-size:.75rem;min-height:140px}
+@media (prefers-reduced-motion:reduce){.progress>div{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Alert Reader Study</h1>
+    <span class="meta" id="hdr-meta"></span>
+  </header>
+  <main id="app"></main>
+</div>
+
+<script>
+/* ---------- alert sets ---------------------------------------------------------------- */
+// PILOT SET: the three real alerts in reports/t3_3_reader_test.md, produced by the trained ensemble.
+const PILOT = {source:"reports/t3_3_reader_test.md (3 real alerts; load alerts_20.json for the full study)", alerts:[
+ {id:"PILOT-1",category:"CERTIFIED",certified:true,summary:`[VERIFIED] Removing the top 1 cited measurement changes this decision by 98%, against 19% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 98% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       22% of the total evidence, strongest at record 9 of 10.
+  5. the size of the smallest packet in the conversation (Pkt_Len_Min)
+       6% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       13% of the total evidence, strongest at record 9 of 10.
+  3. the average packet size in the conversation (Pkt_Len_Mean)
+       8% of the total evidence, strongest at record 10 of 10.
+  4. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       6% of the total evidence, strongest at record 10 of 10.
+
+Detector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.18s. 'Attack' is the positive class.)`},
+ {id:"PILOT-2",category:"CERTIFIED",certified:true,summary:`[VERIFIED] Removing the top 1 cited measurement changes this decision by 98%, against 20% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       16% of the total evidence, strongest at record 7 of 10.
+  4. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       5% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       14% of the total evidence, strongest at record 2 of 10.
+  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       6% of the total evidence, strongest at record 9 of 10.
+  5. the smallest packet sent to the device (Fwd_Pkt_Len_Min)
+       4% of the total evidence, strongest at record 9 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.18s. 'Attack' is the positive class.)`},
+ {id:"PILOT-3",category:"UNCERTIFIED",certified:false,summary:`[UNVERIFIED] removing the cited measurements barely changes this decision (best gain -13.4% at k=5, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 68% confidence.
+
+What pointed to Attack:
+  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       7% of the total evidence, strongest at record 5 of 10.
+  4. the average packet size in the conversation (Pkt_Len_Mean)
+       6% of the total evidence, strongest at record 7 of 10.
+
+What argued against it (these looked more like Normal):
+  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       13% of the total evidence, strongest at record 2 of 10.
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       12% of the total evidence, strongest at record 9 of 10.
+  5. which network protocol was used (TCP, UDP, or other) (Protocol)
+       6% of the total evidence, strongest at record 1 of 10.
+
+Detector agreement: the bilstm detector carried the most weight (39%); weights across all detectors were cnn 32%, bilstm 39%, transformer 29%.
+(Explanation produced by SHAP in 1.73s. 'Attack' is the positive class.)`}
+]};
+// Measurements that never appear in an alert above, used as distractors in Q2. Plain CICFlowMeter meanings.
+const DISTRACTORS = [
+ {column:"Flow_Duration",description:"how long the connection lasted"},
+ {column:"Idle_Mean",description:"the average quiet gap between bursts of activity"},
+ {column:"Fwd_IAT_Mean",description:"the average time between packets sent to the device"},
+ {column:"Dst_Port",description:"the service port number the traffic was sent to"}
+];
+
+/* ---------- parsing the operator text into structured evidence ------------------------- */
+function parseAlert(a){
+  const s=a.summary, lines=s.split("\n");
+  let mode=null; const feats=[];
+  for(const ln of lines){
+    if(/^What pointed to Attack/.test(ln)) mode="attack";
+    else if(/^What argued against it/.test(ln)) mode="normal";
+    else if(/^Detector agreement/.test(ln)) mode=null;
+    const m=ln.match(/^\s+(\d+)\.\s+(.*)\(([^()]+)\)\s*$/);
+    if(mode&&m) feats.push({rank:+m[1],description:m[2].trim(),column:m[3],direction:mode});
+  }
+  const conf=(s.match(/with (\d+)% confidence/)||[])[1];
+  const verdict=(s.match(/classified as (ATTACK|NORMAL)/)||[])[1];
+  const status=(s.match(/^\[(VERIFIED|UNVERIFIED|UNCHECKED)\]/)||[])[1]||"";
+  const features=(a.features&&a.features.length)?a.features.map(f=>({rank:f.rank,description:f.description||f.column,column:f.column,direction:f.direction})):feats;
+  return {...a,verdict:verdict||"ATTACK",systemConfidence:conf?+conf:Math.round((a.confidence||0)*100),status,features};
+}
+
+/* ---------- storage (facilitator laptop) ---------------------------------------------- */
+const KEY="alert-reader-study-v1";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{sessions:[],set:null}}catch(e){return {sessions:[],set:null}}}
+function save(st){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+let store=load();
+let alertSet=store.set||PILOT;
+let session=null;
+
+/* ---------- seeded order -------------------------------------------------------------- */
+function seedFrom(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffled(arr,seed){const r=rng(seed),a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* ---------- rendering helpers ---------------------------------------------------------- */
+const app=document.getElementById("app");
+function h(tag,attrs={},...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?"":v)}for(const k of kids.flat()){if(k==null)continue;e.append(k.nodeType?k:document.createTextNode(k))}return e}
+function radioGroup(name,legend,options,cls="opts"){return h("fieldset",{},h("legend",{},legend),h("div",{class:cls},options.map((o,i)=>h("label",{class:"opt"},h("input",{type:"radio",name,id:`${name}-${i}`,value:o.value}),o.label))))}
+function scale(name,legend,lo,hi){return h("fieldset",{},h("legend",{},legend),h("div",{class:"scale"},[1,2,3,4,5,6,7].map(v=>h("label",{class:"opt"},h("input",{type:"radio",name,id:`${name}-${v}`,value:String(v)}),String(v)))),h("div",{class:"scale-ends"},h("span",{},lo),h("span",{},hi)))}
+function val(name){const e=app.querySelector(`input[name="${name}"]:checked`);return e?e.value:""}
+function vals(name){return[...app.querySelectorAll(`input[name="${name}"]:checked`)].map(e=>e.value)}
+function header(){const n=alertSet.alerts.length;document.getElementById("hdr-meta").textContent=`${n} alert${n===1?"":"s"} loaded · ${store.sessions.length} session${store.sessions.length===1?"":"s"} recorded`}
+
+/* ---------- facilitator console ------------------------------------------------------- */
+function consoleView(msg){
+  header();
+  const parsed=alertSet.alerts.map(parseAlert);
+  const counts=parsed.reduce((m,a)=>(m[a.category]=(m[a.category]||0)+1,m),{});
+  const nextCode="P"+String(store.sessions.length+1).padStart(2,"0");
+  const fileIn=h("input",{type:"file",accept:".json,application/json",id:"setfile",hidden:true,onchange:ev=>{
+    const f=ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const j=JSON.parse(rd.result);if(!Array.isArray(j.alerts)||!j.alerts.length)throw new Error("no alerts array");store.set=j;alertSet=j;save(store);consoleView(`Loaded ${j.alerts.length} alerts from ${f.name}.`)}catch(e){consoleView("That file is not an alert set exported by export_study_alerts.py ("+e.message+").")}};rd.readAsText(f)}});
+  const code=h("input",{type:"text",id:"pcode",value:nextCode,"aria-label":"Participant code"});
+  app.replaceChildren(
+    h("section",{class:"panel"},
+      h("h2",{},"Facilitator console"),
+      h("p",{},"Run one participant at a time on this laptop. Every answer and its timing is kept in this browser until you export it."),
+      alertSet===PILOT?h("div",{class:"note"},"Pilot set loaded: the 3 real alerts from the T3.3 handout. Load alerts_20.json (made by export_study_alerts.py) before running the study."):null,
+      msg?h("div",{class:"note",role:"status"},msg):null,
+      h("div",{class:"row"},...Object.entries(counts).map(([k,v])=>h("span",{class:"pill"},`${k} ${v}`)),h("span",{class:"meta"},alertSet.source||"")),
+      h("div",{class:"row"},h("button",{onclick:()=>fileIn.click()},"Load alert set"),fileIn,store.set?h("button",{onclick:()=>{store.set=null;alertSet=PILOT;save(store);consoleView("Back to the pilot set.")}},"Use pilot set"):null)
+    ),
+    h("section",{class:"panel"},
+      h("h3",{},"Next participant"),
+      h("div",{class:"row"},h("div",{style:"flex:1 1 200px;min-width:0"},code),h("button",{class:"primary",onclick:()=>{const c=code.value.trim()||nextCode;startSession(c)}},"Start session")),
+      h("p",{class:"meta"},"Use codes only, never names. The alert order is shuffled from the code, so P01 always sees the same order.")
+    ),
+    resultsPanel()
+  );
+}
+function resultsPanel(){
+  const rows=flatRows();
+  const done=store.sessions.filter(s=>s.completedAt);
+  const correct=rows.filter(r=>r.q2_correct==="1").length;
+  const box=h("textarea",{class:"dump",id:"dump",readonly:true,hidden:true});
+  return h("section",{class:"panel"},
+    h("h3",{},"Recorded data"),
+    h("div",{class:"row",style:"gap:24px"},
+      h("div",{class:"stat"},h("span",{class:"meta"},"completed sessions"),h("b",{},String(done.length))),
+      h("div",{class:"stat"},h("span",{class:"meta"},"alert responses"),h("b",{},String(rows.length))),
+      h("div",{class:"stat"},h("span",{class:"meta"},"reason correctly stated"),h("b",{},rows.length?Math.round(100*correct/rows.length)+"%":"–"))),
+    h("div",{class:"row"},
+      h("button",{disabled:!rows.length,onclick:()=>exportFile("reader_study_responses.csv",toCSV(rows),box)},"Export CSV"),
+      h("button",{disabled:!store.sessions.length,onclick:()=>exportFile("reader_study_sessions.json",JSON.stringify(store.sessions,null,2),box)},"Export JSON"),
+      h("button",{disabled:!store.sessions.length,onclick:ev=>{const b=ev.currentTarget;if(b.dataset.armed){store.sessions=[];save(store);consoleView("All recorded sessions were cleared.")}else{b.dataset.armed="1";b.textContent="Click again to clear every session"}}},"Clear sessions")),
+    box,
+    done.length?h("div",{class:"tablebox"},h("table",{},h("thead",{},h("tr",{},["code","role","alerts","reason correct","median s/alert","spotted unreliable"].map(t=>h("th",{},t)))),
+      h("tbody",{},done.map(s=>{const r=s.responses;const t=r.map(x=>x.timeMs).sort((a,b)=>a-b);return h("tr",{},h("td",{},s.code),h("td",{},s.demo.role||""),h("td",{},String(r.length)),h("td",{},`${r.filter(x=>x.q2Correct).length}/${r.length}`),h("td",{},t.length?(t[Math.floor(t.length/2)]/1000).toFixed(1):""),h("td",{},(s.post.unreliable||"").slice(0,40)))})))):null
+  );
+}
+async function exportFile(name,data,box){
+  let saved=false;
+  try{const d=await window.claude?.use?.("downloads");if(d){await d.save({filename:name,data});saved=true}}catch(e){}
+  if(!saved){box.hidden=false;box.value=data;box.select();try{await navigator.clipboard.writeText(data);box.insertAdjacentElement("beforebegin",h("p",{class:"meta"},`${name} copied to the clipboard. Paste it into a file with that name.`))}catch(e){box.insertAdjacentElement("beforebegin",h("p",{class:"meta"},`Select all in the box below and copy it into ${name}.`))}}
+}
+
+/* ---------- participant flow ---------------------------------------------------------- */
+function startSession(code){
+  const order=shuffled(alertSet.alerts.map(parseAlert),seedFrom(code));
+  session={code,startedAt:new Date().toISOString(),alertSetSource:alertSet.source||"",order:order.map(a=>a.id),consent:false,demo:{},responses:[],post:{},completedAt:null,_alerts:order};
+  infoView();
+}
+function infoView(){
+  header();
+  const box=h("input",{type:"checkbox",id:"consent"});
+  const btn=h("button",{class:"primary",disabled:true,onclick:()=>{session.consent=true;session.consentAt=new Date().toISOString();demoView()}},"Continue");
+  box.addEventListener("change",()=>btn.disabled=!box.checked);
+  app.replaceChildren(h("section",{class:"panel"},
+    h("h2",{},"Before you start"),
+    h("p",{},"A monitoring system watches network traffic going to medical devices on a hospital network. When it decides a short window of traffic is an attack, it writes a note explaining why. You will read "+session._alerts.length+" of these notes and answer a few questions about each."),
+    h("p",{},"No machine-learning background is needed and there are no trick questions about networking. We are testing whether the notes are understandable, not testing you. Each note is timed. It takes about 25 minutes."),
+    h("p",{},"Taking part is voluntary. You can stop at any point without giving a reason, and your answers are then discarded. Answers are stored under a code, never your name, and are reported only as group statistics."),
+    h("label",{class:"opt"},box,"I have read the information sheet, I am 18 or older, and I agree to take part."),
+    h("div",{class:"row"},btn,h("button",{onclick:()=>{session=null;consoleView("Session cancelled before consent. Nothing was stored.")}},"Cancel"))
+  ));
+}
+function demoView(){
+  app.replaceChildren(h("section",{class:"panel"},
+    h("h2",{},"About you"),
+    radioGroup("role","Which best describes you?",[["UG student","Undergraduate student"],["PG student","Postgraduate student"],["Researcher","Researcher or faculty"],["Clinician","Clinician or nurse"],["IT staff","IT or network staff"],["Other","Other"]].map(([v,l])=>({value:v,label:l}))),
+    radioGroup("net","Hands-on experience with computer networks",["None","Less than 1 year","1 to 3 years","More than 3 years"].map(v=>({value:v,label:v}))),
+    scale("ml","How familiar are you with machine learning?","1 not at all","7 very"),
+    scale("sec","How familiar are you with network security?","1 not at all","7 very"),
+    h("div",{class:"row"},h("button",{class:"primary",onclick:()=>{const d={role:val("role"),net:val("net"),ml:val("ml"),sec:val("sec")};if(Object.values(d).some(x=>!x)){alert2("Please answer all four questions.");return}session.demo=d;alertView(0)}},"Start the alerts"))
+  ));
+}
+function alert2(t){let n=app.querySelector(".formmsg");if(!n){n=h("div",{class:"note formmsg",role:"alert"});app.querySelector(".panel").append(n)}n.textContent=t}
+
+function alertView(i){
+  const a=session._alerts[i];
+  const pool=session._alerts.filter(x=>x.id!==a.id).flatMap(x=>x.features).filter(f=>!a.features.some(g=>g.column===f.column));
+  const extra=[...new Map([...pool,...DISTRACTORS].map(f=>[f.column,{column:f.column,description:f.description}])).values()];
+  const distract=shuffled(extra,seedFrom(session.code+a.id)).slice(0,2);
+  const choices=shuffled([...a.features.map(f=>({column:f.column,description:f.description})),...distract],seedFrom(a.id+session.code));
+  const t0=performance.now();let firstTouch=null;
+  const panel=h("section",{class:"panel",oninput:()=>{if(firstTouch==null)firstTouch=performance.now()-t0}},
+    h("div",{class:"row",style:"justify-content:space-between"},h("h3",{},`Alert ${i+1} of ${session._alerts.length}`),h("span",{class:"meta"},session.code)),
+    h("div",{class:"progress","aria-hidden":"true"},h("div",{style:`width:${100*i/session._alerts.length}%`})),
+    h("pre",{class:"alert"},a.summary),
+    radioGroup("q1","1. What did the system decide?",[["ATTACK","Attack"],["NORMAL","Normal"],["UNSURE","I can't tell"]].map(([v,l])=>({value:v,label:l}))),
+    radioGroup("q1c","How sure was the system?",[["lt70","Under 70%"],["70to89","70 to 89%"],["90plus","90% or more"],["unsure","I can't tell"]].map(([v,l])=>({value:v,label:l}))),
+    h("fieldset",{},h("legend",{},"2. Why did it decide that? Tick the measurement or measurements it based the decision on."),
+      h("div",{class:"opts"},choices.map((c,k)=>h("label",{class:"opt feature"},h("input",{type:"checkbox",name:"q2",id:`q2-${k}`,value:c.column}),`${c.description} (${c.column})`)))),
+    h("fieldset",{},h("legend",{},"In your own words (one sentence)"),h("textarea",{id:"q2text","aria-label":"Reason in your own words"})),
+    radioGroup("q3","3. What would you do with this alert?",[["act","Act on it now"],["escalate","Ask someone to check it first"],["ignore","Ignore it"]].map(([v,l])=>({value:v,label:l}))),
+    scale("q4","4. How confident are you in your answers to 1 and 2?","1 guessing","7 certain"),
+    scale("q5","5. How much do you trust this alert?","1 not at all","7 completely"),
+    h("div",{class:"row"},h("button",{class:"primary",onclick:()=>{
+      const r={alertId:a.id,category:a.category,certified:!!a.certified,status:a.status,position:i+1,
+        q1:val("q1"),q1c:val("q1c"),q2:vals("q2"),q2text:app.querySelector("#q2text").value.trim(),q3:val("q3"),q4:val("q4"),q5:val("q5"),
+        timeMs:Math.round(performance.now()-t0),firstInteractionMs:firstTouch==null?null:Math.round(firstTouch),
+        offered:choices.map(c=>c.column),distractors:distract.map(d=>d.column)};
+      if(!r.q1||!r.q1c||!r.q2.length||!r.q3||!r.q4||!r.q5){alert2("Please answer every question (the sentence is optional).");return}
+      score(r,a);session.responses.push(r);
+      if(i+1<session._alerts.length){alertView(i+1);window.scrollTo(0,0)}else postView();
+    }},i+1<session._alerts.length?"Next alert":"Finish alerts"))
+  );
+  app.replaceChildren(panel);
+}
+function score(r,a){
+  const sup=a.features.filter(f=>f.direction==="attack").map(f=>f.column);
+  const opp=a.features.filter(f=>f.direction==="normal").map(f=>f.column);
+  r.q1Correct=r.q1===a.verdict;
+  const c=a.systemConfidence;r.q1cCorrect=r.q1c===(c<70?"lt70":c<90?"70to89":"90plus");
+  r.pickedSupporting=r.q2.filter(x=>sup.includes(x)).length;
+  r.pickedOpposing=r.q2.filter(x=>opp.includes(x)).length;
+  r.pickedDistractor=r.q2.filter(x=>r.distractors.includes(x)).length;
+  // Pass rule from make_reader_test.py: names at least one measurement the alert actually cited for
+  // its verdict, and invents no reason the alert did not give (no distractor, no counter-evidence).
+  r.q2Correct=r.pickedSupporting>0&&r.pickedOpposing===0&&r.pickedDistractor===0;
+}
+function postView(){
+  app.replaceChildren(h("section",{class:"panel"},
+    h("h2",{},"Last questions"),
+    h("fieldset",{},h("legend",{},"Did any alerts look less reliable than the others? Which, and what told you?"),h("textarea",{id:"unrel"})),
+    h("fieldset",{},h("legend",{},"Was anything hard to understand? Quote any word or phrase that stopped you."),h("textarea",{id:"unclear"})),
+    scale("t1","The notes helped me understand why traffic was flagged.","1 strongly disagree","7 strongly agree"),
+    scale("t2","I could tell which notes the system was unsure about.","1 strongly disagree","7 strongly agree"),
+    scale("t3","I would rely on these notes in a real hospital network.","1 strongly disagree","7 strongly agree"),
+    h("div",{class:"row"},h("button",{class:"primary",onclick:()=>{
+      const p={unreliable:app.querySelector("#unrel").value.trim(),unclear:app.querySelector("#unclear").value.trim(),t1:val("t1"),t2:val("t2"),t3:val("t3")};
+      if(!p.t1||!p.t2||!p.t3){alert2("Please answer the three agreement questions.");return}
+      session.post=p;session.completedAt=new Date().toISOString();const {_alerts,...keep}=session;store.sessions.push(keep);save(store);session=null;thanksView();
+    }},"Submit"))
+  ));
+}
+function thanksView(){header();app.replaceChildren(h("section",{class:"panel"},h("h2",{},"Thank you"),h("p",{},"Your answers are saved. Please hand the laptop back to the facilitator."),h("div",{class:"row"},h("button",{class:"primary",onclick:()=>consoleView("Session saved.")},"Facilitator: back to console"))))}
+
+/* ---------- export ------------------------------------------------------------------- */
+function flatRows(){const out=[];for(const s of store.sessions){if(!s.completedAt)continue;for(const r of s.responses){out.push({participant:s.code,role:s.demo.role,net_experience:s.demo.net,ml_familiarity:s.demo.ml,security_familiarity:s.demo.sec,
+  alert_id:r.alertId,category:r.category,certified:r.certified?"1":"0",status:r.status,position:r.position,q1:r.q1,q1_correct:r.q1Correct?"1":"0",q1_confidence_read:r.q1c,q1_confidence_correct:r.q1cCorrect?"1":"0",
+  q2_selected:r.q2.join("|"),q2_correct:r.q2Correct?"1":"0",picked_supporting:r.pickedSupporting,picked_opposing:r.pickedOpposing,picked_distractor:r.pickedDistractor,q2_text:r.q2text,
+  q3_action:r.q3,q4_self_confidence:r.q4,q5_trust:r.q5,time_ms:r.timeMs,first_interaction_ms:r.firstInteractionMs??"",
+  post_unreliable:s.post.unreliable,post_unclear:s.post.unclear,post_t1:s.post.t1,post_t2:s.post.t2,post_t3:s.post.t3,started:s.startedAt,completed:s.completedAt,alert_set:s.alertSetSource})}}return out}
+function toCSV(rows){if(!rows.length)return"";const cols=Object.keys(rows[0]);const esc=v=>{v=v==null?"":String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};return[cols.join(","),...rows.map(r=>cols.map(c=>esc(r[c])).join(","))].join("\n")}
+
+consoleView();
+</script>

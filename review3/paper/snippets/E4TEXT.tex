@@ -1,0 +1,14 @@
+\noindent To locate the boundary we swept inspection cost $\{500, 1000, 2000, 3000, 5000\}$\,µs, attacker-bots $\{20, 40, 60, 80, 120\}$, patience $p \in \{1, \dots, 5\}$ and smoothing $\alpha \in \{0.1, 0.3, 0.7\}$: 375 runs of 20 simulated seconds, one seed per cell to fit the compute budget (Fig.~\ref{fig:e4}).
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.56\textwidth]{fig_e4_phase_diagram.png}
+\caption{Latch-off region of rule B. Rows: patience; columns: smoothing $\alpha$; within each panel, inspection cost against attack scale. Dark cells latched off (fewer than half of the bots blocked, IDS queue overflowing). One seed per cell.}
+\label{fig:e4}
+\end{figure*}
+
+The outcome is all or nothing. Of the 375 runs, 208 blocked every bot, 152 blocked none and only 15 ended in between: there is no regime in which B degrades gracefully. At the Review~2 patience of 3 the detector works at 500\,µs for every attack scale up to 120 bots, latches at 1,000\,µs only with 120 bots, from 60 bots at 2,000 and 3,000\,µs, and from 40 bots at 5,000\,µs; 20 bots never latch it at any cost we tried. At 2,000\,µs and 60 bots, $p \le 2$ works and $p \ge 3$ latches, which reproduces the Review~2 discontinuity exactly.
+
+Patience moves the boundary and smoothing barely does. The share of cells that latch grows from 24\,\% at $p = 1$ to 40, 44, 51 and 52\,\% at $p = 2$ to 5, because each extra violation required before quarantine gives the queue more time to fill. The three values of $\alpha$ agree in 72 of the 75 (patience, cost, attack scale) cells; the three disagreements are at $p \ge 4$, where the slowest smoothing latches and the fastest does not.
+
+Offered utilisation alone does not predict the outcome. With $\rho$ the per-fog arrival rate times the inspection cost, every cell with $\rho \le 2$ kept working and every cell with $\rho \ge 12$ latched; between those the outcome depends on patience. A detector can therefore survive an offered load ten times its capacity if it quarantines fast enough, and fail at three times capacity if it waits ($\rho$ values are computed from the configured rates, before any quarantine). The latch-off is a race between quarantine and queue growth, which is why the mitigations act on the threshold's floor or on its coupling rather than on capacity alone.

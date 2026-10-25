@@ -1,0 +1,16 @@
+attack_type,rows,distinct_vectors
+Normal,24301,397
+DDoS_UDP,14498,1
+DDoS_ICMP,14090,1
+Ransomware,10925,32
+DDoS_HTTP,10561,126
+SQL_injection,10311,163
+Uploading,10269,27
+DDoS_TCP,10247,2
+Backdoor,10195,119
+Vulnerability_scanner,10076,730
+Port_Scanning,10071,5
+XSS,10052,44
+Password,9989,17
+MITM,1214,116
+Fingerprinting,1001,5

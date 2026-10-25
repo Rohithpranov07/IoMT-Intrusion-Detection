@@ -1,0 +1,10 @@
+\noindent The baseline flood is trivially separable from telemetry (Section~\ref{sec:sensitivity}), so the curve needs attackers who resemble the devices. Half of the 60 bots now send at a fixed period drawn uniformly from 300 to 700\,ms with $\pm$40\,\% jitter, overlapping the wearables' 360 to 840\,ms, and the other half flood. We sweep $\tau_0$ from 50 to 1,500\,ms for each rule (5 seeds per point) and plot wearables quarantined against attackers missed (Fig.~\ref{fig:tradeoff}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig_e5_tradeoff.png}
+\caption{False quarantine against missed attackers as $\tau_0$ varies from 50 to 1,500\,ms, with half the bots sending at wearable-like rates. Open circles: $\tau_0 = 500$\,ms. Purple: rule C gated by a measured classifier branch (independent errors).}
+\label{fig:tradeoff}
+\end{figure}
+
+\noindent Every threshold rule spans the same two corners: no quarantine with half the attackers missed (the slow half), and every wearable quarantined with none missed. None comes near the origin. Varying $\tau_0$ slides each rule along its own curve, and the flat rule's curve has almost no middle: it jumps from 0\,\% quarantined and 18\,\% missed at 350\,ms to 82\,\% quarantined and 7.7\,\% missed at 400\,ms, because one constant cannot separate two overlapping gap distributions. C's curve lies below A's and B's in the middle region, at 31\,\% quarantined for 10.3\,\% missed and 49\,\% for 3.0\,\%, since device class is information the other rules lack; but C too reaches zero missed attacks only by quarantining 72\,\% of wearables. Changing the rule's parameter moves the operating point; changing the information the rule has moves the curve, and how far is bounded by that information.

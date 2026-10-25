@@ -1,0 +1,7 @@
+pair,extractor_same,name_matched_features,examples
+"IoTID20 (CICFlowMeter, 69 used) vs Edge-IIoTset (tshark per-packet, 61)",no,0,
+"IoTID20 (CICFlowMeter, 69 used) vs WUSTL-EHMS-2020 (Argus flow + biometrics, 43)",no,0,
+"IoTID20 (CICFlowMeter, 69 used) vs CICIDS2017 Friday (CICFlowMeter, 31)",yes,20,ACK_Flag_Cnt; Bwd_Header_Len; Bwd_Pkts/s; Bwd_PSH_Flags; Bwd_URG_Flags; CWE_Flag_Count
+"Edge-IIoTset (tshark per-packet, 61) vs WUSTL-EHMS-2020 (Argus flow + biometrics, 43)",no,0,
+"Edge-IIoTset (tshark per-packet, 61) vs CICIDS2017 Friday (CICFlowMeter, 31)",no,0,
+"WUSTL-EHMS-2020 (Argus flow + biometrics, 43) vs CICIDS2017 Friday (CICFlowMeter, 31)",no,0,
