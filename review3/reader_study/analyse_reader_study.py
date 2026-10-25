@@ -21,6 +21,8 @@ from scipy.stats import chi2_contingency, wilcoxon
 
 df = pd.read_csv(sys.argv[1], keep_default_na=False, na_values=[""])
 df["time_s"] = df["time_ms"] / 1000.0
+for col in ("q1_correct", "q1_confidence_correct"):  # not asked in the shortened (remote) version
+    df[col] = pd.to_numeric(df[col], errors="coerce")
 cats = [c for c in ("CERTIFIED", "UNCERTIFIED", "CONTRADICTORY") if c in set(df.category)]
 n_part = df.participant.nunique()
 
@@ -43,7 +45,7 @@ for c in cats:
                  "self_confidence_1to7": g.selfconf.mean(), "trust_1to7": g.trust.mean(),
                  "median_time_s": g.time_s.median(),
                  "act_%": 100 * acts.get("act", 0), "escalate_%": 100 * acts.get("escalate", 0), "ignore_%": 100 * acts.get("ignore", 0)})
-tab = pd.DataFrame(rows)
+tab = pd.DataFrame(rows).dropna(axis=1, how="all")  # verdict columns are empty in the shortened version
 print(tab.round(2).to_markdown(index=False))
 
 tests = []

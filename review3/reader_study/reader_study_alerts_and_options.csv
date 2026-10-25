@@ -1,0 +1,401 @@
+alert_no,alert_text,option_1,option_2,option_3,option_4,option_5,option_6,option_7,correct_options (pointed to Attack),counter_evidence (wrong),distractors (wrong),category (do not show participants),alert_id
+1,"[VERIFIED] Removing the top 1 cited measurement changes this decision by 100%, against 20% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       20% of the total evidence, strongest at record 7 of 10.
+  5. the size of the smallest packet in the conversation (Pkt_Len_Min)
+       6% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       9% of the total evidence, strongest at record 9 of 10.
+  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       8% of the total evidence, strongest at record 6 of 10.
+  4. the average packet size in the conversation (Pkt_Len_Mean)
+       6% of the total evidence, strongest at record 3 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 1.05s. 'Attack' is the positive class.)",the average gap between replies from the device (Bwd_IAT_Mean),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the size of the smallest packet in the conversation (Pkt_Len_Min),the average size of packets in the conversation (Pkt_Size_Avg),the average time between packets sent to the device (Fwd_IAT_Mean),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the average packet size in the conversation (Pkt_Len_Mean),the average size of packets in the conversation (Pkt_Size_Avg) | the size of the smallest packet in the conversation (Pkt_Len_Min),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average packet size in the conversation (Pkt_Len_Mean),the average time between packets sent to the device (Fwd_IAT_Mean) | the average gap between replies from the device (Bwd_IAT_Mean),CERTIFIED,CER-6
+2,"[VERIFIED] Removing the top 1 cited measurement changes this decision by 92%, against 18% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       18% of the total evidence, strongest at record 8 of 10.
+
+What argued against it (these looked more like Normal):
+  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       12% of the total evidence, strongest at record 9 of 10.
+  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       7% of the total evidence, strongest at record 8 of 10.
+  4. the size of the largest packet in the conversation (Pkt_Len_Max)
+       5% of the total evidence, strongest at record 9 of 10.
+  5. how many packets were acknowledgements of data already received (ACK_Flag_Cnt)
+       5% of the total evidence, strongest at record 3 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.85s. 'Attack' is the positive class.)",the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),how many packets were acknowledgements of data already received (ACK_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg),the shortest gap between replies from the device (Bwd_IAT_Min),the longest quiet period in the conversation (Idle_Max),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the size of the largest packet in the conversation (Pkt_Len_Max),the average size of packets in the conversation (Pkt_Size_Avg),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | the size of the largest packet in the conversation (Pkt_Len_Max) | how many packets were acknowledgements of data already received (ACK_Flag_Cnt),the shortest gap between replies from the device (Bwd_IAT_Min) | the longest quiet period in the conversation (Idle_Max),CERTIFIED,CER-3
+3,"[VERIFIED] Removing the top 1 cited measurement changes this decision by 98%, against 19% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 98% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       23% of the total evidence, strongest at record 9 of 10.
+  5. the size of the smallest packet in the conversation (Pkt_Len_Min)
+       7% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       14% of the total evidence, strongest at record 9 of 10.
+  3. the average packet size in the conversation (Pkt_Len_Mean)
+       8% of the total evidence, strongest at record 10 of 10.
+  4. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       7% of the total evidence, strongest at record 10 of 10.
+
+Detector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.98s. 'Attack' is the positive class.)",the average time between packets sent to the device (Fwd_IAT_Mean),the average gap between packets in the conversation (Flow_IAT_Mean),the average size of packets in the conversation (Pkt_Size_Avg),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the average packet size in the conversation (Pkt_Len_Mean),the size of the smallest packet in the conversation (Pkt_Len_Min),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg) | the size of the smallest packet in the conversation (Pkt_Len_Min),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | the average packet size in the conversation (Pkt_Len_Mean) | how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average gap between packets in the conversation (Flow_IAT_Mean) | the average time between packets sent to the device (Fwd_IAT_Mean),CERTIFIED,CER-1
+4,"[VERIFIED] Removing the top 1 cited measurement changes this decision by 98%, against 20% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       19% of the total evidence, strongest at record 7 of 10.
+
+What argued against it (these looked more like Normal):
+  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       14% of the total evidence, strongest at record 9 of 10.
+  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       7% of the total evidence, strongest at record 9 of 10.
+  4. the size of the largest packet in the conversation (Pkt_Len_Max)
+       5% of the total evidence, strongest at record 7 of 10.
+  5. how many packets were acknowledgements of data already received (ACK_Flag_Cnt)
+       5% of the total evidence, strongest at record 8 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.99s. 'Attack' is the positive class.)",how many packets were acknowledgements of data already received (ACK_Flag_Cnt),total time spent waiting between packets sent to the device (Fwd_IAT_Tot),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the average size of packets in the conversation (Pkt_Size_Avg),how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts),the size of the largest packet in the conversation (Pkt_Len_Max),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | the size of the largest packet in the conversation (Pkt_Len_Max) | how many packets were acknowledgements of data already received (ACK_Flag_Cnt),total time spent waiting between packets sent to the device (Fwd_IAT_Tot) | how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts),CERTIFIED,CER-2
+5,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +0.0% at k=2, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. the smallest packet sent to the device (Fwd_Pkt_Len_Min)
+       13% of the total evidence, strongest at record 8 of 10.
+  2. how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts)
+       11% of the total evidence, strongest at record 6 of 10.
+  4. which network protocol was used (TCP, UDP, or other) (Protocol)
+       9% of the total evidence, strongest at record 8 of 10.
+  5. the total size of the addressing information on the device's replies (Bwd_Header_Len)
+       6% of the total evidence, strongest at record 8 of 10.
+
+What argued against it (these looked more like Normal):
+  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       11% of the total evidence, strongest at record 2 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.81s. 'Attack' is the positive class.)",how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),how many packets were acknowledgements of data already received (ACK_Flag_Cnt),"which network protocol was used (TCP, UDP, or other) (Protocol)",the total size of the addressing information on the device's replies (Bwd_Header_Len),how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts),the size of the largest packet in the conversation (Pkt_Len_Max),the smallest packet sent to the device (Fwd_Pkt_Len_Min),"the smallest packet sent to the device (Fwd_Pkt_Len_Min) | how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts) | which network protocol was used (TCP, UDP, or other) (Protocol) | the total size of the addressing information on the device's replies (Bwd_Header_Len)",how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),how many packets were acknowledgements of data already received (ACK_Flag_Cnt) | the size of the largest packet in the conversation (Pkt_Len_Max),UNCERTIFIED,UNC-541
+6,"[VERIFIED] Removing the top 1 cited measurement changes this decision by 100%, against 20% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       22% of the total evidence, strongest at record 8 of 10.
+  4. the size of the smallest packet in the conversation (Pkt_Len_Min)
+       6% of the total evidence, strongest at record 8 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       11% of the total evidence, strongest at record 9 of 10.
+  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       10% of the total evidence, strongest at record 9 of 10.
+  5. the average packet size in the conversation (Pkt_Len_Mean)
+       6% of the total evidence, strongest at record 4 of 10.
+
+Detector agreement: the bilstm detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.87s. 'Attack' is the positive class.)",the size of the smallest packet in the conversation (Pkt_Len_Min),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the average packet size in the conversation (Pkt_Len_Mean),the longest quiet period in the conversation (Idle_Max),the average size of packets in the conversation (Pkt_Size_Avg),how many packets were acknowledgements of data already received (ACK_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg) | the size of the smallest packet in the conversation (Pkt_Len_Min),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average packet size in the conversation (Pkt_Len_Mean),how many packets were acknowledgements of data already received (ACK_Flag_Cnt) | the longest quiet period in the conversation (Idle_Max),CERTIFIED,CER-5
+7,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +0.3% at k=3, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. total time spent waiting between packets sent to the device (Fwd_IAT_Tot)
+       9% of the total evidence, strongest at record 8 of 10.
+  3. the longest pause between packets sent to the device (Fwd_IAT_Max)
+       8% of the total evidence, strongest at record 8 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average gap between replies from the device (Bwd_IAT_Mean)
+       8% of the total evidence, strongest at record 1 of 10.
+  4. the shortest gap between replies from the device (Bwd_IAT_Min)
+       7% of the total evidence, strongest at record 1 of 10.
+  5. the average gap between packets in the conversation (Flow_IAT_Mean)
+       7% of the total evidence, strongest at record 2 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.85s. 'Attack' is the positive class.)",the average size of packets in the conversation (Pkt_Size_Avg),the average gap between replies from the device (Bwd_IAT_Mean),the shortest gap between replies from the device (Bwd_IAT_Min),the average gap between packets in the conversation (Flow_IAT_Mean),total time spent waiting between packets sent to the device (Fwd_IAT_Tot),the largest packet sent to the device (Fwd_Pkt_Len_Max),the longest pause between packets sent to the device (Fwd_IAT_Max),total time spent waiting between packets sent to the device (Fwd_IAT_Tot) | the longest pause between packets sent to the device (Fwd_IAT_Max),the average gap between replies from the device (Bwd_IAT_Mean) | the shortest gap between replies from the device (Bwd_IAT_Min) | the average gap between packets in the conversation (Flow_IAT_Mean),the largest packet sent to the device (Fwd_Pkt_Len_Max) | the average size of packets in the conversation (Pkt_Size_Avg),UNCERTIFIED,UNC-479
+8,"[VERIFIED] Removing the top 1 cited measurement changes this decision by 99%, against 20% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 99% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       22% of the total evidence, strongest at record 6 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       11% of the total evidence, strongest at record 7 of 10.
+  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       8% of the total evidence, strongest at record 7 of 10.
+  4. the average packet size in the conversation (Pkt_Len_Mean)
+       7% of the total evidence, strongest at record 7 of 10.
+  5. the size of the largest packet in the conversation (Pkt_Len_Max)
+       6% of the total evidence, strongest at record 7 of 10.
+
+Detector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.74s. 'Attack' is the positive class.)",the size of the largest packet in the conversation (Pkt_Len_Max),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average packet size in the conversation (Pkt_Len_Mean),the average size of packets sent to the device (Fwd_Pkt_Len_Mean),the average size of packets in the conversation (Pkt_Size_Avg),total time spent waiting between packets sent to the device (Fwd_IAT_Tot),the average size of packets in the conversation (Pkt_Size_Avg),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average packet size in the conversation (Pkt_Len_Mean) | the size of the largest packet in the conversation (Pkt_Len_Max),the average size of packets sent to the device (Fwd_Pkt_Len_Mean) | total time spent waiting between packets sent to the device (Fwd_IAT_Tot),CERTIFIED,CER-8
+9,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain -0.0% at k=2, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  2. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       10% of the total evidence, strongest at record 9 of 10.
+  4. the average size of packets sent to the device (Fwd_Pkt_Len_Mean)
+       6% of the total evidence, strongest at record 9 of 10.
+  5. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       5% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       18% of the total evidence, strongest at record 1 of 10.
+  3. the smallest packet sent to the device (Fwd_Pkt_Len_Min)
+       8% of the total evidence, strongest at record 9 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.98s. 'Attack' is the positive class.)",the average time between packets sent to the device (Fwd_IAT_Mean),the average size of packets sent to the device (Fwd_Pkt_Len_Mean),the largest packet sent to the device (Fwd_Pkt_Len_Max),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the total size of the addressing information on the device's replies (Bwd_Header_Len),the smallest packet sent to the device (Fwd_Pkt_Len_Min),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the largest packet sent to the device (Fwd_Pkt_Len_Max) | the average size of packets sent to the device (Fwd_Pkt_Len_Mean) | the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the smallest packet sent to the device (Fwd_Pkt_Len_Min),the total size of the addressing information on the device's replies (Bwd_Header_Len) | the average time between packets sent to the device (Fwd_IAT_Mean),CONTRADICTORY,CON-19
+10,"[VERIFIED] Removing the top 1 cited measurement changes this decision by 99%, against 19% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 99% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       24% of the total evidence, strongest at record 9 of 10.
+  5. the size of the smallest packet in the conversation (Pkt_Len_Min)
+       6% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       12% of the total evidence, strongest at record 9 of 10.
+  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       7% of the total evidence, strongest at record 2 of 10.
+  4. the average packet size in the conversation (Pkt_Len_Mean)
+       7% of the total evidence, strongest at record 9 of 10.
+
+Detector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 34%.
+(Explanation produced by SHAP in 1.01s. 'Attack' is the positive class.)",the size of the smallest packet in the conversation (Pkt_Len_Min),the total size of the addressing information on the device's replies (Bwd_Header_Len),the average packet size in the conversation (Pkt_Len_Mean),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the average size of packets in the conversation (Pkt_Size_Avg),the average quiet gap between bursts of activity (Idle_Mean),the average size of packets in the conversation (Pkt_Size_Avg) | the size of the smallest packet in the conversation (Pkt_Len_Min),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average packet size in the conversation (Pkt_Len_Mean),the average quiet gap between bursts of activity (Idle_Mean) | the total size of the addressing information on the device's replies (Bwd_Header_Len),CERTIFIED,CER-7
+11,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +0.1% at k=3, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       11% of the total evidence, strongest at record 4 of 10.
+  4. the average packet size in the conversation (Pkt_Len_Mean)
+       7% of the total evidence, strongest at record 7 of 10.
+  5. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       6% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       11% of the total evidence, strongest at record 2 of 10.
+  3. the average size of packets in the conversation (Pkt_Size_Avg)
+       8% of the total evidence, strongest at record 5 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 1.00s. 'Attack' is the positive class.)",the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average packet size in the conversation (Pkt_Len_Mean),the largest packet sent to the device (Fwd_Pkt_Len_Max),the size of the largest packet in the conversation (Pkt_Len_Max),the average size of packets in the conversation (Pkt_Size_Avg),the smallest packet sent to the device (Fwd_Pkt_Len_Min),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | the average packet size in the conversation (Pkt_Len_Mean) | the largest packet sent to the device (Fwd_Pkt_Len_Max),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average size of packets in the conversation (Pkt_Size_Avg),the smallest packet sent to the device (Fwd_Pkt_Len_Min) | the size of the largest packet in the conversation (Pkt_Len_Max),UNCERTIFIED,UNC-159
+12,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain -0.0% at k=2, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts)
+       13% of the total evidence, strongest at record 4 of 10.
+  3. the total size of the addressing information on the device's replies (Bwd_Header_Len)
+       7% of the total evidence, strongest at record 4 of 10.
+  4. which network protocol was used (TCP, UDP, or other) (Protocol)
+       7% of the total evidence, strongest at record 1 of 10.
+
+What argued against it (these looked more like Normal):
+  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       8% of the total evidence, strongest at record 4 of 10.
+  5. how many packets were acknowledgements of data already received (ACK_Flag_Cnt)
+       5% of the total evidence, strongest at record 6 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.86s. 'Attack' is the positive class.)",the size of the largest packet in the conversation (Pkt_Len_Max),the average size of packets in the conversation (Pkt_Size_Avg),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),"which network protocol was used (TCP, UDP, or other) (Protocol)",how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts),how many packets were acknowledgements of data already received (ACK_Flag_Cnt),the total size of the addressing information on the device's replies (Bwd_Header_Len),"how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts) | the total size of the addressing information on the device's replies (Bwd_Header_Len) | which network protocol was used (TCP, UDP, or other) (Protocol)",how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | how many packets were acknowledgements of data already received (ACK_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg) | the size of the largest packet in the conversation (Pkt_Len_Max),UNCERTIFIED,UNC-529
+13,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +1.0% at k=5, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       13% of the total evidence, strongest at record 9 of 10.
+  4. the average packet size in the conversation (Pkt_Len_Mean)
+       9% of the total evidence, strongest at record 10 of 10.
+  5. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       7% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       10% of the total evidence, strongest at record 10 of 10.
+  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       9% of the total evidence, strongest at record 10 of 10.
+
+Detector agreement: the bilstm detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 1.03s. 'Attack' is the positive class.)",the average packet size in the conversation (Pkt_Len_Mean),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the average time between packets sent to the device (Fwd_IAT_Mean),the largest packet sent to the device (Fwd_Pkt_Len_Max),the average quiet gap between bursts of activity (Idle_Mean),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | the average packet size in the conversation (Pkt_Len_Mean) | the largest packet sent to the device (Fwd_Pkt_Len_Max),the average size of packets in the conversation (Pkt_Size_Avg) | how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average time between packets sent to the device (Fwd_IAT_Mean) | the average quiet gap between bursts of activity (Idle_Mean),UNCERTIFIED,UNC-267
+14,"[VERIFIED] Removing the top 2 cited measurements changes this decision by 14%, against 0% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       9% of the total evidence, strongest at record 3 of 10.
+  3. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       9% of the total evidence, strongest at record 9 of 10.
+  5. the average size of packets sent to the device (Fwd_Pkt_Len_Mean)
+       6% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       14% of the total evidence, strongest at record 2 of 10.
+  4. the smallest packet sent to the device (Fwd_Pkt_Len_Min)
+       7% of the total evidence, strongest at record 9 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.96s. 'Attack' is the positive class.)",total time spent waiting between packets sent to the device (Fwd_IAT_Tot),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average size of packets sent to the device (Fwd_Pkt_Len_Mean),the size of the smallest packet in the conversation (Pkt_Len_Min),the largest packet sent to the device (Fwd_Pkt_Len_Max),the average size of packets in the conversation (Pkt_Size_Avg),the smallest packet sent to the device (Fwd_Pkt_Len_Min),the average size of packets in the conversation (Pkt_Size_Avg) | the largest packet sent to the device (Fwd_Pkt_Len_Max) | the average size of packets sent to the device (Fwd_Pkt_Len_Mean),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the smallest packet sent to the device (Fwd_Pkt_Len_Min),the size of the smallest packet in the conversation (Pkt_Len_Min) | total time spent waiting between packets sent to the device (Fwd_IAT_Tot),CONTRADICTORY,CON-16
+15,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain -13.4% at k=5, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 68% confidence.
+
+What pointed to Attack:
+  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       7% of the total evidence, strongest at record 6 of 10.
+  5. the average packet size in the conversation (Pkt_Len_Mean)
+       5% of the total evidence, strongest at record 6 of 10.
+
+What argued against it (these looked more like Normal):
+  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       18% of the total evidence, strongest at record 2 of 10.
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       11% of the total evidence, strongest at record 9 of 10.
+  4. which network protocol was used (TCP, UDP, or other) (Protocol)
+       6% of the total evidence, strongest at record 1 of 10.
+
+Detector agreement: the bilstm detector carried the most weight (39%); weights across all detectors were cnn 32%, bilstm 39%, transformer 29%.
+(Explanation produced by SHAP in 8.19s. 'Attack' is the positive class.)",total time spent waiting between packets sent to the device (Fwd_IAT_Tot),"which network protocol was used (TCP, UDP, or other) (Protocol)",how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the average size of packets in the conversation (Pkt_Size_Avg),the average packet size in the conversation (Pkt_Len_Mean),how long the connection lasted (Flow_Duration),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | the average packet size in the conversation (Pkt_Len_Mean),"how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average size of packets in the conversation (Pkt_Size_Avg) | which network protocol was used (TCP, UDP, or other) (Protocol)",how long the connection lasted (Flow_Duration) | total time spent waiting between packets sent to the device (Fwd_IAT_Tot),CONTRADICTORY,CON-0
+16,"[VERIFIED] Removing the top 5 cited measurements changes this decision by 9%, against 0% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       12% of the total evidence, strongest at record 8 of 10.
+  4. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       4% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       13% of the total evidence, strongest at record 2 of 10.
+  3. the size of the largest packet in the conversation (Pkt_Len_Max)
+       5% of the total evidence, strongest at record 8 of 10.
+  5. how many packets were acknowledgements of data already received (ACK_Flag_Cnt)
+       4% of the total evidence, strongest at record 2 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.93s. 'Attack' is the positive class.)",how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the size of the largest packet in the conversation (Pkt_Len_Max),the shortest gap between replies from the device (Bwd_IAT_Min),how long the connection lasted (Flow_Duration),the average size of packets in the conversation (Pkt_Size_Avg),the largest packet sent to the device (Fwd_Pkt_Len_Max),how many packets were acknowledgements of data already received (ACK_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg) | the largest packet sent to the device (Fwd_Pkt_Len_Max),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the size of the largest packet in the conversation (Pkt_Len_Max) | how many packets were acknowledgements of data already received (ACK_Flag_Cnt),the shortest gap between replies from the device (Bwd_IAT_Min) | how long the connection lasted (Flow_Duration),CONTRADICTORY,CON-20
+17,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +1.7% at k=3, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       8% of the total evidence, strongest at record 5 of 10.
+  3. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       5% of the total evidence, strongest at record 9 of 10.
+
+What argued against it (these looked more like Normal):
+  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       19% of the total evidence, strongest at record 9 of 10.
+  4. the smallest packet sent to the device (Fwd_Pkt_Len_Min)
+       5% of the total evidence, strongest at record 9 of 10.
+  5. the size of the largest packet in the conversation (Pkt_Len_Max)
+       5% of the total evidence, strongest at record 3 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 1.08s. 'Attack' is the positive class.)",the average size of packets sent to the device (Fwd_Pkt_Len_Mean),the largest packet sent to the device (Fwd_Pkt_Len_Max),the smallest packet sent to the device (Fwd_Pkt_Len_Min),the size of the largest packet in the conversation (Pkt_Len_Max),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg),the size of the smallest packet in the conversation (Pkt_Len_Min),the average size of packets in the conversation (Pkt_Size_Avg) | the largest packet sent to the device (Fwd_Pkt_Len_Max),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the smallest packet sent to the device (Fwd_Pkt_Len_Min) | the size of the largest packet in the conversation (Pkt_Len_Max),the average size of packets sent to the device (Fwd_Pkt_Len_Mean) | the size of the smallest packet in the conversation (Pkt_Len_Min),CONTRADICTORY,CON-18
+18,"[VERIFIED] Removing the top 2 cited measurements changes this decision by 7%, against 0% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       7% of the total evidence, strongest at record 8 of 10.
+  3. the largest packet sent to the device (Fwd_Pkt_Len_Max)
+       7% of the total evidence, strongest at record 9 of 10.
+  5. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       5% of the total evidence, strongest at record 10 of 10.
+
+What argued against it (these looked more like Normal):
+  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       19% of the total evidence, strongest at record 9 of 10.
+  4. the size of the largest packet in the conversation (Pkt_Len_Max)
+       6% of the total evidence, strongest at record 8 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 0.95s. 'Attack' is the positive class.)",the size of the largest packet in the conversation (Pkt_Len_Max),the average time between packets sent to the device (Fwd_IAT_Mean),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the largest packet sent to the device (Fwd_Pkt_Len_Max),the average size of packets in the conversation (Pkt_Size_Avg),the longest quiet period in the conversation (Idle_Max),the average size of packets in the conversation (Pkt_Size_Avg) | the largest packet sent to the device (Fwd_Pkt_Len_Max) | the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the size of the largest packet in the conversation (Pkt_Len_Max),the average time between packets sent to the device (Fwd_IAT_Mean) | the longest quiet period in the conversation (Idle_Max),CONTRADICTORY,CON-17
+19,"[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +0.0% at k=5, threshold 5%) — the model's decision here is spread across many measurements, so no short list explains it
+
+ALERT: this traffic window was classified as ATTACK with 100% confidence.
+
+What pointed to Attack:
+  1. how long the conversation lasted (Flow_Duration)
+       12% of the total evidence, strongest at record 10 of 10.
+  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       8% of the total evidence, strongest at record 8 of 10.
+  4. the longest quiet period in the conversation (Idle_Max)
+       7% of the total evidence, strongest at record 10 of 10.
+  5. the average packet size in the conversation (Pkt_Len_Mean)
+       6% of the total evidence, strongest at record 8 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average size of packets in the conversation (Pkt_Size_Avg)
+       10% of the total evidence, strongest at record 8 of 10.
+
+Detector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.
+(Explanation produced by SHAP in 1.05s. 'Attack' is the positive class.)",the average time between packets sent to the device (Fwd_IAT_Mean),the average packet size in the conversation (Pkt_Len_Mean),the average size of packets in the conversation (Pkt_Size_Avg),how long the conversation lasted (Flow_Duration),the average size of packets sent to the device (Fwd_Pkt_Len_Mean),the longest quiet period in the conversation (Idle_Max),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),how long the conversation lasted (Flow_Duration) | the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | the longest quiet period in the conversation (Idle_Max) | the average packet size in the conversation (Pkt_Len_Mean),the average size of packets in the conversation (Pkt_Size_Avg),the average size of packets sent to the device (Fwd_Pkt_Len_Mean) | the average time between packets sent to the device (Fwd_IAT_Mean),UNCERTIFIED,UNC-366
+20,"[VERIFIED] Removing the top 1 cited measurement changes this decision by 99%, against 19% for unrelated ones.
+
+ALERT: this traffic window was classified as ATTACK with 99% confidence.
+
+What pointed to Attack:
+  1. the average size of packets in the conversation (Pkt_Size_Avg)
+       18% of the total evidence, strongest at record 7 of 10.
+  5. the size of the smallest packet in the conversation (Pkt_Len_Min)
+       5% of the total evidence, strongest at record 6 of 10.
+
+What argued against it (these looked more like Normal):
+  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)
+       9% of the total evidence, strongest at record 10 of 10.
+  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)
+       6% of the total evidence, strongest at record 2 of 10.
+  4. the average packet size in the conversation (Pkt_Len_Mean)
+       6% of the total evidence, strongest at record 9 of 10.
+
+Detector agreement: the bilstm detector carried the most weight (34%); weights across all detectors were cnn 33%, bilstm 34%, transformer 33%.
+(Explanation produced by SHAP in 0.93s. 'Attack' is the positive class.)",the longest quiet period in the conversation (Idle_Max),how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt),the average size of packets in the conversation (Pkt_Size_Avg),the size of the smallest packet in the conversation (Pkt_Len_Min),total time spent waiting between packets sent to the device (Fwd_IAT_Tot),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg),the average packet size in the conversation (Pkt_Len_Mean),the average size of packets in the conversation (Pkt_Size_Avg) | the size of the smallest packet in the conversation (Pkt_Len_Min),the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg) | how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt) | the average packet size in the conversation (Pkt_Len_Mean),total time spent waiting between packets sent to the device (Fwd_IAT_Tot) | the longest quiet period in the conversation (Idle_Max),CERTIFIED,CER-4

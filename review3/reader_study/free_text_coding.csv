@@ -1,0 +1,14 @@
+participant,"answer: which alerts looked less reliable, and what told you",noticed_label (rule: mentions UNVERIFIED or removal barely changing the decision)
+RUFNG,",",no answer
+R42RS,"the low confidence level and the UNVERIFIED status at the top.,the gain and threshold values given were difficult.",yes
+RJQ46,",",no answer
+R4HLF,"I think the alerts where the decision did not change drastically just by changing the top 1 or 2 cited measurements looked more reliable.,It was difficult to understand the first line explaining what would change based on cited measurements. It made me confused.",no
+RENL7,",",no answer
+R958P,"The [UNVERIFIED] alerts looked significantly less reliable than the [VERIFIED] ones,""best gain -0.0% at k=2, threshold 5%""",yes
+RGDND,"""none , all were same"",it was manageable",no
+RRUMH,"""Yes, some alerts appeared less reliable than others. The alerts where removing the top cited measurement barely changed the decision seemed less reliable, as the model's prediction was spread across multiple features rather than strongly supported by one key measurement."",""Yes, a few phrases were difficult to understand.""",yes
+R95PB,"few looked less reliable because they were marked as unverified and removing the citations barely changed the decision. hence the explanation was not clear,few phrases were hard to understand without any explanations of what few terms meant.",yes
+RGR9A,",",no answer
+R76YL,",",no answer
+RFMRG,"""Alerts 1, 2, 4, 6, 7, 11, 13, and 14 looked less reliable. Their explanations were marked unverified, and removing the cited measurements barely changed the model's decision. Some alerts also reported 100% confidence despite unclear explanations or evidence that argued against an attack."",""The terms ""SHAP,"" ""Bwd_Seg_Size_Avg,"" and ""removing the cited measurements barely changes this decision"" were somewhat difficult to understand. A simpler explanation of how the measurements affect the model's decision would make the notes easier to interpret.""",yes
+RAPUK,",",no answer

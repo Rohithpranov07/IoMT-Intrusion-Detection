@@ -34,7 +34,7 @@ minus identifiers & 26 & 6.26 & 211,612 & 7.54 \\
 On Edge-IIoTset the duplicate rate moves from 0.52\,\% to 98.95\,\% as identifier, nonce and payload columns are removed, and each removal is one a careful pipeline should make: ports with a distinct value on a third of all rows are connection identifiers, and payload columns contain the attack strings themselves \cite{galal2026}. Both published figures are correct, the 0.52\,\% reported over all columns \cite{galal2026} and the 98.95\,\% our earlier report gave for the modelling space; they measure different populations, and the second is the one a model sees. In that space DDoS\_UDP's 14,498 rows and DDoS\_ICMP's 14,090 rows are each a single vector, and 99.5\,\% of test rows have a training twin. The step from 38 to 30 features also shows the serialisation artefact at work: normalising the two spellings of a missing value merges 32 vectors that had been separated only by spelling, and each of them then carries both labels. IoTID20 rises from 26.2\,\% in raw rows, consistent with the 164,087 duplicates removed by Alsulami \textit{et al.} \cite{alsulami2022}, to 58.2\,\% in its modelling space. WUSTL-EHMS-2020 contains no duplicates at all, so for the two papers that use it check (d) is moot and the ordering check is the one that matters.
 
 \subsubsection{Oversampling order, isolated over 20 partitions}
-Table~\ref{tab:order} isolates the partitioning order on two datasets with a fixed learner (random forest, 100 trees). LEAKY applies SMOTE \cite{chawla2002} to the whole dataset and then splits, the order confirmed in \cite{berguiga2025} and \cite{hosain2025}; ORDER splits first and oversamples only the training fold; HONEST additionally removes duplicates in the modelling space before splitting.
+Table~\ref{tab:order} isolates the partitioning order on three datasets with a fixed learner (random forest, 100 trees). LEAKY applies SMOTE \cite{chawla2002} to the whole dataset and then splits, the order confirmed in \cite{berguiga2025} and \cite{hosain2025}; ORDER splits first and oversamples only the training fold; HONEST additionally removes duplicates in the modelling space before splitting.
 
 \begin{table}[t]
 \caption{Effect of partitioning order, 20 stratified partitions per row (mean $\pm$ sd). Attack is positive. Synth.: share of the test fold that is synthetic.}
@@ -46,6 +46,10 @@ Table~\ref{tab:order} isolates the partitioning order on two datasets with a fix
 \midrule
 WUSTL & LEAKY & 0.959 $\pm$ 0.003 & 0.962 & 0.957 & 42.7\,\% \\
 & ORDER = HONEST & 0.673 $\pm$ 0.014 & 0.724 & 0.629 & 0 \\
+\midrule
+IoTID20 & LEAKY & 0.9993 $\pm$ 0.0001 & 0.9988 & 0.9997 & 46.6\,\% \\
+& ORDER & 0.9994 $\pm$ 0.0000 & 0.9992 & 0.9997 & 0 \\
+& HONEST & 0.9983 $\pm$ 0.0001 & 0.9976 & 0.9990 & 0 \\
 \midrule
 Edge & LEAKY & 0.941 $\pm$ 0.001 & 0.994 & 0.894 & 40.9\,\% \\
 & ORDER & 0.943 $\pm$ 0.001 & 0.998 & 0.893 & 0 \\
@@ -59,4 +63,4 @@ On WUSTL-EHMS-2020 the order alone moves F1 from 0.673 to 0.959 (paired Wilcoxon
 \subsubsection{How common is the leaky order?}
 Of the four pipelines whose order we could establish, three oversample before partitioning (\cite{berguiga2025}, \cite{hosain2025}, and the prior work in our own laboratory \cite{badiyani2026}) and one does not \cite{tarish2026}. Four is too few to estimate a prevalence, and we do not; the point is that the leaky order is easy to find in recent IoMT work and that, where it is used, its effect can exceed the margin separating published methods by an order of magnitude.
 
-\pending{IoTID20 Table 3 over 20 partitions: team\_scripts/R3\_multiseed\_tables.py --dataset iotid20 --table 3. Single-partition values from Review 2: LEAKY F1 0.9986 (46.6\,\% synthetic), ORDER 0.9994, HONEST 0.9980.}
+IoTID20 is the third pattern (Table~\ref{tab:order}, 20 partitions per regime). Its record-level classes are separable enough that no regime matters much: F1 is 0.9993 when SMOTE precedes the split, 0.9994 when it follows, and 0.9983 once duplicates are removed, although 46.6\,\% of the leaky test fold is synthetic. The differences are tiny but consistent across partitions (each pairwise comparison $p = 1.3\times10^{-5}$ after Bonferroni over 7 tests), so on this dataset leakage costs a thousandth of F1, not a third. The size of the leakage penalty is therefore a property of the dataset, and a near-perfect score on an easy dataset neither proves nor rules out a leaky protocol.

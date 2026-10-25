@@ -248,10 +248,10 @@ function infoView(){
   app.replaceChildren(h("section",{class:"panel"},
     h("h2",{},"Before you start"),
     h("p",{},"A monitoring system watches network traffic going to medical devices on a hospital network. When it decides a short window of traffic is an attack, it writes a note explaining why. You will read "+session._alerts.length+" of these notes and answer a few questions about each."),
-    h("p",{},"No machine-learning background is needed and there are no trick questions about networking. We are testing whether the notes are understandable, not testing you. Each note is timed. It takes about 25 minutes."),
+    h("p",{},"Imagine you are on night duty in a hospital's IT room. The monitoring system raises "+session._alerts.length+" alerts in rounds of five. For each one you decide why it fired, what you would do, and how much you trust it. No technical background is needed: we are testing whether the notes are understandable, not testing you. It takes about 12 to 15 minutes, and you see your score at the end."),
     h("p",{},"Taking part is voluntary. You can stop at any point without giving a reason, and your answers are then discarded. Answers are stored under a code, never your name, and are reported only as group statistics."),
-    h("label",{class:"opt"},box,"I have read the information sheet, I am 18 or older, and I agree to take part."),
-    h("div",{class:"row"},btn,h("button",{onclick:()=>{session=null;consoleView("Session cancelled before consent. Nothing was stored.")}},"Cancel"))
+    h("label",{class:"opt"},box,REMOTE?"I have read this information, I am 18 or older, and I agree to take part. Ticking this box is my consent.":"I have read the information sheet, I am 18 or older, and I agree to take part."),
+    h("div",{class:"row"},btn,h("button",{onclick:()=>{session=null;REMOTE?remoteStart():consoleView("Session cancelled before consent. Nothing was stored.")}},"Cancel"))
   ));
 }
 function demoView(){
@@ -267,41 +267,54 @@ function demoView(){
 function alert2(t){let n=app.querySelector(".formmsg");if(!n){n=h("div",{class:"note formmsg",role:"alert"});app.querySelector(".panel").append(n)}n.textContent=t}
 
 function alertView(i){
-  const a=session._alerts[i];
+  const a=session._alerts[i], N=session._alerts.length;
   const pool=session._alerts.filter(x=>x.id!==a.id).flatMap(x=>x.features).filter(f=>!a.features.some(g=>g.column===f.column));
-  const extra=[...new Map([...pool,...DISTRACTORS].map(f=>[f.column,{column:f.column,description:f.description}])).values()];
+  const extra=[...new Map([...pool,...DISTRACTORS.filter(d=>!a.features.some(g=>g.column===d.column))].map(f=>[f.column,{column:f.column,description:f.description}])).values()];
   const distract=shuffled(extra,seedFrom(session.code+a.id)).slice(0,2);
   const choices=shuffled([...a.features.map(f=>({column:f.column,description:f.description})),...distract],seedFrom(a.id+session.code));
   const t0=performance.now();let firstTouch=null;
+  const round=Math.floor(i/5)+1, rounds=Math.ceil(N/5);
+  const more=h("details",{},h("summary",{class:"meta"},"Add a comment (optional)"),h("textarea",{id:"q2text","aria-label":"Comment"}));
   const panel=h("section",{class:"panel",oninput:()=>{if(firstTouch==null)firstTouch=performance.now()-t0}},
-    h("div",{class:"row",style:"justify-content:space-between"},h("h3",{},`Alert ${i+1} of ${session._alerts.length}`),h("span",{class:"meta"},session.code)),
-    h("div",{class:"progress","aria-hidden":"true"},h("div",{style:`width:${100*i/session._alerts.length}%`})),
+    h("div",{class:"row",style:"justify-content:space-between"},h("h3",{},`Round ${round} of ${rounds} · Alert ${i+1} of ${N}`),h("span",{class:"meta"},session.code)),
+    h("div",{class:"progress","aria-hidden":"true"},h("div",{style:`width:${100*i/N}%`})),
     h("pre",{class:"alert"},a.summary),
-    radioGroup("q1","1. What did the system decide?",[["ATTACK","Attack"],["NORMAL","Normal"],["UNSURE","I can't tell"]].map(([v,l])=>({value:v,label:l}))),
-    radioGroup("q1c","How sure was the system?",[["lt70","Under 70%"],["70to89","70 to 89%"],["90plus","90% or more"],["unsure","I can't tell"]].map(([v,l])=>({value:v,label:l}))),
-    h("fieldset",{},h("legend",{},"2. Why did it decide that? Tick the measurement or measurements it based the decision on."),
+    h("fieldset",{},h("legend",{},"1. Why did the system raise this alert? Tick what it based the decision on."),
       h("div",{class:"opts"},choices.map((c,k)=>h("label",{class:"opt feature"},h("input",{type:"checkbox",name:"q2",id:`q2-${k}`,value:c.column}),`${c.description} (${c.column})`)))),
-    h("fieldset",{},h("legend",{},"In your own words (one sentence)"),h("textarea",{id:"q2text","aria-label":"Reason in your own words"})),
-    radioGroup("q3","3. What would you do with this alert?",[["act","Act on it now"],["escalate","Ask someone to check it first"],["ignore","Ignore it"]].map(([v,l])=>({value:v,label:l}))),
-    scale("q4","4. How confident are you in your answers to 1 and 2?","1 guessing","7 certain"),
-    scale("q5","5. How much do you trust this alert?","1 not at all","7 completely"),
+    radioGroup("q3","2. You're on duty. What do you do?",[["act","Act on it now"],["escalate","Ask someone to check first"],["ignore","Ignore it"]].map(([v,l])=>({value:v,label:l}))),
+    scale("q4","3. How sure are you of your answer to 1?","1 guessing","7 certain"),
+    scale("q5","4. How much do you trust this alert?","1 not at all","7 completely"),
+    more,
     h("div",{class:"row"},h("button",{class:"primary",onclick:()=>{
       const r={alertId:a.id,category:a.category,certified:!!a.certified,status:a.status,position:i+1,
-        q1:val("q1"),q1c:val("q1c"),q2:vals("q2"),q2text:app.querySelector("#q2text").value.trim(),q3:val("q3"),q4:val("q4"),q5:val("q5"),
+        q1:"",q1c:"",q2:vals("q2"),q2text:(app.querySelector("#q2text")||{value:""}).value.trim(),q3:val("q3"),q4:val("q4"),q5:val("q5"),
         timeMs:Math.round(performance.now()-t0),firstInteractionMs:firstTouch==null?null:Math.round(firstTouch),
         offered:choices.map(c=>c.column),distractors:distract.map(d=>d.column)};
-      if(!r.q1||!r.q1c||!r.q2.length||!r.q3||!r.q4||!r.q5){alert2("Please answer every question (the sentence is optional).");return}
-      score(r,a);session.responses.push(r);
-      if(i+1<session._alerts.length){alertView(i+1);window.scrollTo(0,0)}else postView();
-    }},i+1<session._alerts.length?"Next alert":"Finish alerts"))
+      if(!r.q2.length||!r.q3||!r.q4||!r.q5){alert2("Please answer questions 1 to 4 (the comment is optional).");return}
+      score(r,a);session.responses.push(r);window.scrollTo(0,0);
+      if(i+1>=N){postView();return}
+      if((i+1)%5===0){breakView(i+1);return}
+      alertView(i+1);
+    }},i+1<N?"Next alert":"Finish"))
   );
   app.replaceChildren(panel);
+}
+function breakView(next){
+  const N=session._alerts.length, done=next, left=N-done;
+  const mins=Math.max(1,Math.round(left*35/60));
+  const msgs=["Good start. The first round is usually the slowest.","Halfway there. You're getting faster.","Last round. Five more and you're done."];
+  app.replaceChildren(h("section",{class:"panel"},
+    h("h3",{},`Round ${done/5} of ${Math.ceil(N/5)} complete`),
+    h("div",{class:"progress","aria-hidden":"true"},h("div",{style:`width:${100*done/N}%`})),
+    h("h2",{},`${done} of ${N} alerts reviewed`),
+    h("p",{},msgs[Math.min(done/5-1,msgs.length-1)]+` About ${mins} minute${mins===1?"":"s"} to go. Your score is revealed at the end.`),
+    h("div",{class:"row"},h("button",{class:"primary",onclick:()=>alertView(next)},"Continue"))));
 }
 function score(r,a){
   const sup=a.features.filter(f=>f.direction==="attack").map(f=>f.column);
   const opp=a.features.filter(f=>f.direction==="normal").map(f=>f.column);
-  r.q1Correct=r.q1===a.verdict;
-  const c=a.systemConfidence;r.q1cCorrect=r.q1c===(c<70?"lt70":c<90?"70to89":"90plus");
+  r.q1Correct=r.q1?r.q1===a.verdict:null;
+  const c=a.systemConfidence;r.q1cCorrect=r.q1c?r.q1c===(c<70?"lt70":c<90?"70to89":"90plus"):null;
   r.pickedSupporting=r.q2.filter(x=>sup.includes(x)).length;
   r.pickedOpposing=r.q2.filter(x=>opp.includes(x)).length;
   r.pickedDistractor=r.q2.filter(x=>r.distractors.includes(x)).length;
@@ -324,15 +337,54 @@ function postView(){
     }},"Submit"))
   ));
 }
-function thanksView(){header();app.replaceChildren(h("section",{class:"panel"},h("h2",{},"Thank you"),h("p",{},"Your answers are saved. Please hand the laptop back to the facilitator."),h("div",{class:"row"},h("button",{class:"primary",onclick:()=>consoleView("Session saved.")},"Facilitator: back to console"))))}
+function scoreCard(sess){
+  const r=sess.responses, n=r.length;
+  const ok=r.filter(x=>x.q2Correct).length;
+  const unc=r.filter(x=>x.category==="UNCERTIFIED");
+  const careful=unc.filter(x=>x.q3!=="act").length;
+  const t=r.map(x=>x.timeMs).sort((a,b)=>a-b); const med=t.length?Math.round(t[Math.floor(t.length/2)]/1000):0;
+  const stat=(big,label)=>h("div",{class:"stat",style:"flex:1 1 140px"},h("b",{style:"font-size:2rem"},big),h("span",{class:"meta"},label));
+  return h("div",{class:"row",style:"gap:16px;align-items:stretch"},
+    stat(`${ok}/${n}`,"reasons identified correctly"),
+    unc.length?stat(`${careful}/${unc.length}`,"unreliable alerts you did not act on blindly"):null,
+    stat(`${med}s`,"median time per alert"));
+}
+function thanksView(){header();
+  if(REMOTE){
+    const s=store.sessions[store.sessions.length-1];
+    const rows=flatRows().filter(r=>r.participant===s.code);
+    const box=h("textarea",{class:"dump",readonly:true,hidden:true});
+    app.replaceChildren(h("section",{class:"panel"},
+      h("h2",{},"Your results"),
+      scoreCard(s),
+      h("p",{},"One last thing before you go: some of the notes you read were ones the system itself marks as unreliable, shown by the status line at the top. We did not tell you that in advance because we wanted to see whether the line is noticed on its own."),
+      h("div",{class:"note"},"Please send your answers to the person who invited you. Tap the button below to save the file, then send it to them on WhatsApp or email. If no file appears, the answers are copied instead: paste them into a message and send that."),
+      h("div",{class:"row"},h("button",{class:"primary",onclick:()=>exportFile(`reader_study_${s.code}.csv`,toCSV(rows),box)},"Save my answers")),
+      box));
+    return}
+  const last=store.sessions[store.sessions.length-1];app.replaceChildren(h("section",{class:"panel"},h("h2",{},"Thank you"),last?scoreCard(last):null,h("p",{},"Your answers are saved. Please hand the laptop back to the facilitator."),h("div",{class:"row"},h("button",{class:"primary",onclick:()=>consoleView("Session saved.")},"Facilitator: back to console"))))}
 
 /* ---------- export ------------------------------------------------------------------- */
 function flatRows(){const out=[];for(const s of store.sessions){if(!s.completedAt)continue;for(const r of s.responses){out.push({participant:s.code,role:s.demo.role,net_experience:s.demo.net,ml_familiarity:s.demo.ml,security_familiarity:s.demo.sec,
-  alert_id:r.alertId,category:r.category,certified:r.certified?"1":"0",status:r.status,position:r.position,q1:r.q1,q1_correct:r.q1Correct?"1":"0",q1_confidence_read:r.q1c,q1_confidence_correct:r.q1cCorrect?"1":"0",
+  alert_id:r.alertId,category:r.category,certified:r.certified?"1":"0",status:r.status,position:r.position,q1:r.q1,q1_correct:r.q1Correct==null?"":(r.q1Correct?"1":"0"),q1_confidence_read:r.q1c,q1_confidence_correct:r.q1cCorrect==null?"":(r.q1cCorrect?"1":"0"),
   q2_selected:r.q2.join("|"),q2_correct:r.q2Correct?"1":"0",picked_supporting:r.pickedSupporting,picked_opposing:r.pickedOpposing,picked_distractor:r.pickedDistractor,q2_text:r.q2text,
   q3_action:r.q3,q4_self_confidence:r.q4,q5_trust:r.q5,time_ms:r.timeMs,first_interaction_ms:r.firstInteractionMs??"",
   post_unreliable:s.post.unreliable,post_unclear:s.post.unclear,post_t1:s.post.t1,post_t2:s.post.t2,post_t3:s.post.t3,started:s.startedAt,completed:s.completedAt,alert_set:s.alertSetSource})}}return out}
 function toCSV(rows){if(!rows.length)return"";const cols=Object.keys(rows[0]);const esc=v=>{v=v==null?"":String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};return[cols.join(","),...rows.map(r=>cols.map(c=>esc(r[c])).join(","))].join("\n")}
 
-consoleView();
+/* ---------- remote mode: participant opens the link with #remote on their own device ---------- */
+const REMOTE=location.hash.replace("#","")==="remote";
+function remoteStart(){
+  header();
+  const auto="R"+Array.from({length:4},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random()*32)]).join("");
+  const code=h("input",{type:"text",id:"rcode","aria-label":"Your participant code",value:auto});
+  app.replaceChildren(h("section",{class:"panel"},
+    h("h2",{},"Welcome"),
+    h("p",{},"Thank you for helping with our study. You have been given a random code below; just press Start (or type the code you were sent, if you have one). Please do it in one sitting of about 12 to 15 minutes, on a laptop or tablet if you can."),
+    h("div",{class:"row"},h("div",{style:"flex:1 1 200px;min-width:0"},code),
+      h("button",{class:"primary",onclick:()=>{const c=code.value.trim().toUpperCase();if(!/^[A-Z0-9]{2,8}$/.test(c)){alert2("Codes use letters and numbers only, for example P07.");return}if(store.sessions.some(x=>x.code===c&&x.completedAt)){alert2("This code has already been used on this device.");return}store.set=null;alertSet=FULL;startSession(c)}},"Start")),
+    h("p",{class:"meta"},"Your name is never asked for or stored.")));
+}
+
+if(REMOTE) remoteStart(); else consoleView();
 </script>

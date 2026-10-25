@@ -163,7 +163,9 @@ def table7(dataset):
         if s in done(path):
             continue
         t0 = time.time()
-        _, probs, fused, (_, _, yte) = train_partition(dataset, s)
+        models, probs, fused, (Xtr, Xte, yte) = train_partition(dataset, s)
+        if s in SEEDS[:5] and s not in done(OUT / f"{dataset}_table8.csv"):
+            stability_row(dataset, s, models, fused, Xtr, Xte)  # Table 8 from the same trained ensemble
         row = {"seed": s, "test_windows": int(len(yte)), "test_attack_rate": float(yte.mean())}
         for n, p in probs.items():
             for k, v in metrics(yte, p.argmax(1)).items():
@@ -180,32 +182,38 @@ def table7(dataset):
 
 
 # ---------------------------------------------------------------------------------- Table 8
-def table8(dataset):
+def stability_row(dataset, s, models, fused, Xtr, Xte):
     from src.models.fusion import confidence_weighted_fusion
     from src.xai.lime_explainer import EnsembleLimeExplainer
     from src.xai.metrics import measure_stability
     from src.xai.shap_explainer import EnsembleShapExplainer
     path = OUT / f"{dataset}_table8.csv"
+    names = list(models)
+    feature_names = [f"f{i}" for i in range(Xtr.shape[2])]
+    bg = Xtr[np.random.default_rng(s).choice(len(Xtr), min(500, len(Xtr)), replace=False)]
+
+    def predict_fn(w):
+        return confidence_weighted_fusion([models[n].predict(w, verbose=0) for n in names], names).probabilities
+
+    flagged = np.flatnonzero(fused.predictions == 1)[:8]
+    row = {"seed": s}
+    for method, Ex in (("shap", EnsembleShapExplainer), ("lime", EnsembleLimeExplainer)):
+        kw = {"background_size": 100} if "background_size" in inspect.signature(Ex).parameters else {}
+        ex = Ex(models, feature_names, bg, **kw)
+        r = measure_stability(ex, predict_fn, Xte[flagged], method, random_state=s)
+        row.update({f"{method}_jaccard": r.jaccard, f"{method}_spearman": r.spearman, f"{method}_flip_rate": r.prediction_flip_rate})
+    append(path, row)
+    print(f"T8 {dataset} seed {s}: SHAP {row['shap_jaccard']:.3f} LIME {row['lime_jaccard']:.3f}", flush=True)
+
+
+def table8(dataset):
+    """Seeds 1..5. Normally already filled during table7; trains only seeds that are missing."""
+    path = OUT / f"{dataset}_table8.csv"
     for s in SEEDS[:5]:
         if s in done(path):
             continue
         models, _, fused, (Xtr, Xte, _) = train_partition(dataset, s)
-        names = list(models)
-        feature_names = [f"f{i}" for i in range(Xtr.shape[2])]
-        bg = Xtr[np.random.default_rng(s).choice(len(Xtr), min(500, len(Xtr)), replace=False)]
-
-        def predict_fn(w):
-            return confidence_weighted_fusion([models[n].predict(w, verbose=0) for n in names], names).probabilities
-
-        flagged = np.flatnonzero(fused.predictions == 1)[:8]
-        row = {"seed": s}
-        for method, Ex in (("shap", EnsembleShapExplainer), ("lime", EnsembleLimeExplainer)):
-            kw = {"background_size": 100} if "background_size" in inspect.signature(Ex).parameters else {}
-            ex = Ex(models, feature_names, bg, **kw)
-            r = measure_stability(ex, predict_fn, Xte[flagged], method, random_state=s)
-            row.update({f"{method}_jaccard": r.jaccard, f"{method}_spearman": r.spearman, f"{method}_flip_rate": r.prediction_flip_rate})
-        append(path, row)
-        print(f"T8 {dataset} seed {s}: SHAP {row['shap_jaccard']:.3f} LIME {row['lime_jaccard']:.3f}", flush=True)
+        stability_row(dataset, s, models, fused, Xtr, Xte)
 
 
 # ---------------------------------------------------------------------------------- summary

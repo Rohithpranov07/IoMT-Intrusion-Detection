@@ -36,6 +36,13 @@ Within-participant. Every participant sees all 20 alerts: 8 CERTIFIED, 6 UNCERTI
 
 The facilitator does not explain any term, banner or number during a session. Answer "please use your best judgement".
 
+### 4a. Remote sessions (used when participants are not on site)
+
+To keep a session near 12 to 15 minutes, the remote version asks four questions per alert (reason checklist, action, self-confidence, trust) and drops the verdict and confidence-band questions, which every participant answers trivially because every alert is an ATTACK verdict. Alerts come in four rounds of five with a progress screen between rounds, and each participant sees their own score only after the last alert, so feedback cannot change their answers.
+
+
+Each participant opens the study link with `#remote` added to the end, on their own device. The app generates a random participant code (or accepts one the coordinator assigned), so no code list has to be kept. The information screen and the consent tick replace the paper form (electronic consent). The debrief is shown on the final screen. The participant saves their answers with "Save my answers" (or copies them if the device blocks downloads) and sends the file to the study coordinator. The coordinator combines the files before analysis. No facilitator is present, so nobody can explain terms during the session.
+
 ## 5. Measures and scoring
 
 | Measure | Definition |
@@ -46,7 +53,7 @@ The facilitator does not explain any term, banner or number during a session. An
 | Action | act / escalate / ignore |
 | Self-confidence, trust | 1 to 7 |
 | Time-to-decision | display to submit, ms |
-| Spotted unreliable | free text, coded by two team members independently; report Cohen's kappa |
+| Spotted unreliable | free text, coded independently by two team members (Cohen's kappa reported) and checked against a fixed rule (mentions UNVERIFIED, or that removing the cited measurements barely changes the decision); see `coding/` |
 
 ## 6. Analysis
 

@@ -1,6 +1,22 @@
 \subsection{Detection pipeline: partitions, ensembles and generalisation}\label{sec:pipeline}
 \subsubsection{Ensemble ablation}
-The three-branch ensemble (a three-layer 1-D CNN; a two-layer BiLSTM with 64 units per direction; a two-layer, four-head transformer encoder; confidence-weighted fusion) operates on ten-record flow windows built within sessions, with sessions rather than windows assigned to folds. On a single session-level partition (Table~\ref{tab:ensemble}) the fused ensemble is beaten by its best branch on both datasets, and the best branch differs between them. The three branches agree on 90.9\,\% of IoTID20 test windows, so fusion acts on 9.1\,\% of them, and an oracle that resolved every disagreement correctly would gain only 0.026 accuracy over the best branch. \pending{20-partition version of this table: team\_scripts/R3\_multiseed\_tables.py --table 7 for both datasets, adding mean $\pm$ sd and a paired test of ensemble against best branch.}
+The three-branch ensemble (a three-layer 1-D CNN; a two-layer BiLSTM with 64 units per direction; a two-layer, four-head transformer encoder; confidence-weighted fusion) operates on ten-record flow windows built within sessions, with sessions rather than windows assigned to folds. On a single session-level partition (Table~\ref{tab:ensemble}) the fused ensemble is beaten by its best branch on both datasets, and the best branch differs between them. The three branches agree on 90.9\,\% of IoTID20 test windows, so fusion acts on 9.1\,\% of them, and an oracle that resolved every disagreement correctly would gain only 0.026 accuracy over the best branch. Over 20 session-level partitions (Table~\ref{tab:ensemble20}) the result holds and sharpens. On IoTID20 the ensemble's F1 is $0.949 \pm 0.012$ against $0.958 \pm 0.017$ for the BiLSTM, and the ensemble beats the best branch of its own partition in 1 of 20 partitions; on Edge-IIoTset it is $0.870 \pm 0.014$ against $0.932 \pm 0.042$ for the CNN and never beats the best branch. Both differences are significant (paired Wilcoxon, Bonferroni over 7 tests: $p = 2.7\times10^{-5}$ and $1.3\times10^{-5}$). The best branch differs by dataset (BiLSTM in 15 of 20 IoTID20 partitions, CNN in 17 of 20 Edge-IIoTset partitions), and on IoTID20 the single-partition winner of Review~2, the transformer, is best in only 4. What fusion does buy is stability: its standard deviation is the smallest of the four on both datasets. The branches agree on $87.5 \pm 3.5\,\%$ of IoTID20 windows and $75.7 \pm 9.8\,\%$ of Edge-IIoTset windows, and an oracle that resolved every disagreement correctly would gain $0.025$ and $0.058$ accuracy over the best branch.
+
+\begin{table}[t]
+\caption{Window-level F1 over 20 session-level partitions (mean $\pm$ sd). Attack is positive.}
+\label{tab:ensemble20}
+\centering\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Configuration} & \textbf{IoTID20} & \textbf{Edge-IIoTset} \\
+\midrule
+CNN alone & 0.934 $\pm$ 0.020 & \textbf{0.932 $\pm$ 0.042} \\
+BiLSTM alone & \textbf{0.958 $\pm$ 0.017} & 0.856 $\pm$ 0.031 \\
+Transformer alone & 0.939 $\pm$ 0.020 & 0.870 $\pm$ 0.023 \\
+Full three-branch ensemble & 0.949 $\pm$ 0.012 & 0.870 $\pm$ 0.014 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[t]
 \caption{Window-level accuracy, single session-level partition (Review 2). Attack is positive.}
