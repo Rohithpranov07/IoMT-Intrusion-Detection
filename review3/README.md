@@ -51,4 +51,4 @@ Regression check: with default options `sim/hids-r3` and `orig/hids-iomt-adaptiv
 This folder sits inside the project repository as `review3/`; paths in the table are relative to it.
 
 
-Code: MIT (see `LICENSE`). Cite via `CITATION.cff`. After pushing to GitHub, enable the Zenodo GitHub integration and create a release to mint the DOI; `.zenodo.json` supplies the metadata.
+Archived on Zenodo: [doi:10.5281/zenodo.23638403](https://doi.org/10.5281/zenodo.23638403) (always the latest version; first release 10.5281/zenodo.23638404). Cite via `CITATION.cff` at the repository root.

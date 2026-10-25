@@ -1,0 +1,1031 @@
+{
+  "source": "real model outputs from artifacts/ (notebook 03 ensemble); SHAP + per-alert certification",
+  "counts": {
+    "CERTIFIED": 8,
+    "UNCERTIFIED": 6,
+    "CONTRADICTORY": 6
+  },
+  "shortfall": {},
+  "alerts": [
+    {
+      "id": "CER-1",
+      "category": "CERTIFIED",
+      "test_index": 1,
+      "true_label": "Attack",
+      "confidence": 0.9799892106279658,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 1 cited measurement changes this decision by 98%, against 19% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 98% confidence.\n\nWhat pointed to Attack:\n  1. the average size of packets in the conversation (Pkt_Size_Avg)\n       23% of the total evidence, strongest at record 9 of 10.\n  5. the size of the smallest packet in the conversation (Pkt_Len_Min)\n       7% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       14% of the total evidence, strongest at record 9 of 10.\n  3. the average packet size in the conversation (Pkt_Len_Mean)\n       8% of the total evidence, strongest at record 10 of 10.\n  4. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       7% of the total evidence, strongest at record 10 of 10.\n\nDetector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.98s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.2252142795480816,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 2,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.1383651570266763,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 3,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.08342077321445791,
+          "direction": "normal",
+          "peak_record": 10
+        },
+        {
+          "rank": 4,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.07028448419300183,
+          "direction": "normal",
+          "peak_record": 10
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Min",
+          "description": "the size of the smallest packet in the conversation",
+          "share": 0.06861522795214856,
+          "direction": "attack",
+          "peak_record": 9
+        }
+      ]
+    },
+    {
+      "id": "CER-2",
+      "category": "CERTIFIED",
+      "test_index": 2,
+      "true_label": "Attack",
+      "confidence": 0.9957216513643463,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 1 cited measurement changes this decision by 98%, against 20% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. the average size of packets in the conversation (Pkt_Size_Avg)\n       19% of the total evidence, strongest at record 7 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       14% of the total evidence, strongest at record 9 of 10.\n  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       7% of the total evidence, strongest at record 9 of 10.\n  4. the size of the largest packet in the conversation (Pkt_Len_Max)\n       5% of the total evidence, strongest at record 7 of 10.\n  5. how many packets were acknowledgements of data already received (ACK_Flag_Cnt)\n       5% of the total evidence, strongest at record 8 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.99s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.1909902942138569,
+          "direction": "attack",
+          "peak_record": 7
+        },
+        {
+          "rank": 2,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.13584353453915338,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 3,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.06789585288038928,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Max",
+          "description": "the size of the largest packet in the conversation",
+          "share": 0.04736866844916148,
+          "direction": "normal",
+          "peak_record": 7
+        },
+        {
+          "rank": 5,
+          "column": "ACK_Flag_Cnt",
+          "description": "how many packets were acknowledgements of data already received",
+          "share": 0.04701252947592418,
+          "direction": "normal",
+          "peak_record": 8
+        }
+      ]
+    },
+    {
+      "id": "CER-3",
+      "category": "CERTIFIED",
+      "test_index": 3,
+      "true_label": "Attack",
+      "confidence": 0.9996113023775427,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 1 cited measurement changes this decision by 92%, against 18% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. the average size of packets in the conversation (Pkt_Size_Avg)\n       18% of the total evidence, strongest at record 8 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       12% of the total evidence, strongest at record 9 of 10.\n  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       7% of the total evidence, strongest at record 8 of 10.\n  4. the size of the largest packet in the conversation (Pkt_Len_Max)\n       5% of the total evidence, strongest at record 9 of 10.\n  5. how many packets were acknowledgements of data already received (ACK_Flag_Cnt)\n       5% of the total evidence, strongest at record 3 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.85s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.17716064271436197,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 2,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.12137078881442036,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 3,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.06540948307389251,
+          "direction": "normal",
+          "peak_record": 8
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Max",
+          "description": "the size of the largest packet in the conversation",
+          "share": 0.04613237797568089,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 5,
+          "column": "ACK_Flag_Cnt",
+          "description": "how many packets were acknowledgements of data already received",
+          "share": 0.04567413663084734,
+          "direction": "normal",
+          "peak_record": 3
+        }
+      ]
+    },
+    {
+      "id": "CER-4",
+      "category": "CERTIFIED",
+      "test_index": 4,
+      "true_label": "Attack",
+      "confidence": 0.9875305373670008,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 1 cited measurement changes this decision by 99%, against 19% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 99% confidence.\n\nWhat pointed to Attack:\n  1. the average size of packets in the conversation (Pkt_Size_Avg)\n       18% of the total evidence, strongest at record 7 of 10.\n  5. the size of the smallest packet in the conversation (Pkt_Len_Min)\n       5% of the total evidence, strongest at record 6 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       9% of the total evidence, strongest at record 10 of 10.\n  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       6% of the total evidence, strongest at record 2 of 10.\n  4. the average packet size in the conversation (Pkt_Len_Mean)\n       6% of the total evidence, strongest at record 9 of 10.\n\nDetector agreement: the bilstm detector carried the most weight (34%); weights across all detectors were cnn 33%, bilstm 34%, transformer 33%.\n(Explanation produced by SHAP in 0.93s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.17946891553127675,
+          "direction": "attack",
+          "peak_record": 7
+        },
+        {
+          "rank": 2,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.09304787149398872,
+          "direction": "normal",
+          "peak_record": 10
+        },
+        {
+          "rank": 3,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.06252570242069384,
+          "direction": "normal",
+          "peak_record": 2
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.06060700850729286,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Min",
+          "description": "the size of the smallest packet in the conversation",
+          "share": 0.0523274250379308,
+          "direction": "attack",
+          "peak_record": 6
+        }
+      ]
+    },
+    {
+      "id": "CER-5",
+      "category": "CERTIFIED",
+      "test_index": 5,
+      "true_label": "Attack",
+      "confidence": 0.9975459970126127,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 1 cited measurement changes this decision by 100%, against 20% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. the average size of packets in the conversation (Pkt_Size_Avg)\n       22% of the total evidence, strongest at record 8 of 10.\n  4. the size of the smallest packet in the conversation (Pkt_Len_Min)\n       6% of the total evidence, strongest at record 8 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       11% of the total evidence, strongest at record 9 of 10.\n  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       10% of the total evidence, strongest at record 9 of 10.\n  5. the average packet size in the conversation (Pkt_Len_Mean)\n       6% of the total evidence, strongest at record 4 of 10.\n\nDetector agreement: the bilstm detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.87s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.2214202745525064,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 2,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.10957060976491939,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 3,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.09795825871971026,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Min",
+          "description": "the size of the smallest packet in the conversation",
+          "share": 0.05855602756338227,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.057635908948750134,
+          "direction": "normal",
+          "peak_record": 4
+        }
+      ]
+    },
+    {
+      "id": "CER-6",
+      "category": "CERTIFIED",
+      "test_index": 6,
+      "true_label": "Attack",
+      "confidence": 0.9963002550865434,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 1 cited measurement changes this decision by 100%, against 20% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. the average size of packets in the conversation (Pkt_Size_Avg)\n       20% of the total evidence, strongest at record 7 of 10.\n  5. the size of the smallest packet in the conversation (Pkt_Len_Min)\n       6% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       9% of the total evidence, strongest at record 9 of 10.\n  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       8% of the total evidence, strongest at record 6 of 10.\n  4. the average packet size in the conversation (Pkt_Len_Mean)\n       6% of the total evidence, strongest at record 3 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 1.05s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.1962019561120341,
+          "direction": "attack",
+          "peak_record": 7
+        },
+        {
+          "rank": 2,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.0864714592386518,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 3,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.07752364949024124,
+          "direction": "normal",
+          "peak_record": 6
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.056821679345635145,
+          "direction": "normal",
+          "peak_record": 3
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Min",
+          "description": "the size of the smallest packet in the conversation",
+          "share": 0.05611579861121651,
+          "direction": "attack",
+          "peak_record": 9
+        }
+      ]
+    },
+    {
+      "id": "CER-7",
+      "category": "CERTIFIED",
+      "test_index": 7,
+      "true_label": "Attack",
+      "confidence": 0.985640151294582,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 1 cited measurement changes this decision by 99%, against 19% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 99% confidence.\n\nWhat pointed to Attack:\n  1. the average size of packets in the conversation (Pkt_Size_Avg)\n       24% of the total evidence, strongest at record 9 of 10.\n  5. the size of the smallest packet in the conversation (Pkt_Len_Min)\n       6% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       12% of the total evidence, strongest at record 9 of 10.\n  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       7% of the total evidence, strongest at record 2 of 10.\n  4. the average packet size in the conversation (Pkt_Len_Mean)\n       7% of the total evidence, strongest at record 9 of 10.\n\nDetector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 34%.\n(Explanation produced by SHAP in 1.01s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.24395649163672856,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 2,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.11560922771509277,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 3,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.07498044629289678,
+          "direction": "normal",
+          "peak_record": 2
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.06883514640160802,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Min",
+          "description": "the size of the smallest packet in the conversation",
+          "share": 0.05742604095499887,
+          "direction": "attack",
+          "peak_record": 9
+        }
+      ]
+    },
+    {
+      "id": "CER-8",
+      "category": "CERTIFIED",
+      "test_index": 8,
+      "true_label": "Attack",
+      "confidence": 0.9901503497552968,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 1 cited measurement changes this decision by 99%, against 20% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 99% confidence.\n\nWhat pointed to Attack:\n  1. the average size of packets in the conversation (Pkt_Size_Avg)\n       22% of the total evidence, strongest at record 6 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       11% of the total evidence, strongest at record 7 of 10.\n  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       8% of the total evidence, strongest at record 7 of 10.\n  4. the average packet size in the conversation (Pkt_Len_Mean)\n       7% of the total evidence, strongest at record 7 of 10.\n  5. the size of the largest packet in the conversation (Pkt_Len_Max)\n       6% of the total evidence, strongest at record 7 of 10.\n\nDetector agreement: the cnn detector carried the most weight (34%); weights across all detectors were cnn 34%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.74s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.222968078153047,
+          "direction": "attack",
+          "peak_record": 6
+        },
+        {
+          "rank": 2,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.11022163717111619,
+          "direction": "normal",
+          "peak_record": 7
+        },
+        {
+          "rank": 3,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.0837350503790359,
+          "direction": "normal",
+          "peak_record": 7
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.06877086804566608,
+          "direction": "normal",
+          "peak_record": 7
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Max",
+          "description": "the size of the largest packet in the conversation",
+          "share": 0.05939805775133142,
+          "direction": "normal",
+          "peak_record": 7
+        }
+      ]
+    },
+    {
+      "id": "UNC-159",
+      "category": "UNCERTIFIED",
+      "test_index": 159,
+      "true_label": "Attack",
+      "confidence": 0.9997248060856359,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +0.1% at k=3, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       11% of the total evidence, strongest at record 4 of 10.\n  4. the average packet size in the conversation (Pkt_Len_Mean)\n       7% of the total evidence, strongest at record 7 of 10.\n  5. the largest packet sent to the device (Fwd_Pkt_Len_Max)\n       6% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       11% of the total evidence, strongest at record 2 of 10.\n  3. the average size of packets in the conversation (Pkt_Size_Avg)\n       8% of the total evidence, strongest at record 5 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 1.00s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.11003493328954815,
+          "direction": "attack",
+          "peak_record": 4
+        },
+        {
+          "rank": 2,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.10854471293003495,
+          "direction": "normal",
+          "peak_record": 2
+        },
+        {
+          "rank": 3,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.08177116060337816,
+          "direction": "normal",
+          "peak_record": 5
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.07453136029886481,
+          "direction": "attack",
+          "peak_record": 7
+        },
+        {
+          "rank": 5,
+          "column": "Fwd_Pkt_Len_Max",
+          "description": "the largest packet sent to the device",
+          "share": 0.05559382007169058,
+          "direction": "attack",
+          "peak_record": 9
+        }
+      ]
+    },
+    {
+      "id": "UNC-267",
+      "category": "UNCERTIFIED",
+      "test_index": 267,
+      "true_label": "Attack",
+      "confidence": 0.9999616160306624,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +1.0% at k=5, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       13% of the total evidence, strongest at record 9 of 10.\n  4. the average packet size in the conversation (Pkt_Len_Mean)\n       9% of the total evidence, strongest at record 10 of 10.\n  5. the largest packet sent to the device (Fwd_Pkt_Len_Max)\n       7% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average size of packets in the conversation (Pkt_Size_Avg)\n       10% of the total evidence, strongest at record 10 of 10.\n  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       9% of the total evidence, strongest at record 10 of 10.\n\nDetector agreement: the bilstm detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 1.03s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.12661728400652747,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 2,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.10226467900430432,
+          "direction": "normal",
+          "peak_record": 10
+        },
+        {
+          "rank": 3,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.0880803523505755,
+          "direction": "normal",
+          "peak_record": 10
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.08657583691242338,
+          "direction": "attack",
+          "peak_record": 10
+        },
+        {
+          "rank": 5,
+          "column": "Fwd_Pkt_Len_Max",
+          "description": "the largest packet sent to the device",
+          "share": 0.07209848802322669,
+          "direction": "attack",
+          "peak_record": 9
+        }
+      ]
+    },
+    {
+      "id": "UNC-366",
+      "category": "UNCERTIFIED",
+      "test_index": 366,
+      "true_label": "Attack",
+      "confidence": 0.9998925348978738,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +0.0% at k=5, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. how long the conversation lasted (Flow_Duration)\n       12% of the total evidence, strongest at record 10 of 10.\n  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       8% of the total evidence, strongest at record 8 of 10.\n  4. the longest quiet period in the conversation (Idle_Max)\n       7% of the total evidence, strongest at record 10 of 10.\n  5. the average packet size in the conversation (Pkt_Len_Mean)\n       6% of the total evidence, strongest at record 8 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average size of packets in the conversation (Pkt_Size_Avg)\n       10% of the total evidence, strongest at record 8 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 1.05s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Flow_Duration",
+          "description": "how long the conversation lasted",
+          "share": 0.11590280068863604,
+          "direction": "attack",
+          "peak_record": 10
+        },
+        {
+          "rank": 2,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.1033449701216162,
+          "direction": "normal",
+          "peak_record": 8
+        },
+        {
+          "rank": 3,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.0791959361070931,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 4,
+          "column": "Idle_Max",
+          "description": "the longest quiet period in the conversation",
+          "share": 0.06676411643131876,
+          "direction": "attack",
+          "peak_record": 10
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.05578736609564794,
+          "direction": "attack",
+          "peak_record": 8
+        }
+      ]
+    },
+    {
+      "id": "UNC-479",
+      "category": "UNCERTIFIED",
+      "test_index": 479,
+      "true_label": "Attack",
+      "confidence": 0.9989436667428694,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +0.3% at k=3, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. total time spent waiting between packets sent to the device (Fwd_IAT_Tot)\n       9% of the total evidence, strongest at record 8 of 10.\n  3. the longest pause between packets sent to the device (Fwd_IAT_Max)\n       8% of the total evidence, strongest at record 8 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. the average gap between replies from the device (Bwd_IAT_Mean)\n       8% of the total evidence, strongest at record 1 of 10.\n  4. the shortest gap between replies from the device (Bwd_IAT_Min)\n       7% of the total evidence, strongest at record 1 of 10.\n  5. the average gap between packets in the conversation (Flow_IAT_Mean)\n       7% of the total evidence, strongest at record 2 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.85s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Fwd_IAT_Tot",
+          "description": "total time spent waiting between packets sent to the device",
+          "share": 0.0880297066504333,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 2,
+          "column": "Bwd_IAT_Mean",
+          "description": "the average gap between replies from the device",
+          "share": 0.07960579250374399,
+          "direction": "normal",
+          "peak_record": 1
+        },
+        {
+          "rank": 3,
+          "column": "Fwd_IAT_Max",
+          "description": "the longest pause between packets sent to the device",
+          "share": 0.07529164330850922,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 4,
+          "column": "Bwd_IAT_Min",
+          "description": "the shortest gap between replies from the device",
+          "share": 0.07444625107131277,
+          "direction": "normal",
+          "peak_record": 1
+        },
+        {
+          "rank": 5,
+          "column": "Flow_IAT_Mean",
+          "description": "the average gap between packets in the conversation",
+          "share": 0.07212058148577968,
+          "direction": "normal",
+          "peak_record": 2
+        }
+      ]
+    },
+    {
+      "id": "UNC-529",
+      "category": "UNCERTIFIED",
+      "test_index": 529,
+      "true_label": "Attack",
+      "confidence": 0.9999802511273489,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain -0.0% at k=2, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts)\n       13% of the total evidence, strongest at record 4 of 10.\n  3. the total size of the addressing information on the device's replies (Bwd_Header_Len)\n       7% of the total evidence, strongest at record 4 of 10.\n  4. which network protocol was used (TCP, UDP, or other) (Protocol)\n       7% of the total evidence, strongest at record 1 of 10.\n\nWhat argued against it (these looked more like Normal):\n  2. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       8% of the total evidence, strongest at record 4 of 10.\n  5. how many packets were acknowledgements of data already received (ACK_Flag_Cnt)\n       5% of the total evidence, strongest at record 6 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.86s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Init_Bwd_Win_Byts",
+          "description": "how much data the device said it was ready to receive when it first replied",
+          "share": 0.12742382374891775,
+          "direction": "attack",
+          "peak_record": 4
+        },
+        {
+          "rank": 2,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.08229695162822881,
+          "direction": "normal",
+          "peak_record": 4
+        },
+        {
+          "rank": 3,
+          "column": "Bwd_Header_Len",
+          "description": "the total size of the addressing information on the device's replies",
+          "share": 0.0661505655145292,
+          "direction": "attack",
+          "peak_record": 4
+        },
+        {
+          "rank": 4,
+          "column": "Protocol",
+          "description": "which network protocol was used (TCP, UDP, or other)",
+          "share": 0.06542617464453039,
+          "direction": "attack",
+          "peak_record": 1
+        },
+        {
+          "rank": 5,
+          "column": "ACK_Flag_Cnt",
+          "description": "how many packets were acknowledgements of data already received",
+          "share": 0.04512383221580809,
+          "direction": "normal",
+          "peak_record": 6
+        }
+      ]
+    },
+    {
+      "id": "UNC-541",
+      "category": "UNCERTIFIED",
+      "test_index": 541,
+      "true_label": "Attack",
+      "confidence": 0.9999927676631916,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +0.0% at k=2, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  1. the smallest packet sent to the device (Fwd_Pkt_Len_Min)\n       13% of the total evidence, strongest at record 8 of 10.\n  2. how much data the device said it was ready to receive when it first replied (Init_Bwd_Win_Byts)\n       11% of the total evidence, strongest at record 6 of 10.\n  4. which network protocol was used (TCP, UDP, or other) (Protocol)\n       9% of the total evidence, strongest at record 8 of 10.\n  5. the total size of the addressing information on the device's replies (Bwd_Header_Len)\n       6% of the total evidence, strongest at record 8 of 10.\n\nWhat argued against it (these looked more like Normal):\n  3. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       11% of the total evidence, strongest at record 2 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.81s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "Fwd_Pkt_Len_Min",
+          "description": "the smallest packet sent to the device",
+          "share": 0.13485487120014694,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 2,
+          "column": "Init_Bwd_Win_Byts",
+          "description": "how much data the device said it was ready to receive when it first replied",
+          "share": 0.10707476831374413,
+          "direction": "attack",
+          "peak_record": 6
+        },
+        {
+          "rank": 3,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.1057531278976624,
+          "direction": "normal",
+          "peak_record": 2
+        },
+        {
+          "rank": 4,
+          "column": "Protocol",
+          "description": "which network protocol was used (TCP, UDP, or other)",
+          "share": 0.09483728448190823,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 5,
+          "column": "Bwd_Header_Len",
+          "description": "the total size of the addressing information on the device's replies",
+          "share": 0.060652507986920706,
+          "direction": "attack",
+          "peak_record": 8
+        }
+      ]
+    },
+    {
+      "id": "CON-0",
+      "category": "CONTRADICTORY",
+      "test_index": 0,
+      "true_label": "Attack",
+      "confidence": 0.6819471293387861,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain -13.4% at k=5, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 68% confidence.\n\nWhat pointed to Attack:\n  3. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       7% of the total evidence, strongest at record 6 of 10.\n  5. the average packet size in the conversation (Pkt_Len_Mean)\n       5% of the total evidence, strongest at record 6 of 10.\n\nWhat argued against it (these looked more like Normal):\n  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       18% of the total evidence, strongest at record 2 of 10.\n  2. the average size of packets in the conversation (Pkt_Size_Avg)\n       11% of the total evidence, strongest at record 9 of 10.\n  4. which network protocol was used (TCP, UDP, or other) (Protocol)\n       6% of the total evidence, strongest at record 1 of 10.\n\nDetector agreement: the bilstm detector carried the most weight (39%); weights across all detectors were cnn 32%, bilstm 39%, transformer 29%.\n(Explanation produced by SHAP in 8.19s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.1806331051343379,
+          "direction": "normal",
+          "peak_record": 2
+        },
+        {
+          "rank": 2,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.11193227778779569,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 3,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.07254230923329719,
+          "direction": "attack",
+          "peak_record": 6
+        },
+        {
+          "rank": 4,
+          "column": "Protocol",
+          "description": "which network protocol was used (TCP, UDP, or other)",
+          "share": 0.056156018939835906,
+          "direction": "normal",
+          "peak_record": 1
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Mean",
+          "description": "the average packet size in the conversation",
+          "share": 0.05438550140507276,
+          "direction": "attack",
+          "peak_record": 6
+        }
+      ]
+    },
+    {
+      "id": "CON-16",
+      "category": "CONTRADICTORY",
+      "test_index": 16,
+      "true_label": "Attack",
+      "confidence": 0.9992996730023289,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 2 cited measurements changes this decision by 14%, against 0% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  2. the average size of packets in the conversation (Pkt_Size_Avg)\n       9% of the total evidence, strongest at record 3 of 10.\n  3. the largest packet sent to the device (Fwd_Pkt_Len_Max)\n       9% of the total evidence, strongest at record 9 of 10.\n  5. the average size of packets sent to the device (Fwd_Pkt_Len_Mean)\n       6% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       14% of the total evidence, strongest at record 2 of 10.\n  4. the smallest packet sent to the device (Fwd_Pkt_Len_Min)\n       7% of the total evidence, strongest at record 9 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.96s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.13733371616685058,
+          "direction": "normal",
+          "peak_record": 2
+        },
+        {
+          "rank": 2,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.09015015979076275,
+          "direction": "attack",
+          "peak_record": 3
+        },
+        {
+          "rank": 3,
+          "column": "Fwd_Pkt_Len_Max",
+          "description": "the largest packet sent to the device",
+          "share": 0.08634294047330103,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 4,
+          "column": "Fwd_Pkt_Len_Min",
+          "description": "the smallest packet sent to the device",
+          "share": 0.07424087879830625,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 5,
+          "column": "Fwd_Pkt_Len_Mean",
+          "description": "the average size of packets sent to the device",
+          "share": 0.05614587375111541,
+          "direction": "attack",
+          "peak_record": 9
+        }
+      ]
+    },
+    {
+      "id": "CON-17",
+      "category": "CONTRADICTORY",
+      "test_index": 17,
+      "true_label": "Attack",
+      "confidence": 0.9998462327253825,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 2 cited measurements changes this decision by 7%, against 0% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  2. the average size of packets in the conversation (Pkt_Size_Avg)\n       7% of the total evidence, strongest at record 8 of 10.\n  3. the largest packet sent to the device (Fwd_Pkt_Len_Max)\n       7% of the total evidence, strongest at record 9 of 10.\n  5. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       5% of the total evidence, strongest at record 10 of 10.\n\nWhat argued against it (these looked more like Normal):\n  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       19% of the total evidence, strongest at record 9 of 10.\n  4. the size of the largest packet in the conversation (Pkt_Len_Max)\n       6% of the total evidence, strongest at record 8 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.95s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.19198950707398815,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 2,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.07309705728175903,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 3,
+          "column": "Fwd_Pkt_Len_Max",
+          "description": "the largest packet sent to the device",
+          "share": 0.06747820163022304,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 4,
+          "column": "Pkt_Len_Max",
+          "description": "the size of the largest packet in the conversation",
+          "share": 0.05916207131426195,
+          "direction": "normal",
+          "peak_record": 8
+        },
+        {
+          "rank": 5,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.052192734722579216,
+          "direction": "attack",
+          "peak_record": 10
+        }
+      ]
+    },
+    {
+      "id": "CON-18",
+      "category": "CONTRADICTORY",
+      "test_index": 18,
+      "true_label": "Attack",
+      "confidence": 0.9998392358000865,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain +1.7% at k=3, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  2. the average size of packets in the conversation (Pkt_Size_Avg)\n       8% of the total evidence, strongest at record 5 of 10.\n  3. the largest packet sent to the device (Fwd_Pkt_Len_Max)\n       5% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       19% of the total evidence, strongest at record 9 of 10.\n  4. the smallest packet sent to the device (Fwd_Pkt_Len_Min)\n       5% of the total evidence, strongest at record 9 of 10.\n  5. the size of the largest packet in the conversation (Pkt_Len_Max)\n       5% of the total evidence, strongest at record 3 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 1.08s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.19166466839316798,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 2,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.07812836536476397,
+          "direction": "attack",
+          "peak_record": 5
+        },
+        {
+          "rank": 3,
+          "column": "Fwd_Pkt_Len_Max",
+          "description": "the largest packet sent to the device",
+          "share": 0.0538825573632775,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 4,
+          "column": "Fwd_Pkt_Len_Min",
+          "description": "the smallest packet sent to the device",
+          "share": 0.05351799577638503,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 5,
+          "column": "Pkt_Len_Max",
+          "description": "the size of the largest packet in the conversation",
+          "share": 0.048970678678329285,
+          "direction": "normal",
+          "peak_record": 3
+        }
+      ]
+    },
+    {
+      "id": "CON-19",
+      "category": "CONTRADICTORY",
+      "test_index": 19,
+      "true_label": "Attack",
+      "confidence": 0.9998939743742989,
+      "certified": false,
+      "summary": "[UNVERIFIED] removing the cited measurements barely changes this decision (best gain -0.0% at k=2, threshold 5%) \u2014 the model's decision here is spread across many measurements, so no short list explains it\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  2. the largest packet sent to the device (Fwd_Pkt_Len_Max)\n       10% of the total evidence, strongest at record 9 of 10.\n  4. the average size of packets sent to the device (Fwd_Pkt_Len_Mean)\n       6% of the total evidence, strongest at record 9 of 10.\n  5. the average amount of useful data per packet the device sent back (Bwd_Seg_Size_Avg)\n       5% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       18% of the total evidence, strongest at record 1 of 10.\n  3. the smallest packet sent to the device (Fwd_Pkt_Len_Min)\n       8% of the total evidence, strongest at record 9 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.98s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.17760760019964542,
+          "direction": "normal",
+          "peak_record": 1
+        },
+        {
+          "rank": 2,
+          "column": "Fwd_Pkt_Len_Max",
+          "description": "the largest packet sent to the device",
+          "share": 0.09562481285379838,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 3,
+          "column": "Fwd_Pkt_Len_Min",
+          "description": "the smallest packet sent to the device",
+          "share": 0.08245978901791766,
+          "direction": "normal",
+          "peak_record": 9
+        },
+        {
+          "rank": 4,
+          "column": "Fwd_Pkt_Len_Mean",
+          "description": "the average size of packets sent to the device",
+          "share": 0.056472500297185195,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 5,
+          "column": "Bwd_Seg_Size_Avg",
+          "description": "the average amount of useful data per packet the device sent back",
+          "share": 0.052766798106427586,
+          "direction": "attack",
+          "peak_record": 9
+        }
+      ]
+    },
+    {
+      "id": "CON-20",
+      "category": "CONTRADICTORY",
+      "test_index": 20,
+      "true_label": "Attack",
+      "confidence": 0.9998754537317954,
+      "certified": true,
+      "summary": "[VERIFIED] Removing the top 5 cited measurements changes this decision by 9%, against 0% for unrelated ones.\n\nALERT: this traffic window was classified as ATTACK with 100% confidence.\n\nWhat pointed to Attack:\n  2. the average size of packets in the conversation (Pkt_Size_Avg)\n       12% of the total evidence, strongest at record 8 of 10.\n  4. the largest packet sent to the device (Fwd_Pkt_Len_Max)\n       4% of the total evidence, strongest at record 9 of 10.\n\nWhat argued against it (these looked more like Normal):\n  1. how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look) (SYN_Flag_Cnt)\n       13% of the total evidence, strongest at record 2 of 10.\n  3. the size of the largest packet in the conversation (Pkt_Len_Max)\n       5% of the total evidence, strongest at record 8 of 10.\n  5. how many packets were acknowledgements of data already received (ACK_Flag_Cnt)\n       4% of the total evidence, strongest at record 2 of 10.\n\nDetector agreement: the cnn detector carried the most weight (33%); weights across all detectors were cnn 33%, bilstm 33%, transformer 33%.\n(Explanation produced by SHAP in 0.93s. 'Attack' is the positive class.)",
+      "features": [
+        {
+          "rank": 1,
+          "column": "SYN_Flag_Cnt",
+          "description": "how many packets were requests to open a new connection (a flood of these is how port scans and SYN attacks look)",
+          "share": 0.1322968814956735,
+          "direction": "normal",
+          "peak_record": 2
+        },
+        {
+          "rank": 2,
+          "column": "Pkt_Size_Avg",
+          "description": "the average size of packets in the conversation",
+          "share": 0.11801732582220893,
+          "direction": "attack",
+          "peak_record": 8
+        },
+        {
+          "rank": 3,
+          "column": "Pkt_Len_Max",
+          "description": "the size of the largest packet in the conversation",
+          "share": 0.04574913300269902,
+          "direction": "normal",
+          "peak_record": 8
+        },
+        {
+          "rank": 4,
+          "column": "Fwd_Pkt_Len_Max",
+          "description": "the largest packet sent to the device",
+          "share": 0.04442960985767385,
+          "direction": "attack",
+          "peak_record": 9
+        },
+        {
+          "rank": 5,
+          "column": "ACK_Flag_Cnt",
+          "description": "how many packets were acknowledgements of data already received",
+          "share": 0.036276809986824955,
+          "direction": "normal",
+          "peak_record": 2
+        }
+      ]
+    }
+  ]
+}

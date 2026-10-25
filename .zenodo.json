@@ -1,0 +1,14 @@
+{
+  "title": "Network-level evaluation of IoMT intrusion detection: simulator, experiments and analysis",
+  "upload_type": "software",
+  "license": "MIT",
+  "creators": [
+    {"name": "Balaji, Malika", "affiliation": "Vellore Institute of Technology"},
+    {"name": "Prabhu, Nehaa", "affiliation": "Vellore Institute of Technology"},
+    {"name": "Pranov, Rohith", "affiliation": "Vellore Institute of Technology"},
+    {"name": "Muthuswamy, Sanhit", "affiliation": "Vellore Institute of Technology"},
+    {"name": "V. P., Rakshan", "affiliation": "Vellore Institute of Technology"}
+  ],
+  "keywords": ["IoMT", "intrusion detection", "ns-3", "data leakage", "adaptive thresholds", "reproducibility"],
+  "description": "ns-3 simulator placing an IoMT intrusion detector in the fog data path, all raw simulation runs, dataset leakage measurements, audit of published metrics, hardware latency harness, reader-study materials and the analysis that regenerates every table and figure."
+}

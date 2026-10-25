@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software or its data, please cite it as below."
+title: "Network-level evaluation of IoMT intrusion detection: simulator, experiments and analysis"
+authors:
+  - family-names: Balaji
+    given-names: Malika
+  - family-names: Prabhu
+    given-names: Nehaa
+  - family-names: Pranov
+    given-names: Rohith
+  - family-names: Muthuswamy
+    given-names: Sanhit
+  - family-names: "V. P."
+    given-names: Rakshan
+affiliation: "Vellore Institute of Technology"
+license: MIT
+doi: 10.5281/zenodo.23638403
+date-released: 2026-10-21
+keywords: [IoMT, intrusion detection, ns-3, data leakage, adaptive thresholds, reproducibility]
